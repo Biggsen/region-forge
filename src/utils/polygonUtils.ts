@@ -104,10 +104,8 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
     }
   }
 
-  // Convert region name to snake_case for nether regions
-  const regionNameForYAML = worldType === 'nether' 
-    ? region.name.toLowerCase().replace(/\s+/g, '_')
-    : region.name
+  // Convert region name to lowercase with underscores (same format for all world types)
+  const regionNameForYAML = region.name.toLowerCase().replace(/\s+/g, '_')
 
   // Use world height setting instead of region's minY/maxY
   const minY = useModernWorldHeight ? -64 : 0
