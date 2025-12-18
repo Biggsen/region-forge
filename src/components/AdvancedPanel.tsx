@@ -53,30 +53,13 @@ export function AdvancedPanel() {
 
     try {
       const text = await file.text()
-      const lines = text.split('\n').filter(line => line.trim())
       
-      if (lines.length === 0) {
+      if (!text.trim()) {
         throw new Error('File is empty or contains no valid data')
       }
 
-      // Parse CSV data
-      const villages = lines.map((line, index) => {
-        const [x, z, name] = line.split(',').map(field => field.trim())
-        
-        if (!x || !z || isNaN(Number(x)) || isNaN(Number(z))) {
-          throw new Error(`Invalid data on line ${index + 1}: ${line}`)
-        }
-
-        return {
-          x: Number(x),
-          z: Number(z),
-          name: name || `Village ${index + 1}`
-        }
-      })
-
-      // Add villages to regions
-      const csvContent = villages.map(v => `${v.x},${v.z},${v.name}`).join('\n')
-      regions.importVillagesFromCSV(csvContent)
+      // Use the existing CSV parser which handles the semicolon-separated format
+      regions.importVillagesFromCSV(text)
       
       // Clear the file input
       if (villageFileInputRef.current) {

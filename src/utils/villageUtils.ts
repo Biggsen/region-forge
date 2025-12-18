@@ -16,7 +16,12 @@ export function parseVillageCSV(csvContent: string): VillageData[] {
   // Skip header lines and find the data start
   let dataStartIndex = 0
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('seed;structure;x;z;details')) {
+    const line = lines[i].trim()
+    // Skip empty lines, separator declarations, and coordinate boundaries
+    if (!line || line.startsWith('Sep=') || line.startsWith('#')) {
+      continue
+    }
+    if (line.startsWith('seed;structure;x;z;details')) {
       dataStartIndex = i + 1
       break
     }
@@ -25,7 +30,8 @@ export function parseVillageCSV(csvContent: string): VillageData[] {
   // Parse village data
   for (let i = dataStartIndex; i < lines.length; i++) {
     const line = lines[i].trim()
-    if (!line) continue
+    // Skip empty lines, separator declarations, and coordinate boundaries
+    if (!line || line.startsWith('Sep=') || line.startsWith('#')) continue
     
     const parts = line.split(';')
     if (parts.length >= 5) {
