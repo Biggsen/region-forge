@@ -145,7 +145,7 @@ ${points}`
   if (includeVillages && region.subregions && region.subregions.length > 0) {
     yaml += '\n\n'
     yaml += region.subregions.map(subregion => 
-      generateSubregionYAML(subregion, region.name, worldType, useModernWorldHeight, useGreetingsAndFarewells)
+      generateSubregionYAML(subregion, region.name, worldType, useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
     ).join('\n\n')
   }
   

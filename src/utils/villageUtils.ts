@@ -91,7 +91,7 @@ export function createVillageSubregion(village: VillageData, index: number, pare
   }
 }
 
-export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false): string {
+export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' = 'large'): string {
   const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
   const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
   
@@ -102,9 +102,32 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const minY = useModernWorldHeight ? -64 : 0
   const maxY = useModernWorldHeight ? 320 : 255
 
-  const flags = useGreetingsAndFarewells
-    ? `{greeting-title: ${greetingText} ${subregion.name} village, farewell-title: Leaving ${subregion.name} village., passthrough: allow}`
-    : `{passthrough: allow}`
+  let flags: string
+  if (useGreetingsAndFarewells) {
+    // Build greeting and farewell lines based on greeting size (same format as main regions)
+    let greetingLine1: string
+    let greetingLine2: string
+    let farewellLine1: string
+    let farewellLine2: string
+    
+    if (greetingSize === 'large') {
+      // Large: greeting text on first line, §f on second
+      greetingLine1 = `§f${greetingText} ${subregion.name} village`
+      greetingLine2 = `§f`
+      farewellLine1 = `§fLeaving ${subregion.name} village`
+      farewellLine2 = `§f`
+    } else {
+      // Small: §f on first line, greeting text on second line
+      greetingLine1 = `§f`
+      greetingLine2 = `§f${greetingText} ${subregion.name} village`
+      farewellLine1 = `§f`
+      farewellLine2 = `§fLeaving ${subregion.name} village`
+    }
+    
+    flags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      passthrough: allow`
+  } else {
+    flags = `{passthrough: allow}`
+  }
 
   return `  ${subregionName}:
     type: cuboid
@@ -112,7 +135,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     max-y: ${maxY}
     priority: 10
     parent: ${parentRegionNameForYAML}
-    flags: ${flags}
+    ${useGreetingsAndFarewells ? `flags:\n${flags}` : `flags: ${flags}`}
     min: {x: ${subregion.x - subregion.radius}, y: ${minY}, z: ${subregion.z - subregion.radius}}
     max: {x: ${subregion.x + subregion.radius}, y: ${maxY}, z: ${subregion.z + subregion.radius}}`
 }
