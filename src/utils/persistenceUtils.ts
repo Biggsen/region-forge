@@ -15,7 +15,7 @@ export interface ExportSettings {
   includeSpawnRegion: boolean
   useModernWorldHeight: boolean
   useGreetingsAndFarewells: boolean
-  greetingSize: 'large' | 'small'
+  greetingSize: 'large' | 'small' | 'chat'
   includeChallengeLevelSubheading: boolean
 }
 

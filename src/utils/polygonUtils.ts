@@ -39,7 +39,7 @@ function generateRandomMobList(): string[] {
   return shuffled.slice(0, count)
 }
 
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, randomMobSpawn: boolean = false, includeHeartRegions: boolean = true, worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, randomMobSpawn: boolean = false, includeHeartRegions: boolean = true, worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -53,7 +53,15 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
   // Generate flags based on region type
   let flags: string
   if (useGreetingsAndFarewells) {
-    if (isMainRegion && region.challengeLevel) {
+    if (greetingSize === 'chat') {
+      // Chat format uses greeting: and farewell: with single-line values
+      if (randomMobSpawn) {
+        const randomMobs = generateRandomMobList()
+        flags = `    greeting: §2Entering §7${region.name}\n    farewell: §6Leaving §7${region.name}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
+      } else {
+        flags = `    greeting: §2Entering §7${region.name}\n    farewell: §6Leaving §7${region.name}\n    passthrough: allow`
+      }
+    } else if (isMainRegion && region.challengeLevel) {
       // Main regions with challenge levels get the new multi-line format
       // When small greeting size is selected, challenge level subheading is not used
       const challengeColor = (includeChallengeLevelSubheading && greetingSize === 'large')
@@ -86,14 +94,14 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
       } else {
         flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
       }
-  } else {
-    // Other regions (spawn, hearts, villages) keep the old format
-    flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow}`
-    if (randomMobSpawn) {
-      const randomMobs = generateRandomMobList()
-      flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow, deny-spawn: [${randomMobs.join(',')}]}`
+    } else {
+      // Other regions (spawn, hearts, villages) keep the old format (unless chat is selected)
+      flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow}`
+      if (randomMobSpawn) {
+        const randomMobs = generateRandomMobList()
+        flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow, deny-spawn: [${randomMobs.join(',')}]}`
+        }
       }
-    }
   } else {
     // No greetings/farewells - only passthrough flag
     if (randomMobSpawn) {
@@ -117,7 +125,7 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
     max-y: ${maxY}
     priority: 0
     flags:
-${useGreetingsAndFarewells && isMainRegion && region.challengeLevel ? '  ' + flags.replace(/\n/g, '\n  ') : '      ' + flags}
+${useGreetingsAndFarewells && ((isMainRegion && region.challengeLevel && greetingSize !== 'chat') || greetingSize === 'chat') ? '  ' + flags.replace(/\n/g, '\n  ') : '      ' + flags}
     points:
 ${points}`
 

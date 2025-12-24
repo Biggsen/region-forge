@@ -91,7 +91,7 @@ export function createVillageSubregion(village: VillageData, index: number, pare
   }
 }
 
-export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' = 'large'): string {
+export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string {
   const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
   const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
   
@@ -104,27 +104,32 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
 
   let flags: string
   if (useGreetingsAndFarewells) {
-    // Build greeting and farewell lines based on greeting size (same format as main regions)
-    let greetingLine1: string
-    let greetingLine2: string
-    let farewellLine1: string
-    let farewellLine2: string
-    
-    if (greetingSize === 'large') {
-      // Large: greeting text on first line, §f on second
-      greetingLine1 = `§f${greetingText} ${subregion.name} village`
-      greetingLine2 = `§f`
-      farewellLine1 = `§fLeaving ${subregion.name} village`
-      farewellLine2 = `§f`
+    if (greetingSize === 'chat') {
+      // Chat format uses greeting: and farewell: with single-line values
+      flags = `      greeting: §2Entering §7${subregion.name} village\n      farewell: §6Leaving §7${subregion.name} village\n      passthrough: allow`
     } else {
-      // Small: §f on first line, greeting text on second line
-      greetingLine1 = `§f`
-      greetingLine2 = `§f${greetingText} ${subregion.name} village`
-      farewellLine1 = `§f`
-      farewellLine2 = `§fLeaving ${subregion.name} village`
+      // Build greeting and farewell lines based on greeting size (same format as main regions)
+      let greetingLine1: string
+      let greetingLine2: string
+      let farewellLine1: string
+      let farewellLine2: string
+      
+      if (greetingSize === 'large') {
+        // Large: greeting text on first line, §f on second
+        greetingLine1 = `§f${greetingText} ${subregion.name} village`
+        greetingLine2 = `§f`
+        farewellLine1 = `§fLeaving ${subregion.name} village`
+        farewellLine2 = `§f`
+      } else {
+        // Small: §f on first line, greeting text on second line
+        greetingLine1 = `§f`
+        greetingLine2 = `§f${greetingText} ${subregion.name} village`
+        farewellLine1 = `§f`
+        farewellLine2 = `§fLeaving ${subregion.name} village`
+      }
+      
+      flags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      passthrough: allow`
     }
-    
-    flags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      passthrough: allow`
   } else {
     flags = `{passthrough: allow}`
   }

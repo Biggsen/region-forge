@@ -133,7 +133,7 @@ export function exportRegionsYAML(
   worldType?: 'overworld' | 'nether',
   useModernWorldHeight: boolean = true,
   useGreetingsAndFarewells: boolean = false,
-  greetingSize: 'large' | 'small' = 'large',
+  greetingSize: 'large' | 'small' | 'chat' = 'large',
   includeChallengeLevelSubheading: boolean = false,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): void {

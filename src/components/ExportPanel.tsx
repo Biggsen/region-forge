@@ -13,9 +13,9 @@ export function ExportPanel() {
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
   const [useModernWorldHeight, setUseModernWorldHeight] = useState(true)
   const [useGreetingsAndFarewells, setUseGreetingsAndFarewells] = useState(false)
-  const [greetingSize, setGreetingSize] = useState<'large' | 'small'>('large')
+  const [greetingSize, setGreetingSize] = useState<'large' | 'small' | 'chat'>('large')
   const [includeChallengeLevelSubheading, setIncludeChallengeLevelSubheading] = useState(false)
-  const [viewingImage, setViewingImage] = useState<{ type: 'greeting' | 'farewell', size: 'large' | 'small' } | null>(null)
+  const [viewingImage, setViewingImage] = useState<{ type: 'greeting' | 'farewell', size: 'large' | 'small' | 'chat' } | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Load saved export settings on mount
@@ -167,7 +167,7 @@ export function ExportPanel() {
                   name="greetingSize"
                   value="large"
                   checked={greetingSize === 'large'}
-                  onChange={(e) => setGreetingSize(e.target.value as 'large' | 'small')}
+                  onChange={(e) => setGreetingSize(e.target.value as 'large' | 'small' | 'chat')}
                   className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal focus:ring-lapis-lazuli focus:ring-2"
                 />
                 <label htmlFor="greetingLarge" className="flex items-center space-x-2 text-white cursor-pointer">
@@ -204,7 +204,7 @@ export function ExportPanel() {
                   value="small"
                   checked={greetingSize === 'small'}
                   onChange={(e) => {
-                    const newSize = e.target.value as 'large' | 'small'
+                    const newSize = e.target.value as 'large' | 'small' | 'chat'
                     setGreetingSize(newSize)
                     if (newSize === 'small') {
                       setIncludeChallengeLevelSubheading(false)
@@ -233,6 +233,42 @@ export function ExportPanel() {
                         e.preventDefault()
                         e.stopPropagation()
                         setViewingImage({ type: 'farewell', size: 'small' })
+                      }}
+                    />
+                  </div>
+                </label>
+              </div>
+              <div className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  id="greetingChat"
+                  name="greetingSize"
+                  value="chat"
+                  checked={greetingSize === 'chat'}
+                  onChange={(e) => setGreetingSize(e.target.value as 'large' | 'small' | 'chat')}
+                  className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal focus:ring-lapis-lazuli focus:ring-2"
+                />
+                <label htmlFor="greetingChat" className="flex items-center space-x-2 text-white cursor-pointer">
+                  <span>Chat</span>
+                  <div className="flex items-center space-x-2">
+                    <img 
+                      src="/greeting-chat.png" 
+                      alt="Chat greeting" 
+                      className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setViewingImage({ type: 'greeting', size: 'chat' })
+                      }}
+                    />
+                    <img 
+                      src="/farewell-chat.png" 
+                      alt="Chat farewell" 
+                      className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setViewingImage({ type: 'farewell', size: 'chat' })
                       }}
                     />
                   </div>
@@ -294,7 +330,7 @@ export function ExportPanel() {
                   id="includeChallengeLevelSubheading"
                   checked={includeChallengeLevelSubheading}
                   onChange={(e) => setIncludeChallengeLevelSubheading(e.target.checked)}
-                  disabled={!useGreetingsAndFarewells || greetingSize === 'small'}
+                  disabled={!useGreetingsAndFarewells || greetingSize === 'small' || greetingSize === 'chat'}
                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gunmetal rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <label htmlFor="includeChallengeLevelSubheading" className="ml-2 text-white">
@@ -304,6 +340,9 @@ export function ExportPanel() {
                   )}
                   {useGreetingsAndFarewells && greetingSize === 'small' && (
                     <span className="text-gray-400 ml-1">(small greetings use subheading space)</span>
+                  )}
+                  {useGreetingsAndFarewells && greetingSize === 'chat' && (
+                    <span className="text-gray-400 ml-1">(chat greetings use subheading space)</span>
                   )}
                 </label>
               </div>
@@ -343,7 +382,7 @@ export function ExportPanel() {
       <BaseModal
         isOpen={viewingImage !== null}
         onClose={() => setViewingImage(null)}
-        size="xl"
+        size="4xl"
         title={viewingImage ? `${viewingImage.size.charAt(0).toUpperCase() + viewingImage.size.slice(1)} ${viewingImage.type.charAt(0).toUpperCase() + viewingImage.type.slice(1)} Preview` : ''}
       >
         <div className="flex justify-center">
