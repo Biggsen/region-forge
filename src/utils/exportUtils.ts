@@ -225,9 +225,12 @@ export function generateAchievementsYAML(regions: Region[], worldType?: 'overwor
     const regionDisplayName = worldType === 'nether' 
       ? 'Nether Region Discovery'
       : 'Region Discovery'
+    const regionGoal = worldType === 'nether'
+      ? `Discover ${region.name} Nether Region`
+      : `Discover ${region.name} Region`
     
     yamlContent += `  ${achievementKey}:\n`
-    yamlContent += `    Goal: Discover ${region.name} Region\n`
+    yamlContent += `    Goal: ${regionGoal}\n`
     yamlContent += `    Message: ${regionMessage}\n`
     yamlContent += `    Name: discover_${region.name.toLowerCase().replace(/\s+/g, '_')}\n`
     yamlContent += `    DisplayName: ${regionDisplayName}\n`
@@ -237,7 +240,7 @@ export function generateAchievementsYAML(regions: Region[], worldType?: 'overwor
     // Generate heart achievement for this region
     const heartKey = `discoverHeartOf${regionKey}`
     const heartMessage = worldType === 'nether'
-      ? `You discovered the nether ${region.name.toLowerCase().replace(/\s+/g, '_')}`
+      ? `You discovered the heart of ${region.name}`
       : `You discovered the Heart of ${region.name}`
     const heartDisplayName = worldType === 'nether'
       ? 'Nether Heart Discovery'
