@@ -135,9 +135,37 @@ ${points}`
     const heartRegionName = `heart_of_${region.name.toLowerCase().replace(/\s+/g, '_')}`
     const heartSize = 7 // 7x7 size as requested
     
-    const heartFlags = useGreetingsAndFarewells 
-      ? `{greeting-title: Heart of ${region.name}, build: deny, interact: allow, creeper-explosion: deny, other-explosion: deny, tnt: deny}`
-      : `{build: deny, interact: allow, creeper-explosion: deny, other-explosion: deny, tnt: deny}`
+    let heartFlags: string
+    if (useGreetingsAndFarewells) {
+      if (greetingSize === 'chat') {
+        // Chat format uses greeting: and farewell: with single-line values
+        heartFlags = `      greeting: §2Entering §7Heart of ${region.name}\n      farewell: §6Leaving §7Heart of ${region.name}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      } else {
+        // Large/small format uses greeting-title: and farewell-title: with multi-line values
+        let greetingLine1: string
+        let greetingLine2: string
+        let farewellLine1: string
+        let farewellLine2: string
+        
+        if (greetingSize === 'large') {
+          // Large: greeting text on first line, §f on second
+          greetingLine1 = `§fHeart of ${region.name}`
+          greetingLine2 = `§f`
+          farewellLine1 = `§fLeaving Heart of ${region.name}`
+          farewellLine2 = `§f`
+        } else {
+          // Small: §f on first line, greeting text on second line
+          greetingLine1 = `§f`
+          greetingLine2 = `§fHeart of ${region.name}`
+          farewellLine1 = `§f`
+          farewellLine2 = `§fLeaving Heart of ${region.name}`
+        }
+        
+        heartFlags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      }
+    } else {
+      heartFlags = `{build: deny, interact: allow, creeper-explosion: deny, other-explosion: deny, tnt: deny}`
+    }
     
     yaml += `\n\n  ${heartRegionName}:
     type: cuboid
@@ -145,7 +173,7 @@ ${points}`
     max: {x: ${Math.round(regionCenter.x + Math.floor(heartSize / 2))}, y: ${maxY}, z: ${Math.round(regionCenter.z + Math.floor(heartSize / 2))}}
     members: {}
     owners: {}
-    flags: ${heartFlags}
+    flags:${useGreetingsAndFarewells ? '\n' + heartFlags : ' ' + heartFlags}
     priority: 10`
   }
 
