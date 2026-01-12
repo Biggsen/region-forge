@@ -9,16 +9,22 @@
 **Description:** The Nether and End dimensions should have world size slider controls, similar to the Overworld dimension.
 
 **Issue:**
-- Currently, world size slider may only be available for Overworld dimension
+- Currently, world size slider is only available for Overworld dimension in `MapLoaderControls.tsx` (line 445: `{importDimension === 'overworld' && ...}`)
 - Nether and End dimensions should also allow users to adjust world size independently
+- **Note:** Nether and End are currently disabled in the UI (`SeedInfoHeading.tsx` shows them as "Coming soon")
+- `useWorldType.ts` only supports 'overworld' and 'nether' (no 'end' support yet)
+- `WorldSizeHeading.tsx` doesn't check dimension and always shows world size selector (may need dimension awareness)
 
 **Affected Components:**
-- World size controls (likely `WorldSizeHeading.tsx` or related components)
-- Dimension selection/world type management (likely `useWorldType.ts` or related hooks)
+- `src/components/MapLoaderControls.tsx` - World size slider only shown for overworld (line 445)
+- `src/components/WorldSizeHeading.tsx` - May need dimension awareness when Nether/End are enabled
+- `src/hooks/useWorldType.ts` - Currently only supports 'overworld' and 'nether' (needs 'end' support)
+- `src/components/SeedInfoHeading.tsx` - Nether and End options are disabled
 
 **Expected Behavior:**
 - World size slider should be available and functional for all dimensions (Overworld, Nether, End)
 - Each dimension should maintain its own world size setting if applicable
+- Implementation blocked until Nether and End dimensions are enabled in the UI
 
 ---
 
@@ -53,8 +59,7 @@
 
 ### Image Validation
 **Priority:** High  
-**Status:** Resolved  
-**Resolved Date:** [Current Date]
+**Status:** Resolved
 
 **Description:** Images loaded from URL are not validated for size limits or square dimensions.
 
