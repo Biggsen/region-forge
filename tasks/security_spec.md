@@ -193,6 +193,11 @@ if (isOriginAllowed(origin)) {
 **Estimated Effort**: 1 hour  
 **Testing**: Test with various Origin headers
 
+**Implementation Status**: ✅ **Implemented**
+- Environment-based origin whitelist configured
+- Dynamic origin validation in `api/proxy-image.js` (lines 228-236)
+- CORS headers only set for allowed origins
+
 ---
 
 ### 3. Missing Content Security Policy (CSP)
@@ -256,6 +261,12 @@ form-action 'self';
 **Priority**: CRITICAL  
 **Estimated Effort**: 2 hours  
 **Testing**: Test all functionality works with CSP enabled
+
+**Implementation Status**: ✅ **Implemented**
+- CSP header added to `vercel.json` (line 23)
+- Includes Google Analytics and Google Fonts domains
+- Includes Railway API for map generation
+- Frame-ancestors set to 'none' to prevent clickjacking
 
 ---
 
@@ -327,6 +338,12 @@ console.error('Proxy error:', {
 **Estimated Effort**: 1 hour  
 **Testing**: Test error scenarios in production mode
 
+**Implementation Status**: ✅ **Implemented**
+- Environment-based error handling using `isDevelopment` flag
+- Generic error messages returned in production
+- Detailed errors logged server-side only
+- Error sanitization in `api/proxy-image.js`
+
 ---
 
 ### 5. Unencrypted Sensitive Data in localStorage
@@ -369,6 +386,11 @@ localStorage.setItem(STORAGE_KEYS.REGIONS, JSON.stringify(regions))
 **Priority**: HIGH  
 **Estimated Effort**: 2-4 hours (documentation) or 8-16 hours (encryption)  
 **Testing**: Verify encryption/decryption works correctly
+
+**Implementation Status**: ✅ **Documented**
+- Security implications documented in this spec
+- Acceptable for MVP as data is stored client-side only
+- Future enhancement: opt-in encryption when user accounts are added
 
 ---
 
@@ -476,6 +498,12 @@ export function importMapData(file: File): Promise<MapExportData> {
 **Estimated Effort**: 2-3 hours  
 **Testing**: Test with large files, invalid JSON, non-JSON files
 
+**Implementation Status**: ❌ **Not Implemented** - See `enhancements/security_enhancement_spec.md` for details
+- Image dimension validation exists, but missing:
+  - File size limits (10MB)
+  - MIME type validation for JSON imports
+  - JSON parsing limits/timeouts
+
 ---
 
 ## Medium Priority Vulnerabilities
@@ -531,6 +559,10 @@ export const logger = {
 **Priority**: MEDIUM  
 **Estimated Effort**: 3-4 hours  
 **Testing**: Verify logs are suppressed in production builds
+
+**Implementation Status**: ❌ **Not Implemented** - See `enhancements/security_enhancement_spec.md` for details
+- No `logger.ts` utility exists
+- Console statements still used throughout codebase
 
 ---
 
@@ -590,6 +622,11 @@ Add the following headers to `vercel.json`:
 **Priority**: MEDIUM  
 **Estimated Effort**: 1 hour  
 **Testing**: Verify headers are present in response
+
+**Implementation Status**: ⚠️ **Partially Implemented** - See `enhancements/security_enhancement_spec.md` for details
+- Only `X-Content-Type-Options` set in proxy-image.js responses
+- Missing site-wide headers: X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- CSP header is set in `vercel.json`
 
 ---
 
@@ -661,6 +698,10 @@ function validateImageURL(urlString: string): boolean {
 **Priority**: MEDIUM  
 **Estimated Effort**: 2 hours  
 **Testing**: Test with various URL formats and edge cases
+
+**Implementation Status**: ❌ **Not Implemented** - See `enhancements/security_enhancement_spec.md` for details
+- Still uses simple string checks (`startsWith('http')`) in `src/utils/imageUtils.ts`
+- Should use `URL` constructor with proper hostname validation
 
 ---
 
@@ -734,6 +775,11 @@ export default async function middleware(request) {
 **Estimated Effort**: 2-4 hours  
 **Testing**: Test rate limiting with multiple requests
 
+**Implementation Status**: ✅ **Implemented**
+- Rate limiting implemented in `api/proxy-image.js` (lines 200-223)
+- Per-IP rate limiting: 10 requests per minute
+- Returns 429 status when limit exceeded
+
 ---
 
 ## Low Priority / Best Practices
@@ -755,6 +801,10 @@ Ensure inputs are validated and sanitized before:
 **Priority**: LOW  
 **Estimated Effort**: 2-3 hours
 
+**Implementation Status**: ⚠️ **Review Needed** - See `enhancements/security_enhancement_spec.md` for details
+- Input validation exists for some fields (region names, coordinates)
+- Comprehensive sanitization review recommended
+
 ---
 
 ### 12. Dependency Security
@@ -768,47 +818,59 @@ Ensure inputs are validated and sanitized before:
 **Priority**: LOW  
 **Estimated Effort**: Ongoing
 
+**Implementation Status**: ✅ **Ongoing**
+- Regular dependency audits using `npm audit`
+- Dependencies kept up to date
+- Manual review process in place
+
 ---
 
 ## Implementation Roadmap
 
-### Phase 1: Critical Fixes (Week 1)
+### Phase 1: Critical Fixes (Week 1) ✅ **COMPLETED**
 1. ✅ Fix SSRF vulnerability in image proxy
-   - ⚠️ Note: All domains use hostname URLs after DNS validation for compatibility (see implementation note)
+   - All validation checks in place
+   - DNS resolution and IP validation for all domains
+   - Hostname URLs used after validation for compatibility
 2. ✅ Restrict CORS to specific origins
+   - Environment-based origin whitelist configured
+   - Dynamic origin validation implemented
 3. ✅ Add Content Security Policy
-   - Status: Implemented - CSP header added to `vercel.json`
+   - CSP header added to `vercel.json`
    - Includes Google Analytics and Google Fonts domains
+   - Includes Railway API for map generation
 4. ✅ Sanitize error messages
+   - Environment-based error handling
+   - Generic messages in production
 
-### Phase 2: High Priority (Week 2)
-5. ⚠️ Add file upload validation
-   - Status: Partially implemented - Image dimension validation exists, but missing:
-     - File size limits (10MB)
-     - MIME type validation for JSON imports
-     - JSON parsing limits/timeouts
+### Phase 2: High Priority (Week 2) ⚠️ **PARTIALLY COMPLETED**
+5. ❌ Add file upload validation
+   - **Status**: Not implemented - See `enhancements/security_enhancement_spec.md`
+   - Image dimension validation exists, but missing file size limits, MIME validation, and parsing timeouts
 6. ✅ Document localStorage security implications
+   - Documented in this spec
+   - Acceptable for MVP
 7. ⚠️ Add security headers
-   - Status: Partially implemented - Only `X-Content-Type-Options` set in proxy-image.js responses
-   - Missing site-wide headers: X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+   - **Status**: Partially implemented - See `enhancements/security_enhancement_spec.md`
+   - CSP header set, but missing other security headers
 
-### Phase 3: Medium Priority (Week 3-4)
+### Phase 3: Medium Priority (Week 3-4) ⚠️ **PARTIALLY COMPLETED**
 8. ✅ Implement rate limiting
+   - Per-IP rate limiting: 10 requests per minute
+   - Returns 429 status when limit exceeded
 9. ❌ Improve URL validation in frontend
-   - Status: Not implemented - Still uses simple string checks (`startsWith('http')`)
-   - Should use `URL` constructor with proper hostname validation
+   - **Status**: Not implemented - See `enhancements/security_enhancement_spec.md`
+   - Still uses simple string checks
 10. ❌ Replace console logging with proper logging utility
-    - Status: Not implemented - No `logger.ts` utility exists
+    - **Status**: Not implemented - See `enhancements/security_enhancement_spec.md`
+    - No `logger.ts` utility exists
 
-### Phase 4: Ongoing
+### Phase 4: Ongoing ✅ **IN PROGRESS**
 11. ✅ Regular security audits (ongoing)
 12. ✅ Dependency updates (ongoing)
 13. ⚠️ Security monitoring
-    - Status: Basic logging in place, but missing:
-      - Error tracking service (Sentry, etc.)
-      - Rate limiting monitoring dashboard
-      - Security headers monitoring
-      - Dependency monitoring (Dependabot/Snyk)
+    - **Status**: Basic logging in place - See `enhancements/security_enhancement_spec.md` for enhancement details
+    - Missing: Error tracking service, monitoring dashboards, automated dependency monitoring
 
 ---
 
@@ -890,6 +952,12 @@ Ensure inputs are validated and sanitized before:
 
 ## Document Version
 
-**Version**: 1.0  
-**Last Updated**: 2024-01-XX  
-**Next Review**: After Phase 1 implementation
+**Version**: 2.0  
+**Last Updated**: 2026-01-12  
+**Next Review**: After Phase 2 implementation
+
+## Related Documents
+
+- **`enhancements/security_enhancement_spec.md`**: Contains outstanding security enhancements and improvements
+- All critical vulnerabilities have been addressed
+- Remaining items are documented in the enhancement spec
