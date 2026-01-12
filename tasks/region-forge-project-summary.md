@@ -9,7 +9,7 @@
   "status": "active",
   "domain": "minecraft",
   "type": "webapp",
-  "lastUpdated": "2025-11-05",
+  "lastUpdated": "2026-01-12",
   "links": {
     "prod": "https://www.minecraftregionforge.com/",
     "staging": null
@@ -71,7 +71,7 @@ The MVP is complete and deployed to production (Vercel). The application is full
 
 ## Current Focus
 
-Currently focused on bug fixes and security improvements. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience.
+Currently focused on bug fixes, security improvements, and dimension unification work. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience. Planning for overworld/nether dimension unification to simplify the codebase.
 
 ---
 
@@ -115,6 +115,7 @@ Currently focused on bug fixes and security improvements. The MVP is complete an
 
 ### Bug Fixes
 - [x] Region Creation Without Map - "Create New Region" button disabled when no map is loaded, with clear messaging
+- [x] Image Validation - Added square dimension validation and size limits (250x250 to 2000x2000 pixels) for all image loading paths
 
 ---
 
@@ -159,10 +160,14 @@ None - MVP is complete and deployed.
 ### Bug Details
 
 #### World Size Slider for Nether and End Dimensions
-- **Description**: Nether and End dimensions should have world size slider controls, similar to the Overworld dimension
+- **Description**: Nether and End dimensions should have world size slider controls, similar to the Overworld dimension. Currently, world size slider is only available for Overworld dimension in `MapLoaderControls.tsx`. Nether and End dimensions should also allow users to adjust world size independently.
 - **Severity**: Medium
-- **Affected Areas**: World size controls (likely `WorldSizeHeading.tsx` or related components), Dimension selection/world type management (likely `useWorldType.ts` or related hooks)
-- **Expected Behavior**: World size slider should be available and functional for all dimensions (Overworld, Nether, End). Each dimension should maintain its own world size setting if applicable
+- **Affected Areas**: 
+  - `src/components/MapLoaderControls.tsx` - World size slider only shown for overworld (line 445)
+  - `src/components/WorldSizeHeading.tsx` - May need dimension awareness when Nether/End are enabled
+  - `src/hooks/useWorldType.ts` - Currently only supports 'overworld' and 'nether' (needs 'end' support)
+  - `src/components/SeedInfoHeading.tsx` - Nether and End options are disabled
+- **Expected Behavior**: World size slider should be available and functional for all dimensions (Overworld, Nether, End). Each dimension should maintain its own world size setting if applicable. Implementation blocked until Nether and End dimensions are enabled in the UI.
 
 ---
 
@@ -192,7 +197,7 @@ None - MVP is complete and deployed.
 
 **Overall Status**: Active Development  
 **Completion**: ~90% (MVP Complete)  
-**Last Major Update**: November 2025
+**Last Major Update**: January 2026
 
 ### Metrics
 
@@ -220,11 +225,13 @@ None - MVP is complete and deployed.
 
 ### Long-term (3+ months)
 
-1. User accounts implementation
-2. Cloud storage and project sharing
-3. Onboarding system
-4. Comprehensive testing suite
-5. Performance optimization
+1. Overworld/Nether dimension unification (see `tasks/overworld-nether-unification-spec.md`)
+2. End dimension support addition (after unification)
+3. User accounts implementation
+4. Cloud storage and project sharing
+5. Onboarding system
+6. Comprehensive testing suite
+7. Performance optimization
 
 ---
 
@@ -243,10 +250,11 @@ None - MVP is complete and deployed.
 ## Related Documentation
 
 - **Main README**: `README.md` - User-facing documentation
-- **Tasks**: `spec/TASKS.md` - Detailed task list and feature status
-- **MVP Plan**: `spec/completed/MVP_DEV_PLAN.md` - Development roadmap and status
-- **Security Spec**: `spec/SECURITY_SPEC.md` - Security vulnerabilities and fixes
-- **User Accounts Spec**: `spec/user-accounts-spec.md` - Future user accounts feature
+- **Bug List**: `tasks/buglist.md` - Current bugs and resolved issues
+- **MVP Plan**: `tasks/completed/MVP_DEV_PLAN.md` - Development roadmap and status
+- **Security Spec**: `tasks/enhancements/security_enhancement_spec.md` - Security vulnerabilities and fixes
+- **Dimension Unification**: `tasks/overworld-nether-unification-spec.md` - Overworld/Nether unification specification
+- **User Accounts Spec**: `tasks/user-accounts-spec.md` - Future user accounts feature
 - **Deployment Guide**: `docs/DEPLOYMENT.md` - Deployment instructions
 - **Seed Generator**: `docs/SEED_GENERATOR_README.md` - Map generation service docs
 
