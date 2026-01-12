@@ -1,5 +1,19 @@
 # 📋 MC Region Maker - Task List
 
+> ⚠️ **WARNING: THIS FILE NEEDS THOROUGH REVIEW**
+> 
+> **Status**: ⛔ **NOT SUITABLE FOR WORK** - Do not use this file for task planning or implementation until a comprehensive review has been completed.
+> 
+> This file contains many items that may no longer be relevant or prioritized. A thorough review is required to:
+> - Remove outdated or irrelevant tasks
+> - Update priorities based on current project needs
+> - Verify accuracy of completed vs. pending items
+> - Align with current project goals
+> 
+> **Do not work on tasks from this file until the review is complete.**
+
+---
+
 ## ✅ Completed Features
 
 ### Export/Import Functionality
