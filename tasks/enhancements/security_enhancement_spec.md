@@ -417,4 +417,4 @@ Ensure inputs are validated and sanitized before:
 
 **Version**: 1.0  
 **Last Updated**: 2026-01-12  
-**Related Document**: `security_spec.md` (for completed critical fixes)
+**Related Document**: `../completed/security_spec.md` (for completed critical fixes)
