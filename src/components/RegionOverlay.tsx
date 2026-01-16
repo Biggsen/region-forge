@@ -290,7 +290,9 @@ export function RegionOverlay({
     mapState: MapState,
     isSelected: boolean = false
   ) => {
-    // Only draw center points for regions with custom center points
+    // Only draw center points for regions with custom center points.
+    // Auto-calculated hearts are deliberately not shown because they would overlap
+    // with the region name display (which is positioned at the calculated center).
     if (!region.centerPoint) return
 
     // Convert world coordinates to canvas coordinates

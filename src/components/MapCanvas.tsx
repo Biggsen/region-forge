@@ -15,7 +15,7 @@ interface MapCanvasProps {
 
 export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers } = useAppContext()
+  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName } = useAppContext()
   const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity } = mapStateHook
   const { 
     drawingRegion, 
@@ -404,6 +404,12 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
 
   return (
     <div className="flex-1 relative h-full">
+      
+      {worldName.worldName && (
+        <div className="absolute top-4 left-4 z-10 bg-gray-900/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-lg font-semibold border border-gunmetal shadow-lg">
+          {worldName.worldName}
+        </div>
+      )}
       
       {!mapState.image && regions.regions.length > 0 && (
         <div className="absolute top-32 left-4 z-10 bg-yellow-600 text-white px-4 py-2 rounded text-sm shadow-lg max-w-md">
