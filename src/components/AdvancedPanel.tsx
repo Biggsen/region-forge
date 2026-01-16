@@ -517,7 +517,7 @@ export function AdvancedPanel() {
                 {regions.selectedRegionId ? (
                   <div className="space-y-2">
                     <div className="flex space-x-2">
-                      <button
+                      <Button
                         onClick={() => {
                           if (showCustomCenterForm) {
                             setShowCustomCenterForm(false)
@@ -525,18 +525,18 @@ export function AdvancedPanel() {
                             mapCanvas.startSettingCenterPoint(regions.selectedRegionId!)
                           }
                         }}
-                        className="text-lapis-lazuli/80 hover:text-lapis-lazuli text-sm px-2 py-1 rounded hover:bg-gray-700 transition-colors"
+                        variant="secondary"
                         title="Click on map to set region heart"
                       >
                         Click Map
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={handleShowCustomCenterForm}
-                        className="text-gray-400 hover:text-gray-300 text-sm px-2 py-1 rounded hover:bg-gray-700 transition-colors"
+                        variant="secondary-outline"
                         title="Manually enter coordinates"
                       >
                         Manual
-                      </button>
+                      </Button>
                     </div>
                     
                     {!showCustomCenterForm ? (
@@ -639,6 +639,13 @@ export function AdvancedPanel() {
                     Select a region to set its heart
                   </div>
                 )}
+                <div className="text-sm text-white mt-2">
+                  {(() => {
+                    const customHearts = regions.regions.filter(r => r.centerPoint != null).length
+                    const totalRegions = regions.regions.length
+                    return `${customHearts} region hearts set out of ${totalRegions} regions`
+                  })()}
+                </div>
               </div>
             </div>
           )}
