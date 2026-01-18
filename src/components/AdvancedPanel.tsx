@@ -6,7 +6,7 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil } from 'lucide-react'
 import { ClearDataModal } from './ClearDataModal'
 
 export function AdvancedPanel() {
@@ -120,12 +120,10 @@ export function AdvancedPanel() {
     }
   }
 
-  const handleUseCalculatedCenter = () => {
+  const handleRemoveCenterPoint = () => {
     if (regions.selectedRegionId) {
       regions.setCustomCenterPoint(regions.selectedRegionId, null)
-      setCustomCenterX('')
-      setCustomCenterZ('')
-      setShowCustomCenterForm(false)
+      toast.showToast('Region heart removed', 'success')
     }
   }
 
@@ -133,8 +131,8 @@ export function AdvancedPanel() {
     if (regions.selectedRegionId) {
       const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
       if (selectedRegion?.centerPoint) {
-        setCustomCenterX(selectedRegion.centerPoint.x.toString())
-        setCustomCenterZ(selectedRegion.centerPoint.z.toString())
+        setCustomCenterX(Math.round(selectedRegion.centerPoint.x).toString())
+        setCustomCenterZ(Math.round(selectedRegion.centerPoint.z).toString())
       } else {
         setCustomCenterX('')
         setCustomCenterZ('')
@@ -509,130 +507,149 @@ export function AdvancedPanel() {
               )}
 
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Region Heart</h5>
-                <div className="text-sm text-gray-300">
-                  Set the center point (heart) of the selected region
-                </div>
+                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Region Heart
+                </h5>
                 
                 {regions.selectedRegionId ? (
                   <div className="space-y-2">
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={() => {
-                          if (showCustomCenterForm) {
-                            setShowCustomCenterForm(false)
-                          } else {
-                            mapCanvas.startSettingCenterPoint(regions.selectedRegionId!)
-                          }
-                        }}
-                        variant="secondary"
-                        title="Click on map to set region heart"
-                      >
-                        Click Map
-                      </Button>
-                      <Button
-                        onClick={handleShowCustomCenterForm}
-                        variant="secondary-outline"
-                        title="Manually enter coordinates"
-                      >
-                        Manual
-                      </Button>
-                    </div>
-                    
                     {!showCustomCenterForm ? (
-                      <div className="bg-gray-700 p-3 rounded border border-gunmetal">
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm">
-                            <span className="text-gray-400">Current: </span>
-                            <span className="text-white">
-                              X: {Math.round(regions.regions.find(r => r.id === regions.selectedRegionId)?.centerPoint?.x ?? 
-                                (() => {
-                                  const region = regions.regions.find(r => r.id === regions.selectedRegionId)
-                                  if (!region) return 0
-                                  const center = region.points.reduce((acc, point) => ({ x: acc.x + point.x, z: acc.z + point.z }), { x: 0, z: 0 })
-                                  return center.x / region.points.length
-                                })())}, Z: {Math.round(regions.regions.find(r => r.id === regions.selectedRegionId)?.centerPoint?.z ?? 
-                                (() => {
-                                  const region = regions.regions.find(r => r.id === regions.selectedRegionId)
-                                  if (!region) return 0
-                                  const center = region.points.reduce((acc, point) => ({ x: acc.x + point.x, z: acc.z + point.z }), { x: 0, z: 0 })
-                                  return center.z / region.points.length
-                                })())}
-                            </span>
-                            {regions.regions.find(r => r.id === regions.selectedRegionId)?.centerPoint && (
-                              <span className="text-lapis-lazuli/80 text-xs ml-2">(Custom)</span>
-                            )}
+                      (() => {
+                        const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
+                        const hasCenterPoint = selectedRegion?.centerPoint != null
+                        if (!hasCenterPoint) {
+                          return null
+                        }
+                        return (
+                          <div className="p-4 border border-gunmetal rounded">
+                            <div className="flex justify-between items-center">
+                              <div className="text-sm font-mono">
+                                <span className="text-gray-400">X:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.x)}</span>{' '}
+                                <span className="text-gray-400 ml-3">Z:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.z)}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  onClick={() => {
+                                    const tpCommand = `/tp @s ${Math.round(selectedRegion!.centerPoint!.x)} ~ ${Math.round(selectedRegion!.centerPoint!.z)}`
+                                    navigator.clipboard.writeText(tpCommand)
+                                    toast.showToast('Teleport command copied', 'success')
+                                  }}
+                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
+                                  title="Copy /tp command to clipboard"
+                                >
+                                  <ClipboardCopy className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={handleShowCustomCenterForm}
+                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
+                                  title="Edit coordinates"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={handleRemoveCenterPoint}
+                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
+                                  title="Remove region heart"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <button
-                            onClick={() => {
-                              const region = regions.regions.find(r => r.id === regions.selectedRegionId)
-                              if (region) {
-                                const center = region.centerPoint || region.points.reduce((acc, point) => ({ x: acc.x + point.x, z: acc.z + point.z }), { x: 0, z: 0 })
-                                const centerX = region.centerPoint ? center.x : center.x / region.points.length
-                                const centerZ = region.centerPoint ? center.z : center.z / region.points.length
-                                const tpCommand = `/tp @s ${Math.round(centerX)} ~ ${Math.round(centerZ)}`
-                                navigator.clipboard.writeText(tpCommand)
-                              }
-                            }}
-                            className="text-lapis-lazuli/80 hover:text-lapis-lazuli text-xs px-2 py-1 rounded hover:bg-gray-700 transition-colors"
-                            title="Copy /tp command to clipboard"
-                          >
-                            Copy /tp
-                          </button>
-                        </div>
-                        {mapCanvas.isSettingCenterPoint && mapCanvas.centerPointRegionId === regions.selectedRegionId && (
-                          <div className="mt-2 p-2 bg-violet-blue/20 border border-violet-blue/50 rounded text-xs text-violet-blue/80">
-                            Click anywhere on the map to set the region heart for this region
-                          </div>
-                        )}
-                      </div>
+                        )
+                      })()
                     ) : (
-                      <div className="bg-gray-700 p-3 rounded border border-gray-600 space-y-3">
+                      <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="text-gray-900" size={18} />
+                          <p className="text-gray-900 text-base">
+                            <strong>Edit heart location</strong>
+                          </p>
+                        </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="block text-xs text-gray-400 mb-1">X Coordinate</label>
+                            <label className="block text-xs text-gray-700 mb-1 font-medium">X Coordinate</label>
                             <input
                               type="number"
                               value={customCenterX}
                               onChange={(e) => setCustomCenterX(e.target.value)}
                               placeholder="X"
-                              className="w-full bg-input-bg text-input-text px-2 py-1 rounded border border-input-border focus:border-lapis-lighter focus:outline-none text-sm placeholder:text-gray-500"
+                              className="w-full bg-white text-gray-900 px-2 py-1 rounded border border-gray-300 focus:border-gray-500 focus:outline-none text-sm placeholder:text-gray-400"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-400 mb-1">Z Coordinate</label>
+                            <label className="block text-xs text-gray-700 mb-1 font-medium">Z Coordinate</label>
                             <input
                               type="number"
                               value={customCenterZ}
                               onChange={(e) => setCustomCenterZ(e.target.value)}
                               placeholder="Z"
-                              className="w-full bg-input-bg text-input-text px-2 py-1 rounded border border-input-border focus:border-lapis-lighter focus:outline-none text-sm placeholder:text-gray-500"
+                              className="w-full bg-white text-gray-900 px-2 py-1 rounded border border-gray-300 focus:border-gray-500 focus:outline-none text-sm placeholder:text-gray-400"
                             />
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={handleSetCustomCenter}
-                            disabled={!customCenterX || !customCenterZ}
-                            className="flex-1 bg-viridian hover:bg-viridian/80 disabled:bg-gray-600 disabled:text-gray-400 text-white text-sm px-2 py-1 rounded"
-                          >
-                            Set Region Heart
-                          </button>
-                          <button
-                            onClick={handleUseCalculatedCenter}
-                            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm px-2 py-1 rounded"
-                          >
-                            Use Calculated
-                          </button>
-                          <button
+                        <div className="flex space-x-2 mt-2">
+                          <Button
+                            variant="ghost"
                             onClick={() => setShowCustomCenterForm(false)}
-                            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm px-2 py-1 rounded"
+                            className="flex-1"
                           >
                             Cancel
-                          </button>
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={handleSetCustomCenter}
+                            disabled={!customCenterX || !customCenterZ}
+                            className="flex-1"
+                          >
+                            Update
+                          </Button>
                         </div>
                       </div>
                     )}
+
+                    {!showCustomCenterForm && (() => {
+                      const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
+                      const hasCenterPoint = selectedRegion?.centerPoint != null
+                      return (
+                        <div className="flex space-x-2">
+                          {!hasCenterPoint ? (
+                            mapCanvas.isSettingCenterPoint && mapCanvas.centerPointRegionId === regions.selectedRegionId ? (
+                              <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2 w-full">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-gray-900 text-base">
+                                    <strong>Set Heart Location</strong>
+                                  </p>
+                                </div>
+                                <p className="text-gray-900 text-sm">
+                                  Click on the map to set the heart location
+                                </p>
+                                <Button
+                                  onClick={() => {
+                                    mapCanvas.stopSettingCenterPoint()
+                                  }}
+                                  variant="primary"
+                                  className="w-full mt-2"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() => {
+                                  mapCanvas.startSettingCenterPoint(regions.selectedRegionId!)
+                                }}
+                                variant="secondary"
+                                title="Click on map to set region heart"
+                              >
+                                Set heart location
+                              </Button>
+                            )
+                          ) : null}
+                        </div>
+                      )
+                    })()}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">

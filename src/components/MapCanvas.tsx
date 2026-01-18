@@ -458,8 +458,10 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
       )}
       
       {isSettingCenterPoint && (
-        <div className="absolute top-4 right-4 z-10 bg-violet-blue text-white px-3 py-1 rounded text-sm">
-          Set Region Heart Mode
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-saffron border-2 border-saffron rounded-lg px-4 py-2 shadow-lg">
+          <p className="text-gray-900 font-semibold text-sm">
+            Set heart location
+          </p>
         </div>
       )}
       
