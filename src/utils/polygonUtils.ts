@@ -55,15 +55,24 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
   if (useGreetingsAndFarewells) {
     if (greetingSize === 'chat') {
       // Chat format uses greeting: and farewell: with single-line values
+      // Challenge text only in greeting, never in farewell. Use YAML \n escape so the value
+      // stays on one line in the source; replace(/\n/g, '\n  ') then won't add spaces into the string.
+      let greetingMsg = `§2Entering §7${region.name}`
+      const farewellMsg = `§6Leaving §7${region.name}`
+      if (isMainRegion && region.challengeLevel && includeChallengeLevelSubheading) {
+        greetingMsg += '\\n' + getChallengeLevelColor(region.challengeLevel)
+      }
+      const hasChallenge = isMainRegion && region.challengeLevel && includeChallengeLevelSubheading
+      const greetingStr = hasChallenge ? `"${greetingMsg.replace(/"/g, '\\"')}"` : greetingMsg
       if (randomMobSpawn) {
         const randomMobs = generateRandomMobList()
-        flags = `    greeting: §2Entering §7${region.name}\n    farewell: §6Leaving §7${region.name}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
+        flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
       } else {
-        flags = `    greeting: §2Entering §7${region.name}\n    farewell: §6Leaving §7${region.name}\n    passthrough: allow`
+        flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow`
       }
     } else if (isMainRegion && region.challengeLevel) {
       // Main regions with challenge levels get the new multi-line format
-      // When small greeting size is selected, challenge level subheading is not used
+      // Large: challenge on greeting-title line 2 when option on. Small: greeting-title for title; greeting: (chat) for challenge when option on. Never in farewell/farewell-title.
       const challengeColor = (includeChallengeLevelSubheading && greetingSize === 'large')
         ? getChallengeLevelColor(region.challengeLevel)
         : '§f'
@@ -81,18 +90,21 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
         farewellLine1 = `§fLeaving ${region.name}`
         farewellLine2 = `§f`
       } else {
-        // Small: §f on first line, greeting text on second line
+        // Small: §f on first line, greeting text on second line; challenge goes in greeting: (chat) when option on
         greetingLine1 = `§f`
         greetingLine2 = `§f${greetingText} ${region.name}`
         farewellLine1 = `§f`
         farewellLine2 = `§fLeaving ${region.name}`
       }
     
+      const smallGreetingChat = (includeChallengeLevelSubheading && greetingSize === 'small')
+        ? `\n    greeting: ${getChallengeLevelColor(region.challengeLevel)}`
+        : ''
       if (randomMobSpawn) {
         const randomMobs = generateRandomMobList()
-        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
+        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
       } else {
-        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
+        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
       }
     } else {
       // Other regions (spawn, hearts, villages) keep the old format (unless chat is selected)
