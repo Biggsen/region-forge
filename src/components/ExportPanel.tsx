@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { exportRegionsYAML } from '../utils/exportUtils'
+import { exportRegionsYAML, exportRegionsMetaYAML } from '../utils/exportUtils'
 import { loadExportSettings, saveExportSettings } from '../utils/persistenceUtils'
 import { BaseModal } from './BaseModal'
 import { Button } from './Button'
 
 export function ExportPanel() {
-  const { regions, spawn, worldType, toast } = useAppContext()
+  const { regions, spawn, worldType, worldName, toast } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
   const [randomMobSpawn, setRandomMobSpawn] = useState(false)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
@@ -109,8 +109,25 @@ export function ExportPanel() {
     exportRegionsYAML(regions.regions, includeVillages, randomMobSpawn, includeHeartRegions, finalIncludeSpawnRegion, spawnData, worldType.worldType, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
+  const handleExportRegionsMeta = () => {
+    const finalIncludeSpawnRegion = worldType.worldType === 'nether' ? false : includeSpawnRegion
+    exportRegionsMetaYAML(
+      regions.regions,
+      worldType.worldType,
+      worldName.worldName,
+      spawn.spawnState,
+      includeVillages,
+      includeHeartRegions,
+      finalIncludeSpawnRegion,
+      toast.showToast
+    )
+  }
+
   const computedHasVillages = regions.regions.some(region => region.subregions && region.subregions.length > 0)
   const hasSpawn = !!spawn.spawnState.coordinates
+
+  const canExportSpawnForMeta = worldType.worldType === 'overworld' && includeSpawnRegion && hasSpawn && !!spawn.spawnState.radius
+  const hasAnythingForRegionsMeta = regions.regions.length > 0 || canExportSpawnForMeta
 
   // Check URL parameter for advanced features
   const urlParams = new URLSearchParams(window.location.search)
@@ -370,6 +387,22 @@ export function ExportPanel() {
           >
             Generate regions.yml
           </Button>
+
+          {showAdvanced && (
+            <div className="border-t border-gunmetal pt-4 mt-4">
+              <p className="text-gray-400 text-sm mb-2">
+                For mc-plugin-manager: discovery metadata, onboarding, spawn center, and LevelledMobs bands.
+              </p>
+              <Button
+                onClick={handleExportRegionsMeta}
+                disabled={!hasAnythingForRegionsMeta}
+                variant="secondary"
+                className="w-full"
+              >
+                Generate regions-meta.yml
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

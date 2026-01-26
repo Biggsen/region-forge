@@ -1,6 +1,7 @@
 import { Region, MapState } from '../types'
 import { generateRegionYAML } from './polygonUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
+import yaml from 'js-yaml'
 
 
 export interface MapExportData {
@@ -201,6 +202,145 @@ function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; radiu
   yaml += `    priority: 10\n`
   
   return yaml
+}
+
+const CHALLENGE_TO_BAND: Record<string, string> = {
+  Vanilla: 'easy',
+  Bronze: 'easy',
+  Silver: 'normal',
+  Gold: 'hard',
+  Platinum: 'severe'
+}
+
+function toRegionId(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '_')
+}
+
+function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether'): string {
+  if (kind === 'system') return 'none'
+  if (world === 'nether') {
+    if (kind === 'region') return 'nether_region'
+    if (kind === 'heart') return 'nether_heart'
+    if (kind === 'village') return 'nether_village'
+  }
+  return kind
+}
+
+export function exportRegionsMetaYAML(
+  regions: Region[],
+  worldType: 'overworld' | 'nether',
+  worldName: string,
+  spawnState: { coordinates: { x: number; z: number } | null; radius: number },
+  includeVillages: boolean,
+  includeHeartRegions: boolean,
+  includeSpawnRegion: boolean,
+  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
+): void {
+  const dim = worldType
+  const hasSpawnCoords = !!spawnState.coordinates
+  const hasSpawnRegion = dim === 'overworld' && includeSpawnRegion && hasSpawnCoords && !!spawnState.radius
+
+  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string } }[] = []
+
+  if (hasSpawnRegion) {
+    metaRegions.push({
+      id: 'spawn',
+      world: dim,
+      kind: 'system',
+      discover: { method: 'disabled', recipeId: 'none' }
+    })
+  }
+
+  for (const region of regions) {
+    const mainId = toRegionId(region.name)
+    metaRegions.push({
+      id: mainId,
+      world: dim,
+      kind: 'region',
+      discover: {
+        method: region.hasSpawn === true ? 'first_join' : 'on_enter',
+        recipeId: getRecipeId('region', dim)
+      }
+    })
+    if (includeHeartRegions) {
+      metaRegions.push({
+        id: `heart_of_${mainId}`,
+        world: dim,
+        kind: 'heart',
+        discover: { method: 'on_enter', recipeId: getRecipeId('heart', dim) }
+      })
+    }
+    if (includeVillages && region.subregions) {
+      for (const sub of region.subregions) {
+        if (sub.type === 'village') {
+          metaRegions.push({
+            id: toRegionId(sub.name),
+            world: dim,
+            kind: 'village',
+            discover: { method: 'on_enter', recipeId: getRecipeId('village', dim) }
+          })
+        }
+      }
+    }
+  }
+
+  if (metaRegions.length === 0) {
+    onShowToast('No regions to export', 'error')
+    return
+  }
+
+  const root: Record<string, unknown> = {
+    format: 1,
+    world: dim,
+    regions: metaRegions
+  }
+
+  if (dim === 'overworld' && hasSpawnCoords) {
+    root.spawnCenter = {
+      world: worldName,
+      x: spawnState.coordinates!.x,
+      z: spawnState.coordinates!.z
+    }
+  }
+
+  const hasSpawnRegionWithHasSpawn = dim === 'overworld' && hasSpawnCoords && regions.some(r => r.hasSpawn === true)
+  if (hasSpawnRegionWithHasSpawn) {
+    const startRegion = regions.find(r => r.hasSpawn === true)!
+    root.onboarding = {
+      startRegionId: toRegionId(startRegion.name),
+      teleport: {
+        world: worldName,
+        x: spawnState.coordinates!.x,
+        z: spawnState.coordinates!.z
+      }
+    }
+  }
+
+  const regionBands: Record<string, string> = {}
+  for (const r of regions) {
+    if (r.challengeLevel && CHALLENGE_TO_BAND[r.challengeLevel]) {
+      regionBands[toRegionId(r.name)] = CHALLENGE_TO_BAND[r.challengeLevel]
+    }
+  }
+  const hasVillagesForLevelled = includeVillages && regions.some(r => r.subregions?.some(s => s.type === 'village'))
+  if (Object.keys(regionBands).length > 0 || hasVillagesForLevelled) {
+    root.levelledMobs = {
+      villageBandStrategy: 'easy',
+      ...(Object.keys(regionBands).length > 0 ? { regionBands } : {})
+    }
+  }
+
+  try {
+    const yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
+    const blob = new Blob([yamlStr], { type: 'text/yaml' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'regions-meta.yml'
+    link.click()
+    URL.revokeObjectURL(link.href)
+  } catch (e) {
+    onShowToast('Failed to generate regions-meta.yml', 'error')
+  }
 }
 
 // Generate achievements YAML for regions and villages
