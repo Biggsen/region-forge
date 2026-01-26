@@ -129,12 +129,10 @@ Omit `spawnCenter` when:
 | Region Forge `challengeLevel` | regions-meta band |
 |-------------------------------|-------------------|
 | Vanilla | `easy` |
-| Bronze | `easy` |
-| Silver | `normal` |
-| Gold | `hard` |
-| Platinum | `severe` |
-
-(Omit `deadly` from the mapping unless a future `challengeLevel` is added; `Platinum` → `severe` is a reasonable default.)
+| Bronze | `normal` |
+| Silver | `hard` |
+| Gold | `severe` |
+| Platinum | `deadly` |
 
 Only include `levelledMobs` when:
 

@@ -206,10 +206,10 @@ function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; radiu
 
 const CHALLENGE_TO_BAND: Record<string, string> = {
   Vanilla: 'easy',
-  Bronze: 'easy',
-  Silver: 'normal',
-  Gold: 'hard',
-  Platinum: 'severe'
+  Bronze: 'normal',
+  Silver: 'hard',
+  Gold: 'severe',
+  Platinum: 'deadly'
 }
 
 function toRegionId(name: string): string {
