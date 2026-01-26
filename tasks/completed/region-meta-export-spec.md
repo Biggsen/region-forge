@@ -1,5 +1,10 @@
 # Region-Meta Export Specification
 
+## Status: ✅ IMPLEMENTED
+
+**Implementation Date**: January 2026  
+**Validation**: Verified working with mc-plugin-manager
+
 ## Overview
 
 This specification defines the **regions-meta export** feature for Region Forge. The export produces a `regions-meta.yml` file conforming to the schema consumed by **mc-plugin-manager** (mcpm). Region Forge currently exports only `regions.yml` (WorldGuard) and several plugin-specific YAMLs in Advanced (Achievements, Event Conditions, LevelledMobs). The region-meta export is the bridge for mcpm: it carries discovery metadata, onboarding, spawn center, and LevelledMobs bands that `regions.yml` does not. Eventually, plugin export logic in Advanced will move to mcpm; region-meta will remain Region Forge’s output for mcpm.
@@ -289,3 +294,4 @@ export function exportRegionsMetaYAML(
 |--------|------|-------|
 | 1 | (spec creation) | Initial spec: regions-meta export, mapping, onboarding/spawnCenter/levelledMobs rules, nether behaviour, `villageBandStrategy` fixed to `easy`, `teleport` without y/yaw/pitch, `startRegionId` from `hasSpawn`. |
 | 1.1 | — | Region-meta is in the **Export** tab, visible only when `?advanced=true`. Uses existing include flags from ExportPanel state. |
+| 1.2 | January 2026 | ✅ **COMPLETED**: Full implementation with root-level `world` field, standard world name mapping (`world`/`world_nether`), updated challenge level mapping (Bronze→normal, Silver→hard, Gold→severe, Platinum→deadly). Validated with mc-plugin-manager. |
