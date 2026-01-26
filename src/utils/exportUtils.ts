@@ -226,6 +226,17 @@ function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'ov
   return kind
 }
 
+function getStandardWorldName(worldType: 'overworld' | 'nether'): string {
+  switch (worldType) {
+    case 'overworld':
+      return 'world'
+    case 'nether':
+      return 'world_nether'
+    default:
+      return 'world'
+  }
+}
+
 export function exportRegionsMetaYAML(
   regions: Region[],
   worldType: 'overworld' | 'nether',
@@ -297,7 +308,7 @@ export function exportRegionsMetaYAML(
 
   if (dim === 'overworld' && hasSpawnCoords) {
     root.spawnCenter = {
-      world: worldName,
+      world: getStandardWorldName(dim),
       x: spawnState.coordinates!.x,
       z: spawnState.coordinates!.z
     }
@@ -309,7 +320,7 @@ export function exportRegionsMetaYAML(
     root.onboarding = {
       startRegionId: toRegionId(startRegion.name),
       teleport: {
-        world: worldName,
+        world: getStandardWorldName(dim),
         x: spawnState.coordinates!.x,
         z: spawnState.coordinates!.z
       }
