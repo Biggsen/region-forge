@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { generateLevelledMobsRulesYAML, importMapData } from '../utils/exportUtils'
+import { importMapData } from '../utils/exportUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
 import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
@@ -27,10 +27,6 @@ export function AdvancedPanel() {
   const [customCenterZ, setCustomCenterZ] = useState('')
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
-
-  const handleGenerateLevelledMobsRules = () => {
-    generateLevelledMobsRulesYAML(regions.regions, worldName.worldName, spawn.spawnState.coordinates, worldType.worldType, toast.showToast)
-  }
 
   const handleRandomizeChallengeLevels = () => {
     regions.randomizeChallengeLevels()
@@ -245,13 +241,6 @@ export function AdvancedPanel() {
             <div className="space-y-4 ml-4">
               <div className="space-y-2">
                 <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">LevelledMobs</h5>
-                <button
-                  onClick={handleGenerateLevelledMobsRules}
-                  disabled={availableRegions.length === 0}
-                  className="w-full bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                >
-                  Generate LevelledMobs Rules
-                </button>
                 <RegionActions
                   regions={availableRegions}
                   onRandomizeChallengeLevels={handleRandomizeChallengeLevels}
