@@ -11,7 +11,7 @@ import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Hand, Paintbrush, 
 interface RegionDetailsViewProps {
   selectedRegion: Region
   editMode: EditMode
-  worldType: string
+  dimension: 'overworld' | 'nether' | 'end'
   isWarping: boolean
   warpRadius: number
   warpStrength: number
@@ -42,7 +42,7 @@ interface RegionDetailsViewProps {
 export function RegionDetailsView({
   selectedRegion,
   editMode,
-  worldType,
+  dimension,
   isWarping,
   warpRadius,
   warpStrength,
@@ -169,7 +169,8 @@ export function RegionDetailsView({
           <Button
             variant="ghost"
             onClick={() => {
-              const generatedName = generateRegionName(worldType as 'overworld' | 'nether')
+              const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+              const generatedName = generateRegionName(effectiveDimension)
               // Check for duplicates before applying
               const isDuplicate = existingRegions.some(r => 
                 r.id !== selectedRegion.id && r.name.trim().toLowerCase() === generatedName.toLowerCase()

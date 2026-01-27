@@ -282,12 +282,14 @@ export function generateNetherName(): string {
   }
 }
 
-// Main functions that choose between overworld and nether based on world type
-export function generateRegionName(worldType: 'overworld' | 'nether'): string {
-  return worldType === 'nether' ? generateNetherName() : generateMedievalName()
+// Main functions that choose between overworld and nether based on dimension
+export function generateRegionName(dimension: 'overworld' | 'nether' | 'end'): string {
+  // Filter 'end' to 'overworld' for now (end names not implemented)
+  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+  return effectiveDimension === 'nether' ? generateNetherName() : generateMedievalName()
 }
 
-export function generateVillageNameByWorldType(worldType: 'overworld' | 'nether'): string {
-  // Villages don't exist in the nether, so always use overworld village names
+export function generateVillageNameByWorldType(dimension: 'overworld' | 'nether' | 'end'): string {
+  // Villages don't exist in the nether or end, so always use overworld village names
   return generateVillageName()
 }

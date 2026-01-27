@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext'
 import { Pencil } from 'lucide-react'
 
 export function SeedInfoHeading() {
-  const { seedInfo, worldType } = useAppContext()
+  const { seedInfo } = useAppContext()
   const [editingSeed, setEditingSeed] = useState(false)
   const [editingDimension, setEditingDimension] = useState(false)
   const [seedValue, setSeedValue] = useState(seedInfo.seedInfo.seed || '')
@@ -67,7 +67,7 @@ export function SeedInfoHeading() {
   }
 
   const displaySeed = seedInfo.seedInfo.seed || 'Not set'
-  const displayDimension = seedInfo.seedInfo.dimension || worldType.worldType || 'Not set'
+  const displayDimension = seedInfo.seedInfo.dimension || 'Not set'
 
   return (
     <div className="space-y-2">
@@ -105,7 +105,7 @@ export function SeedInfoHeading() {
           {editingDimension ? (
             <select
               ref={dimensionSelectRef}
-              value={seedInfo.seedInfo.dimension || worldType.worldType || 'overworld'}
+              value={seedInfo.seedInfo.dimension || 'overworld'}
               onChange={handleDimensionChange}
               onBlur={handleDimensionBlur}
               onKeyDown={handleDimensionKeyDown}

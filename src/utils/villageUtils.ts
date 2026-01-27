@@ -58,14 +58,15 @@ export function findParentRegion(village: VillageData, regions: Region[]): Regio
   return null
 }
 
-export function createVillageSubregion(village: VillageData, index: number, parentRegionId?: string, existingNames: Set<string> = new Set(), worldType: 'overworld' | 'nether' = 'overworld'): Subregion {
-  let generatedName = generateVillageNameByWorldType(worldType)
+export function createVillageSubregion(village: VillageData, index: number, parentRegionId?: string, existingNames: Set<string> = new Set(), dimension: 'overworld' | 'nether' | 'end' = 'overworld'): Subregion {
+  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+  let generatedName = generateVillageNameByWorldType(effectiveDimension)
   let attempts = 0
   const maxAttempts = 100 // Prevent infinite loops
   
   // Keep generating names until we find a unique one
   while (existingNames.has(generatedName) && attempts < maxAttempts) {
-    generatedName = generateVillageNameByWorldType(worldType)
+    generatedName = generateVillageNameByWorldType(effectiveDimension)
     attempts++
   }
   
@@ -91,7 +92,7 @@ export function createVillageSubregion(village: VillageData, index: number, pare
   }
 }
 
-export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string {
+export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string {
   const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
   const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
   

@@ -10,7 +10,7 @@ import { Trash2, Heart, ClipboardCopy, MapPin, Pencil } from 'lucide-react'
 import { ClearDataModal } from './ClearDataModal'
 
 export function AdvancedPanel() {
-  const { regions, worldType, mapCanvas, toast, worldName, spawn } = useAppContext()
+  const { regions, seedInfo, mapCanvas, toast, worldName, spawn } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -19,7 +19,6 @@ export function AdvancedPanel() {
   const [importError, setImportError] = useState<string | null>(null)
   const [isOtherRegionTypesExpanded, setIsOtherRegionTypesExpanded] = useState(false)
   const [isPluginsExpanded, setIsPluginsExpanded] = useState(false)
-  const [isWorldTypeExpanded, setIsWorldTypeExpanded] = useState(false)
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
@@ -145,55 +144,6 @@ export function AdvancedPanel() {
       <h3 className="text-lg font-semibold text-white mb-4">Advanced Tools</h3>
       
       <div className="space-y-4">
-        {/* World Type Toggle */}
-        <div>
-          <button
-            onClick={() => setIsWorldTypeExpanded(!isWorldTypeExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span>World Type</span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isWorldTypeExpanded ? 'rotate-90' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isWorldTypeExpanded && (
-            <div className="ml-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => worldType.setWorldType('overworld')}
-                  className={`text-sm px-3 py-1 rounded border ${
-                    worldType.worldType === 'overworld'
-                      ? 'bg-viridian text-white border-viridian'
-                      : 'text-zomp/80 hover:text-zomp border-zomp/80 hover:border-zomp'
-                  }`}
-                  title="Generate overworld-style names"
-                >
-                  Overworld
-                </button>
-                <button
-                  onClick={() => worldType.setWorldType('nether')}
-                  className={`text-sm px-3 py-1 rounded border ${
-                    worldType.worldType === 'nether'
-                      ? 'bg-red-600 text-white border-red-500'
-                      : 'text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
-                  }`}
-                  title="Generate nether-style names"
-                >
-                  Nether
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-
         {/* Other region types */}
         <div>
           <button
@@ -214,7 +164,7 @@ export function AdvancedPanel() {
           </button>
           {isOtherRegionTypesExpanded && (
             <div className="space-y-2 ml-4">
-              {worldType.worldType !== 'nether' && <SpawnButton />}
+              {seedInfo.seedInfo.dimension !== 'nether' && <SpawnButton />}
             </div>
           )}
         </div>
@@ -423,7 +373,7 @@ export function AdvancedPanel() {
                 )}
               </div>
 
-              {worldType.worldType !== 'nether' && (
+              {seedInfo.seedInfo.dimension !== 'nether' && (
                 <div className="space-y-2">
                   <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Spawn Region</h5>
                   <div className="text-sm text-gray-300">

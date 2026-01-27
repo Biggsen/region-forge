@@ -11,7 +11,7 @@ import { SortButton } from './SortButton'
 import { Trash2, Search, LineSquiggle, ZoomIn } from 'lucide-react'
 
 export function RegionPanel() {
-  const { regions, worldType, mapState: mapStateHook, toast } = useAppContext()
+  const { regions, seedInfo, mapState: mapStateHook, toast } = useAppContext()
   const {
     regions: regionsList,
     selectedRegionId,
@@ -148,7 +148,9 @@ export function RegionPanel() {
             <div className="flex-shrink-0 mb-2">
               <RegionCreationForm
                 existingRegions={regionsList}
-                worldType={worldType.worldType}
+                dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+                  ? seedInfo.seedInfo.dimension 
+                  : 'overworld'}
                 onStartDrawing={(name, freehand) => {
                   regions.setFreehandEnabled(freehand)
                   startDrawingRegion(name)
@@ -358,7 +360,9 @@ export function RegionPanel() {
         <RegionDetailsView
           selectedRegion={selectedRegion}
           editMode={editMode}
-          worldType={worldType.worldType}
+          dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+            ? seedInfo.seedInfo.dimension 
+            : 'overworld'}
           isWarping={isWarping}
           warpRadius={warpRadius}
           warpStrength={warpStrength}

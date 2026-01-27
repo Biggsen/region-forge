@@ -4,7 +4,7 @@ import { Button } from './Button'
 import { Region } from '../types'
 
 interface RegionCreationFormProps {
-  worldType: 'overworld' | 'nether'
+  dimension: 'overworld' | 'nether' | 'end'
   onStartDrawing: (name: string, freehand: boolean) => void
   onCancelDrawing: () => void
   isDrawing: boolean
@@ -13,7 +13,7 @@ interface RegionCreationFormProps {
 }
 
 export function RegionCreationForm({ 
-  worldType, 
+  dimension, 
   onStartDrawing,
   onCancelDrawing,
   isDrawing,
@@ -27,9 +27,10 @@ export function RegionCreationForm({
   // Generate a random name when the form is shown
   useEffect(() => {
     if (showNewRegionForm && !newRegionName) {
-      setNewRegionName(generateRegionName(worldType))
+      const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+      setNewRegionName(generateRegionName(effectiveDimension))
     }
-  }, [showNewRegionForm, newRegionName, worldType])
+  }, [showNewRegionForm, newRegionName, dimension])
 
   // Clear error when name changes
   useEffect(() => {
@@ -39,7 +40,8 @@ export function RegionCreationForm({
   }, [newRegionName])
 
   const handleGenerateNewName = () => {
-    setNewRegionName(generateRegionName(worldType))
+    const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+    setNewRegionName(generateRegionName(effectiveDimension))
     setNameError(null)
   }
 

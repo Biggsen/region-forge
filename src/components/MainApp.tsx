@@ -19,7 +19,7 @@ import { useDataChanged } from '../hooks/useDataChanged'
 type TabType = 'map' | 'regions' | 'export' | 'advanced'
 
 function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) {
-  const { regions, mapState, worldName, spawn, worldType, seedInfo, toast } = useAppContext()
+  const { regions, mapState, worldName, spawn, seedInfo, toast } = useAppContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showLoadModal, setShowLoadModal] = useState(false)
   
@@ -40,26 +40,31 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
     radius: spawn.spawnState.radius
   } : null
 
+  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+    ? seedInfo.seedInfo.dimension 
+    : 'overworld'
   const { hasChanged, markAsSaved } = useDataChanged(
     regions.regions,
     mapState.mapState,
     worldName.worldName,
     spawnData,
-    worldType.worldType
+    dimension
   )
 
   const handleSave = async () => {
     // Load image details for export
     const imageDetails = loadImageDetails()
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+      ? seedInfo.seedInfo.dimension 
+      : 'overworld'
     
     await exportCompleteMap(
       regions.regions, 
       mapState.mapState, 
       worldName.worldName, 
       spawnData, 
-      worldType.worldType,
+      dimension,
       seedInfo.seedInfo.seed,
-      seedInfo.seedInfo.dimension,
       imageDetails?.worldSize,
       imageDetails?.imageSize,
       toast.showToast
@@ -148,11 +153,6 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
       // Always update world name - use import data or default to 'world'
       worldName.updateWorldName(importData.worldName || 'world')
 
-      // Update world type if it exists in import data
-      if (importData.worldType) {
-        worldType.setWorldType(importData.worldType)
-      }
-
       // Update spawn coordinates if they exist in import data
       if (importData.spawnCoordinates) {
         spawn.setSpawnCoordinates(importData.spawnCoordinates)
@@ -163,10 +163,21 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
       }
 
       // Always update seed/dimension - clear if missing from import data
+      // Migration: if old export has worldType but no dimension, copy it
+      let dimensionToUse = importData.dimension
+      if (!dimensionToUse && importData.worldType) {
+        // Migrate from old worldType field
+        if (importData.worldType === 'overworld' || importData.worldType === 'nether') {
+          dimensionToUse = importData.worldType
+        } else {
+          // If worldType is 'end' or invalid, default to 'overworld'
+          dimensionToUse = 'overworld'
+        }
+      }
       // Pass undefined explicitly to clear values (JSON.stringify will omit them when saving)
       seedInfo.updateSeedInfo({
         seed: importData.seed,
-        dimension: importData.dimension
+        dimension: dimensionToUse
       })
 
       // Always update world size and image size - clear if missing from import data

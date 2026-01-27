@@ -39,7 +39,7 @@ function generateRandomMobList(): string[] {
   return shuffled.slice(0, count)
 }
 
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, randomMobSpawn: boolean = false, includeHeartRegions: boolean = true, worldType?: 'overworld' | 'nether', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, randomMobSpawn: boolean = false, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -47,8 +47,9 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
                       !region.name.toLowerCase().includes('heart') && 
                       !region.name.toLowerCase().includes('village')
   
-  // Determine greeting text based on world type
-  const greetingText = worldType === 'nether' ? 'You descend into' : 'Welcome to'
+  // Determine greeting text based on dimension (filter 'end' to 'overworld' for now)
+  const effectiveDimension = dimension === 'end' ? 'overworld' : (dimension || 'overworld')
+  const greetingText = effectiveDimension === 'nether' ? 'You descend into' : 'Welcome to'
   
   // Generate flags based on region type
   let flags: string
@@ -193,7 +194,7 @@ ${points}`
   if (includeVillages && region.subregions && region.subregions.length > 0) {
     yaml += '\n\n'
     yaml += region.subregions.map(subregion => 
-      generateSubregionYAML(subregion, region.name, worldType, useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
+      generateSubregionYAML(subregion, region.name, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
     ).join('\n\n')
   }
   

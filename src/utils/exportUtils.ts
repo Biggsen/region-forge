@@ -14,7 +14,6 @@ export interface MapExportData {
   regions: Region[]
   mapState: Omit<MapState, 'image'> & { imageSrc?: string }
   spawnCoordinates?: { x: number; z: number; radius?: number } | null
-  worldType?: 'overworld' | 'nether'
   exportDate: string
   imageData?: string // Base64 encoded image data
   imageFilename?: string
@@ -30,9 +29,8 @@ export async function exportCompleteMap(
   mapState: MapState, 
   worldName: string, 
   spawnCoordinates?: { x: number; z: number; radius?: number } | null, 
-  worldType?: 'overworld' | 'nether', 
+  dimension?: 'overworld' | 'nether' | 'end', 
   seed?: string, 
-  dimension?: string, 
   worldSize?: number, 
   imageSize?: { width: number; height: number },
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
@@ -96,7 +94,6 @@ export async function exportCompleteMap(
         imageSrc: (mapState.image as any)?.imageSrc || undefined
       },
       spawnCoordinates,
-      worldType,
       exportDate: new Date().toISOString(),
       imageData: imageData || undefined,
       imageFilename: imageData ? `map-image-${new Date().toISOString().split('T')[0]}.png` : undefined,
@@ -110,7 +107,8 @@ export async function exportCompleteMap(
     link.href = URL.createObjectURL(dataBlob)
     const worldNameSlug = worldName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
     const date = new Date().toISOString().split('T')[0]
-    link.download = `${worldNameSlug}-${worldType || 'overworld'}-${date}.json`
+    const dimensionSlug = dimension || 'overworld'
+    link.download = `${worldNameSlug}-${dimensionSlug}-${date}.json`
     link.click()
     
     URL.revokeObjectURL(link.href)
@@ -131,14 +129,15 @@ export function exportRegionsYAML(
   includeHeartRegions: boolean = true,
   includeSpawnRegion: boolean = false,
   spawnCoordinates?: { x: number; z: number; radius?: number } | null,
-  worldType?: 'overworld' | 'nether',
+  dimension?: 'overworld' | 'nether' | 'end',
   useModernWorldHeight: boolean = true,
   useGreetingsAndFarewells: boolean = false,
   greetingSize: 'large' | 'small' | 'chat' = 'large',
   includeChallengeLevelSubheading: boolean = false,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): void {
-  if (regions.length === 0 && (!includeSpawnRegion || worldType === 'nether')) {
+  const effectiveDimension = dimension === 'end' ? 'overworld' : (dimension || 'overworld')
+  if (regions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether')) {
     onShowToast('No regions to export', 'error')
     return
   }
@@ -146,7 +145,7 @@ export function exportRegionsYAML(
   let yamlContent = 'regions:\n'
   
   // Add spawn region if requested and coordinates exist (only for overworld)
-  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && worldType !== 'nether') {
+  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension !== 'nether') {
     const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; radius: number }, useModernWorldHeight)
     yamlContent += spawnRegion
     if (regions.length > 0) {
@@ -155,7 +154,7 @@ export function exportRegionsYAML(
   }
   
   regions.forEach((region, index) => {
-    yamlContent += generateRegionYAML(region, includeVillages, randomMobSpawn, includeHeartRegions, worldType, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
+    yamlContent += generateRegionYAML(region, includeVillages, randomMobSpawn, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
     // Add a blank line between regions (except after the last one)
     if (index < regions.length - 1) {
       yamlContent += '\n'
@@ -216,9 +215,10 @@ function toRegionId(name: string): string {
   return name.toLowerCase().replace(/\s+/g, '_')
 }
 
-function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether'): string {
+function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether' | 'end'): string {
   if (kind === 'system') return 'none'
-  if (world === 'nether') {
+  const effectiveWorld = world === 'end' ? 'overworld' : world
+  if (effectiveWorld === 'nether') {
     if (kind === 'region') return 'nether_region'
     if (kind === 'heart') return 'nether_heart'
     if (kind === 'village') return 'nether_village'
@@ -226,8 +226,9 @@ function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'ov
   return kind
 }
 
-function getStandardWorldName(worldType: 'overworld' | 'nether'): string {
-  switch (worldType) {
+function getStandardWorldName(dimension: 'overworld' | 'nether' | 'end'): string {
+  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+  switch (effectiveDimension) {
     case 'overworld':
       return 'world'
     case 'nether':
@@ -239,7 +240,7 @@ function getStandardWorldName(worldType: 'overworld' | 'nether'): string {
 
 export function exportRegionsMetaYAML(
   regions: Region[],
-  worldType: 'overworld' | 'nether',
+  dimension: 'overworld' | 'nether' | 'end',
   worldName: string,
   spawnState: { coordinates: { x: number; z: number } | null; radius: number },
   includeVillages: boolean,
@@ -247,7 +248,8 @@ export function exportRegionsMetaYAML(
   includeSpawnRegion: boolean,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): void {
-  const dim = worldType
+  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
+  const dim = effectiveDimension
   const hasSpawnCoords = !!spawnState.coordinates
   const hasSpawnRegion = dim === 'overworld' && includeSpawnRegion && hasSpawnCoords && !!spawnState.radius
 

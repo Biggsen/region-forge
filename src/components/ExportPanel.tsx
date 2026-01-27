@@ -6,7 +6,7 @@ import { BaseModal } from './BaseModal'
 import { Button } from './Button'
 
 export function ExportPanel() {
-  const { regions, spawn, worldType, worldName, toast } = useAppContext()
+  const { regions, spawn, seedInfo, worldName, toast } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
   const [randomMobSpawn, setRandomMobSpawn] = useState(false)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
@@ -104,16 +104,22 @@ export function ExportPanel() {
       z: spawn.spawnState.coordinates.z,
       radius: spawn.spawnState.radius
     } : null
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+      ? seedInfo.seedInfo.dimension 
+      : 'overworld'
     // Force spawn region to false for nether since it doesn't exist
-    const finalIncludeSpawnRegion = worldType.worldType === 'nether' ? false : includeSpawnRegion
-    exportRegionsYAML(regions.regions, includeVillages, randomMobSpawn, includeHeartRegions, finalIncludeSpawnRegion, spawnData, worldType.worldType, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
+    const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
+    exportRegionsYAML(regions.regions, includeVillages, randomMobSpawn, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
   const handleExportRegionsMeta = () => {
-    const finalIncludeSpawnRegion = worldType.worldType === 'nether' ? false : includeSpawnRegion
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+      ? seedInfo.seedInfo.dimension 
+      : 'overworld'
+    const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
     exportRegionsMetaYAML(
       regions.regions,
-      worldType.worldType,
+      dimension,
       worldName.worldName,
       spawn.spawnState,
       includeVillages,
@@ -125,8 +131,11 @@ export function ExportPanel() {
 
   const computedHasVillages = regions.regions.some(region => region.subregions && region.subregions.length > 0)
   const hasSpawn = !!spawn.spawnState.coordinates
+  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+    ? seedInfo.seedInfo.dimension 
+    : 'overworld'
 
-  const canExportSpawnForMeta = worldType.worldType === 'overworld' && includeSpawnRegion && hasSpawn && !!spawn.spawnState.radius
+  const canExportSpawnForMeta = dimension === 'overworld' && includeSpawnRegion && hasSpawn && !!spawn.spawnState.radius
   const hasAnythingForRegionsMeta = regions.regions.length > 0 || canExportSpawnForMeta
 
   // Check URL parameter for advanced features
@@ -358,7 +367,7 @@ export function ExportPanel() {
                 </label>
               </div>
               
-              {worldType.worldType !== 'nether' && (
+              {dimension !== 'nether' && (
                 <div className="flex items-center">
                   <input
                     type="checkbox"
