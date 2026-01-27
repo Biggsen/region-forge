@@ -1,32 +1,24 @@
 # Nether Dimension Completion Specification
 
 ## Overview
-This specification outlines the completion of Nether dimension support. Nether functionality is partially implemented (name generation, YAML generation, achievements/events) but is currently disabled in the UI. This spec enables Nether in the user interface and ensures all features work correctly.
+This specification outlines the completion of Nether dimension support. Nether functionality is partially implemented (name generation, YAML generation) but is currently disabled in the UI. This spec enables Nether in the user interface and ensures all features work correctly.
 
 **Prerequisites**: Complete `remove-worldtype-setting-spec.md` first. After the refactor, `dimension` will be the single source of truth, making nether implementation straightforward.
 
 ## Problem Statement
 
-Currently, Nether dimension has:
-- ✅ **Implemented**: Name generation (`generateNetherName()`), YAML generation with nether-specific logic, achievements/events with nether handling
-- ❌ **Disabled**: UI controls show Nether as "Coming soon" and disabled
-- ❌ **Missing**: World size slider support for Nether (only works for overworld)
-- ❌ **Incomplete**: End-to-end testing of Nether functionality
-- ❌ **Bug**: `getRecipeId()` incorrectly returns `'nether_village'` - villages don't exist in nether
+Originally, Nether dimension had:
+- ✅ **Implemented**: Name generation (`generateNetherName()`), YAML generation with nether-specific logic
+- ~~❌ **Disabled**: UI controls show Nether as "Coming soon" and disabled~~ → **Done**: Nether enabled in SeedInfoHeading and MapLoaderControls
+- ~~❌ **Missing**: World size slider support for Nether~~ → **Done**: Slider shown for nether with "Nether World Size" label
+- ~~❌ **Incomplete**: End-to-end testing~~ → **Done**: Manual testing completed
+- ~~❌ **Bug**: `getRecipeId()` incorrectly returns `'nether_village'`~~ → **Done**: Removed; villages skipped for nether
 
-### Current State
+### Current State (post-implementation)
 
-1. **UI Disabled**:
-   - `SeedInfoHeading.tsx`: Nether option disabled with "Coming soon" text
-   - `MapLoaderControls.tsx`: Nether option disabled in dimension dropdown
-
-2. **World Size Slider**:
-   - Only available for overworld dimension (`importDimension === 'overworld'`)
-   - Nether and End dimensions cannot adjust world size
-
-3. **Type Support**:
-   - `dimension` in `seedInfo` supports `'overworld' | 'nether' | 'end'` (end is disabled)
-   - After refactor: `dimension` will be the single source of truth (no worldType confusion)
+1. **UI**: Nether enabled in SeedInfoHeading and MapLoaderControls. Spawn and Villages sections hidden for nether. Spawn marker hidden on map; Villages/Orphaned hidden in Display dropup.
+2. **World Size Slider**: Available for overworld and nether; nether label "Nether World Size". End still no slider.
+3. **Type Support**: `dimension` is the single source of truth (worldType removed). `'overworld' | 'nether' | 'end'` supported; end disabled in UI.
 
 ## Goals
 
@@ -157,19 +149,14 @@ Nether world size is independent of overworld size. The user selects the nether 
    - Verify villages are completely excluded from nether exports
    - Verify **`villageBandStrategy: easy`** is **not** included in `levelledMobs` for nether (villages don't exist; only `regionBands` when applicable).
 
-5. **Achievements/Events**:
-   - Generate achievements YAML for Nether regions
-   - Generate event conditions YAML for Nether regions
-   - Verify nether-specific naming in achievements
-
-6. **World Size**:
+5. **World Size**:
    - Set different world sizes for Nether (2k-16k)
    - Verify world size persists
    - Verify map generation uses the selected size directly (no conversion)
    - Verify API receives correct size parameter for Nether (e.g., size: 2 for 2k nether)
    - Verify coordinates are correct for the loaded image dimension (no conversion needed)
 
-7. **Export/Import**:
+6. **Export/Import**:
    - Export project with Nether dimension
    - Import project with Nether dimension
    - Verify dimension is preserved
@@ -177,84 +164,82 @@ Nether world size is independent of overworld size. The user selects the nether 
 ## Implementation Checklist
 
 ### Phase 1: Enable Nether in UI
-- [ ] Remove `disabled` from Nether option in `SeedInfoHeading.tsx`
-- [ ] Remove "Coming soon" text from Nether option in `SeedInfoHeading.tsx`
-- [ ] Remove `disabled` from Nether option in `MapLoaderControls.tsx`
-- [ ] Remove "Coming soon" text from Nether option in `MapLoaderControls.tsx`
-- [ ] Hide **entire** Spawn collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
-- [ ] Hide **entire** Villages collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
-- [ ] Update spawn export checks in `ExportPanel.tsx` to use `dimension !== 'nether'`; hide "Include Spawn Region" for nether
-- [ ] Hide spawn marker on map for nether: `MapCanvas` passes `spawnCoordinates={null}` to `RegionOverlay` when nether
-- [ ] Hide Villages and Orphaned Villages in Display dropup for nether: `MapDisplayControls` accepts `dimension`, shows village toggles only when `dimension !== 'nether'`
-- [ ] Verify region name generation uses `dimension` (should work automatically after refactor)
-- [ ] Test that Nether can be selected in both locations
+- [x] Remove `disabled` from Nether option in `SeedInfoHeading.tsx`
+- [x] Remove "Coming soon" text from Nether option in `SeedInfoHeading.tsx`
+- [x] Remove `disabled` from Nether option in `MapLoaderControls.tsx`
+- [x] Remove "Coming soon" text from Nether option in `MapLoaderControls.tsx`
+- [x] Hide **entire** Spawn collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
+- [x] Hide **entire** Villages collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
+- [x] Update spawn export checks in `ExportPanel.tsx` to use `dimension !== 'nether'`; hide "Include Spawn Region" for nether
+- [x] Hide spawn marker on map for nether: `MapCanvas` passes `spawnCoordinates={null}` to `RegionOverlay` when nether
+- [x] Hide Villages and Orphaned Villages in Display dropup for nether: `MapDisplayControls` accepts `dimension`, shows village toggles only when `dimension !== 'nether'`
+- [x] Verify region name generation uses `dimension` (works via seedInfo)
+- [x] Test that Nether can be selected in both locations
 
 ### Phase 2: Fix Nether Village Bug
-- [ ] Remove `nether_village` case from `getRecipeId()` function in `src/utils/exportUtils.ts`
-- [ ] Update `exportRegionsMetaYAML()` to skip villages when `dimension === 'nether'`
-- [ ] Test that villages are never exported for nether dimension
+- [x] Remove `nether_village` case from `getRecipeId()` function in `src/utils/exportUtils.ts`
+- [x] Update `exportRegionsMetaYAML()` to skip villages when `dimension === 'nether'`
+- [x] Test that villages are never exported for nether dimension
 
 ### Regions-meta export (nether-specific)
-- [ ] Use filename `nether-regions-meta.yml` when exporting for nether; `regions-meta.yml` otherwise
-- [ ] Omit `villageBandStrategy: 'easy'` from `levelledMobs` when dimension is nether
+- [x] Use filename `nether-regions-meta.yml` when exporting for nether; `regions-meta.yml` otherwise
+- [x] Omit `villageBandStrategy: 'easy'` from `levelledMobs` when dimension is nether
 
 ### Phase 3: World Size Slider
-- [ ] Update world size slider condition in `MapLoaderControls.tsx` to include Nether
-- [ ] Update label to show "Nether World Size" when nether dimension is selected
-- [ ] Send selected size directly to API (no conversion needed)
-- [ ] Test world size slider appears for Nether dimension
-- [ ] Test world size persistence for Nether
-- [ ] Test that selected size is sent directly to API (e.g., 2k → size: 2)
+- [x] Update world size slider condition in `MapLoaderControls.tsx` to include Nether
+- [x] Update label to show "Nether World Size" when nether dimension is selected
+- [x] Send selected size directly to API (no conversion needed)
+- [x] Test world size slider appears for Nether dimension
+- [x] Test world size persistence for Nether
+- [x] Test that selected size is sent directly to API (e.g., 2k → size: 2)
 
 ### Phase 4: Testing
-- [ ] Test map generation from seed with Nether
-- [ ] Test region creation in Nether
-- [ ] Test region name generation (should use nether style)
-- [ ] Test YAML export for Nether regions
-- [ ] Test achievements generation for Nether
-- [ ] Test event conditions generation for Nether
-- [ ] Test spawn region exclusion (nether shouldn't have spawn)
-- [ ] Test villages are excluded from nether exports
-- [ ] Test regions-meta.yml export for nether (correct recipeIds, no onboarding/spawnCenter)
-- [ ] Test export/import with Nether dimension
-- [ ] Test world size slider functionality
-- [ ] Document any bugs found
+- [x] Test map generation from seed with Nether
+- [x] Test region creation in Nether
+- [x] Test region name generation (should use nether style)
+- [x] Test YAML export for Nether regions
+- [x] Test spawn region exclusion (nether shouldn't have spawn)
+- [x] Test villages are excluded from nether exports
+- [x] Test regions-meta export for nether (correct recipeIds, no onboarding/spawnCenter, filename, no villageBandStrategy)
+- [x] Test export/import with Nether dimension
+- [x] Test world size slider functionality
+- [x] Document any bugs found (none)
 
 ### Phase 5: Bug Fixes & General Export Behaviour
-- [ ] Remove `nether_village` from `getRecipeId()`; ensure `exportRegionsMetaYAML()` skips villages when `dimension === 'nether'`
-- [ ] Verify spawn/village UI elements are **hidden** (not just disabled) for nether
-- [ ] **Hearts (not nether-specific):** Export hearts only when `region.centerPoint != null`. Apply in both `generateRegionYAML` (regions YAML) and `exportRegionsMetaYAML` (regions-meta).
-- [ ] Fix any other bugs discovered during testing
-- [ ] Re-test fixed functionality
-- [ ] Update documentation if needed
+- [x] Remove `nether_village` from `getRecipeId()`; ensure `exportRegionsMetaYAML()` skips villages when `dimension === 'nether'`
+- [x] Verify spawn/village UI elements are **hidden** (not just disabled) for nether
+- [x] **Hearts (not nether-specific):** Export hearts only when `region.centerPoint != null`. Apply in both `generateRegionYAML` (regions YAML) and `exportRegionsMetaYAML` (regions-meta).
+- [x] Fix any other bugs discovered during testing (none)
+- [x] Re-test fixed functionality
+- [x] Update documentation if needed (spec updated)
 
 ## Testing Requirements
 
+*Manual QA completed; all items below verified.*
+
 ### Functional Tests
-- [ ] Nether can be selected in SeedInfoHeading
-- [ ] Nether can be selected in MapLoaderControls
-- [ ] World size slider appears for Nether
-- [ ] World size slider works correctly for Nether
-- [ ] API receives correct size parameter for Nether dimension (selected size, no conversion)
-- [ ] Coordinates are correct for loaded image dimension (no conversion needed)
-- [ ] Map generation works with Nether dimension
-- [ ] Region creation works in Nether
-- [ ] Region names use nether-style generation (name generator uses dimension from seedInfo)
-- [ ] YAML export works for Nether regions
-- [ ] Achievements generation works for Nether
-- [ ] Event conditions generation works for Nether
-- [ ] Spawn regions are excluded for Nether
-- [ ] Villages are excluded from nether exports
-- [ ] regions-meta export works correctly for Nether (correct recipeIds, no onboarding/spawnCenter, no villageBandStrategy, filename `nether-regions-meta.yml`)
-- [ ] Spawn marker not shown on map for nether; Villages/Orphaned hidden in Display dropup for nether
-- [ ] Export/import preserves Nether dimension
+- [x] Nether can be selected in SeedInfoHeading
+- [x] Nether can be selected in MapLoaderControls
+- [x] World size slider appears for Nether
+- [x] World size slider works correctly for Nether
+- [x] API receives correct size parameter for Nether dimension (selected size, no conversion)
+- [x] Coordinates are correct for loaded image dimension (no conversion needed)
+- [x] Map generation works with Nether dimension
+- [x] Region creation works in Nether
+- [x] Region names use nether-style generation (name generator uses dimension from seedInfo)
+- [x] YAML export works for Nether regions
+- [x] Spawn regions are excluded for Nether
+- [x] Villages are excluded from nether exports
+- [x] regions-meta export works correctly for Nether (correct recipeIds, no onboarding/spawnCenter, no villageBandStrategy, filename `nether-regions-meta.yml`)
+- [x] Spawn marker not shown on map for nether; Villages/Orphaned hidden in Display dropup for nether
+- [x] Export/import preserves Nether dimension
 
 ### Edge Cases
-- [ ] Switching between Overworld and Nether
-- [ ] World size persistence across dimension switches (each dimension has independent size)
-- [ ] Export file with Nether dimension
-- [ ] Import file with Nether dimension
-- [ ] Coordinate boundaries are correct for the loaded image dimension
+- [x] Switching between Overworld and Nether
+- [x] World size persistence across dimension switches (each dimension has independent size)
+- [x] Export file with Nether dimension
+- [x] Import file with Nether dimension
+- [x] Coordinate boundaries are correct for the loaded image dimension
 
 ## Known Limitations
 
@@ -267,12 +252,16 @@ Nether world size is independent of overworld size. The user selects the nether 
 
 ## Success Criteria
 
-- [ ] Nether is fully enabled in UI (no disabled flags)
-- [ ] World size slider works for Nether dimension
-- [ ] All Nether functionality works end-to-end
-- [ ] No regressions in Overworld functionality
-- [ ] All tests pass
-- [ ] Documentation updated if needed
+- [x] Nether is fully enabled in UI (no disabled flags)
+- [x] World size slider works for Nether dimension
+- [x] All Nether functionality works end-to-end
+- [x] No regressions in Overworld functionality
+- [x] All tests pass
+- [x] Documentation updated if needed (spec updated)
+
+## Completion Status
+
+**Complete.** Implementation and manual testing are done. Achievements and event conditions generation have been removed from the app and are no longer in scope for this spec.
 
 ## Dependencies
 
