@@ -195,40 +195,40 @@ Legacy export files may contain `worldType`:
 ## Implementation Checklist
 
 ### Phase 1: Remove UI and Hook
-- [ ] Remove "World Type" toggle section from `AdvancedPanel.tsx`
-- [ ] Remove `isWorldTypeExpanded` state
-- [ ] Update spawn visibility checks in `AdvancedPanel.tsx` to use `dimension`
-- [ ] Delete `src/hooks/useWorldType.ts`
-- [ ] Remove `worldType` from `AppContext.tsx`
-- [ ] Update `useRegions` call in context to use `dimension`
+- [x] Remove "World Type" toggle section from `AdvancedPanel.tsx`
+- [x] Remove `isWorldTypeExpanded` state
+- [x] Update spawn visibility checks in `AdvancedPanel.tsx` to use `dimension`
+- [x] Delete `src/hooks/useWorldType.ts`
+- [x] Remove `worldType` from `AppContext.tsx`
+- [x] Update `useRegions` call in context to use `dimension`
 
 ### Phase 2: Update Component References
-- [ ] Update `ExportPanel.tsx` to use `dimension` instead of `worldType`
-- [ ] Update `MainApp.tsx` to use `dimension` instead of `worldType`
-- [ ] Update `RegionPanel.tsx` to use `dimension` instead of `worldType`
-- [ ] Update `SeedInfoHeading.tsx` to remove `worldType` fallback
-- [ ] Update `RegionCreationForm.tsx` prop name/usage
-- [ ] Update `RegionDetailsView.tsx` prop name/usage
+- [x] Update `ExportPanel.tsx` to use `dimension` instead of `worldType`
+- [x] Update `MainApp.tsx` to use `dimension` instead of `worldType`
+- [x] Update `RegionPanel.tsx` to use `dimension` instead of `worldType`
+- [x] Update `SeedInfoHeading.tsx` to remove `worldType` fallback
+- [x] Update `RegionCreationForm.tsx` prop name/usage
+- [x] Update `RegionDetailsView.tsx` prop name/usage
 
 ### Phase 3: Update Utility Functions
-- [ ] Update `nameGenerator.ts` to accept `dimension`
-- [ ] Update `exportUtils.ts` to accept `dimension` instead of `worldType`
-- [ ] Update `polygonUtils.ts` to accept `dimension`
-- [ ] Update `villageUtils.ts` to accept `dimension`
-- [ ] Update `useRegions.ts` to accept `dimension`
-- [ ] Update `useDataChanged.ts` to use `dimension`
+- [x] Update `nameGenerator.ts` to accept `dimension`
+- [x] Update `exportUtils.ts` to accept `dimension` instead of `worldType`
+- [x] Update `polygonUtils.ts` to accept `dimension`
+- [x] Update `villageUtils.ts` to accept `dimension`
+- [x] Update `useRegions.ts` to accept `dimension`
+- [x] Update `useDataChanged.ts` to use `dimension`
 
 ### Phase 4: Migration
-- [ ] Add migration logic to `useSeedInfo.ts`
-- [ ] Add migration logic to import in `MainApp.tsx`
-- [ ] Test migration from old localStorage format
-- [ ] Test migration from old export files
+- [x] Add migration logic to `useSeedInfo.ts`
+- [x] Add migration logic to import in `MainApp.tsx`
+- [x] Test migration from old localStorage format
+- [x] Test migration from old export files
 
 ### Phase 5: Cleanup
-- [ ] Remove all `worldType` references
-- [ ] Remove `worldType` from export format
-- [ ] Update documentation
-- [ ] Verify no regressions
+- [x] Remove all `worldType` references
+- [x] Remove `worldType` from export format
+- [x] Update documentation
+- [x] Verify no regressions
 
 ## Testing Requirements
 
@@ -261,14 +261,31 @@ Legacy export files may contain `worldType`:
 
 ## Success Criteria
 
-- [ ] `worldType` toggle removed from Advanced Panel
-- [ ] `useWorldType` hook deleted
-- [ ] All code uses `dimension` as single source of truth
-- [ ] No `worldType` references remain in codebase
-- [ ] Migration handles old data correctly
-- [ ] Export/import maintains compatibility
-- [ ] No regressions in functionality
-- [ ] Codebase is simpler and clearer
+- [x] `worldType` toggle removed from Advanced Panel
+- [x] `useWorldType` hook deleted
+- [x] All code uses `dimension` as single source of truth
+- [x] No `worldType` references remain in codebase (except for migration logic)
+- [x] Migration handles old data correctly
+- [x] Export/import maintains compatibility
+- [x] No regressions in functionality
+- [x] Codebase is simpler and clearer
+
+## Completion Summary
+
+**Completed:** January 27, 2026
+
+**Implementation Notes:**
+- All phases completed successfully
+- Migration logic implemented for both localStorage and export files
+- Backwards compatibility maintained with automatic migration
+- Bug fix: Corrected `exportCompleteMap` parameter order issue (worldSize/imageSize were being passed incorrectly due to duplicate dimension parameter)
+
+**Files Changed:**
+- 16 files modified
+- 1 file deleted (`src/hooks/useWorldType.ts`)
+- Net code reduction: 132 insertions, 161 deletions
+
+**Commit:** `01f7b39` - "refactor: remove redundant worldType setting, use dimension as single source of truth"
 
 ## Dependencies
 
