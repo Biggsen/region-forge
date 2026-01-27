@@ -51,7 +51,7 @@ export function SeedInfoHeading() {
   }
 
   const handleDimensionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value
+    const value = e.target.value as 'overworld' | 'nether' | 'end'
     seedInfo.updateSeedInfo({ dimension: value })
     setEditingDimension(false)
   }
@@ -112,7 +112,7 @@ export function SeedInfoHeading() {
               className="flex-1 text-sm text-input-text bg-input-bg border-b-2 border-lapis-lazuli focus:outline-none focus:border-lapis-lighter px-2 py-1 rounded"
             >
               <option value="overworld">Overworld</option>
-              <option value="nether" disabled>Nether (Coming soon)</option>
+              <option value="nether">Nether</option>
               <option value="end" disabled>End (Coming soon)</option>
             </select>
           ) : (

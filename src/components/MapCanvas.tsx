@@ -15,7 +15,7 @@ interface MapCanvasProps {
 
 export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName } = useAppContext()
+  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName, seedInfo } = useAppContext()
   const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity } = mapStateHook
   const { 
     drawingRegion, 
@@ -541,7 +541,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
               editMode={editMode}
               highlightMode={highlightMode}
               regions={regions.regions}
-              spawnCoordinates={spawnState.coordinates}
+              spawnCoordinates={seedInfo.seedInfo.dimension === 'nether' ? null : spawnState.coordinates}
               isSpacePressed={isSpacePressed}
               onPointMouseDown={handlePointMouseDown}
               onPointMouseMove={handlePointMouseMove}
@@ -573,6 +573,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             highlightMode={highlightMode}
             orphanedVillageMarkers={orphanedVillageMarkers}
             showOrphanedVillages={showOrphanedVillages}
+            dimension={seedInfo.seedInfo.dimension}
             toggleHighlightAll={regions.toggleHighlightAll}
             toggleShowRegions={regions.toggleShowRegions}
             toggleShowVillages={regions.toggleShowVillages}

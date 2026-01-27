@@ -423,12 +423,12 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
           <label className="block text-sm font-medium text-gray-300 mb-1">Dimension:</label>
           <select
             value={importDimension}
-            onChange={(e) => setImportDimension(e.target.value)}
+            onChange={(e) => setImportDimension(e.target.value as 'overworld' | 'nether' | 'end')}
             className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-md focus:outline-none focus:border-lapis-lighter text-sm text-input-text placeholder:text-gray-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
           >
             <option value="overworld">Overworld</option>
-            <option value="nether" disabled>Nether (Coming soon)</option>
+            <option value="nether">Nether</option>
             <option value="end" disabled>End (Coming soon)</option>
           </select>
         </div>
@@ -442,10 +442,10 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
         <div className="mb-4">
           <h5 className="text-sm font-medium text-gray-400 mb-2">Generate from Seed</h5>
           
-          {importDimension === 'overworld' && (
+          {(importDimension === 'overworld' || importDimension === 'nether') && (
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                World Size: {worldSize}k ({worldSize * 125}x{worldSize * 125})
+                {importDimension === 'nether' ? 'Nether ' : ''}World Size: {worldSize}k ({worldSize * 125}x{worldSize * 125})
               </label>
               <div className="relative">
                 <input

@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { ChallengeLevel } from '../types'
 
+const CHALLENGE_TO_BAND: Record<ChallengeLevel, string> = {
+  Vanilla: 'easy',
+  Bronze: 'normal',
+  Silver: 'hard',
+  Gold: 'severe',
+  Platinum: 'deadly'
+}
+
 interface Region {
   id: string
   name: string
@@ -26,9 +34,10 @@ export function RegionActions({ regions, onRandomizeChallengeLevels }: RegionAct
     }
     
     regions.forEach(region => {
-      const level = region.challengeLevel || 'easy'
-      if (level in counts) {
-        counts[level]++
+      const stored = region.challengeLevel || 'Vanilla'
+      const key = CHALLENGE_TO_BAND[stored] ?? 'easy'
+      if (key in counts) {
+        counts[key]++
       }
     })
     

@@ -142,9 +142,9 @@ ${useGreetingsAndFarewells && ((isMainRegion && region.challengeLevel && greetin
     points:
 ${points}`
 
-  // Add heart_of_[region] subregion for each main region if enabled
-  if (includeHeartRegions) {
-    const regionCenter = calculateRegionCenter(region)
+  // Add heart_of_[region] subregion only for regions with a set heart, if enabled
+  if (includeHeartRegions && region.centerPoint != null) {
+    const regionCenter = region.centerPoint
     const heartRegionName = `heart_of_${region.name.toLowerCase().replace(/\s+/g, '_')}`
     const heartSize = 7 // 7x7 size as requested
     

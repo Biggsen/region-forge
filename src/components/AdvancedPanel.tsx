@@ -144,30 +144,31 @@ export function AdvancedPanel() {
       <h3 className="text-lg font-semibold text-white mb-4">Advanced Tools</h3>
       
       <div className="space-y-4">
-        {/* Other region types */}
-        <div>
-          <button
-            onClick={() => setIsOtherRegionTypesExpanded(!isOtherRegionTypesExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span>Spawn</span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isOtherRegionTypesExpanded ? 'rotate-90' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {seedInfo.seedInfo.dimension !== 'nether' && (
+          <div>
+            <button
+              onClick={() => setIsOtherRegionTypesExpanded(!isOtherRegionTypesExpanded)}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isOtherRegionTypesExpanded && (
-            <div className="space-y-2 ml-4">
-              {seedInfo.seedInfo.dimension !== 'nether' && <SpawnButton />}
-            </div>
-          )}
-        </div>
+              <span>Spawn</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isOtherRegionTypesExpanded ? 'rotate-90' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            {isOtherRegionTypesExpanded && (
+              <div className="space-y-2 ml-4">
+                <SpawnButton />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Plugins */}
         <div>
@@ -200,76 +201,78 @@ export function AdvancedPanel() {
           )}
         </div>
 
-        {/* Villages */}
-        <div>
-          <button
-            onClick={() => setIsVillagesExpanded(!isVillagesExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span>Villages</span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isVillagesExpanded ? 'rotate-90' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {seedInfo.seedInfo.dimension !== 'nether' && (
+          <div>
+            {/* Villages */}
+            <button
+              onClick={() => setIsVillagesExpanded(!isVillagesExpanded)}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isVillagesExpanded && (
-            <div className="ml-4 space-y-4">
-              {/* Villages Counter */}
-              {(() => {
-                const hasVillages = availableRegions.some(region => region.subregions && region.subregions.length > 0)
-                const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions?.length || 0), 0)
-                
-                if (hasVillages) {
-                  return (
-                    <div>
-                      <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Village Count</h5>
-                      <div className="text-lg font-semibold text-white">
-                        {totalVillages} villages across {availableRegions.length} regions
+              <span>Villages</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isVillagesExpanded ? 'rotate-90' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            {isVillagesExpanded && (
+              <div className="ml-4 space-y-4">
+                {/* Villages Counter */}
+                {(() => {
+                  const hasVillages = availableRegions.some(region => region.subregions && region.subregions.length > 0)
+                  const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions?.length || 0), 0)
+                  
+                  if (hasVillages) {
+                    return (
+                      <div>
+                        <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Village Count</h5>
+                        <div className="text-lg font-semibold text-white">
+                          {totalVillages} villages across {availableRegions.length} regions
+                        </div>
                       </div>
-                    </div>
-                  )
-                }
-                return null
-              })()}
+                    )
+                  }
+                  return null
+                })()}
 
-              {/* Village Import */}
-              <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import Villages</h5>
-                <div className="text-sm text-gray-300">
-                  Import villages from CSV files generated by seed map tools
-                </div>
-                
-                <button
-                  onClick={triggerVillageFileInput}
-                  disabled={isImportingVillages}
-                  className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                >
-                  {isImportingVillages ? 'Importing...' : 'Import Villages (CSV)'}
-                </button>
-
-                <input
-                  ref={villageFileInputRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleVillageImport}
-                  className="hidden"
-                />
-
-                {villageImportError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
-                    {villageImportError}
+                {/* Village Import */}
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import Villages</h5>
+                  <div className="text-sm text-gray-300">
+                    Import villages from CSV files generated by seed map tools
                   </div>
-                )}
+                  
+                  <button
+                    onClick={triggerVillageFileInput}
+                    disabled={isImportingVillages}
+                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                  >
+                    {isImportingVillages ? 'Importing...' : 'Import Villages (CSV)'}
+                  </button>
+
+                  <input
+                    ref={villageFileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleVillageImport}
+                    className="hidden"
+                  />
+
+                  {villageImportError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                      {villageImportError}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Import */}
         <div>

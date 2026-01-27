@@ -12,6 +12,7 @@ interface MapDisplayControlsProps {
   }
   orphanedVillageMarkers: any[]
   showOrphanedVillages: boolean
+  dimension?: 'overworld' | 'nether' | 'end'
   toggleHighlightAll: () => void
   toggleShowRegions: () => void
   toggleShowVillages: () => void
@@ -25,6 +26,7 @@ export function MapDisplayControls({
   highlightMode,
   orphanedVillageMarkers,
   showOrphanedVillages,
+  dimension,
   toggleHighlightAll,
   toggleShowRegions,
   toggleShowVillages,
@@ -33,6 +35,7 @@ export function MapDisplayControls({
   toggleShowChallengeLevels,
   toggleShowGrid
 }: MapDisplayControlsProps) {
+  const showVillagesOption = dimension !== 'nether'
   const [isExpanded, setIsExpanded] = useState(false)
   
   // Check URL parameter for advanced features
@@ -84,7 +87,7 @@ export function MapDisplayControls({
             Regions
           </ToggleButton>
           
-          {showAdvanced && (
+          {showAdvanced && showVillagesOption && (
             <ToggleButton
               isActive={highlightMode.showVillages}
               onClick={toggleShowVillages}
@@ -94,7 +97,7 @@ export function MapDisplayControls({
             </ToggleButton>
           )}
           
-          {orphanedVillageMarkers.length > 0 && (
+          {showVillagesOption && orphanedVillageMarkers.length > 0 && (
             <ToggleButton
               isActive={showOrphanedVillages}
               onClick={toggleShowOrphanedVillages}

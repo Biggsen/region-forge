@@ -221,7 +221,6 @@ function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'ov
   if (effectiveWorld === 'nether') {
     if (kind === 'region') return 'nether_region'
     if (kind === 'heart') return 'nether_heart'
-    if (kind === 'village') return 'nether_village'
   }
   return kind
 }
@@ -275,7 +274,7 @@ export function exportRegionsMetaYAML(
         recipeId: getRecipeId('region', dim)
       }
     })
-    if (includeHeartRegions) {
+    if (includeHeartRegions && region.centerPoint != null) {
       metaRegions.push({
         id: `heart_of_${mainId}`,
         world: dim,
@@ -283,7 +282,7 @@ export function exportRegionsMetaYAML(
         discover: { method: 'on_enter', recipeId: getRecipeId('heart', dim) }
       })
     }
-    if (includeVillages && region.subregions) {
+    if (includeVillages && dim !== 'nether' && region.subregions) {
       for (const sub of region.subregions) {
         if (sub.type === 'village') {
           metaRegions.push({
@@ -338,21 +337,22 @@ export function exportRegionsMetaYAML(
   const hasVillagesForLevelled = includeVillages && regions.some(r => r.subregions?.some(s => s.type === 'village'))
   if (Object.keys(regionBands).length > 0 || hasVillagesForLevelled) {
     root.levelledMobs = {
-      villageBandStrategy: 'easy',
+      ...(dim !== 'nether' ? { villageBandStrategy: 'easy' as const } : {}),
       ...(Object.keys(regionBands).length > 0 ? { regionBands } : {})
     }
   }
 
+  const filename = dim === 'nether' ? 'nether-regions-meta.yml' : 'regions-meta.yml'
   try {
     const yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
     const blob = new Blob([yamlStr], { type: 'text/yaml' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = 'regions-meta.yml'
+    link.download = filename
     link.click()
     URL.revokeObjectURL(link.href)
   } catch (e) {
-    onShowToast('Failed to generate regions-meta.yml', 'error')
+    onShowToast(`Failed to generate ${filename}`, 'error')
   }
 }
 
