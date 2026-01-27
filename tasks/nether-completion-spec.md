@@ -61,10 +61,11 @@ Currently, Nether dimension has:
 **Important**: Spawn and onboarding are overworld-only features and must not be available for nether.
 
 **Changes:**
-- `src/components/AdvancedPanel.tsx`: Update spawn button visibility check to use `dimension !== 'nether'` instead of `worldType.worldType !== 'nether'`
-- `src/components/AdvancedPanel.tsx`: Update "Has Spawn" checkbox visibility to use `dimension !== 'nether'`
-- `src/components/ExportPanel.tsx`: Update spawn region export checks to use `dimension !== 'nether'`
-- Ensure spawn-related UI elements are completely hidden (not just disabled) when nether dimension is selected
+- `src/components/AdvancedPanel.tsx`: Hide the **entire** Spawn collapsible section when `dimension === 'nether'` (not just the inner button). The whole "Spawn" toggle is omitted.
+- `src/components/AdvancedPanel.tsx`: Hide the **entire** Villages collapsible section when `dimension === 'nether'` (villages don't exist in nether).
+- `src/components/AdvancedPanel.tsx`: "Has Spawn" / Region Specific spawn checkbox is already gated by `dimension !== 'nether'`.
+- `src/components/ExportPanel.tsx`: Spawn region export checks use `dimension !== 'nether'`; "Include Spawn Region" checkbox is hidden for nether.
+- Ensure spawn-related and village-related UI elements are **completely hidden** (not just disabled) when nether is selected.
 
 ### Phase 2: Fix Nether Village Bug
 
@@ -123,6 +124,10 @@ Nether world size is independent of overworld size. The user selects the nether 
 - Send selected size directly to API (no conversion)
 - Ensure world size persists correctly for Nether dimension
 
+#### Spawn on Map & Display Options
+- **MapCanvas / RegionOverlay**: Do not draw the spawn marker (red circle + "Spawn" label) on the map when `dimension === 'nether'`. Pass `spawnCoordinates={null}` to `RegionOverlay` when nether.
+- **MapDisplayControls** (Display dropup): Hide the "Villages" and "Orphaned Villages" options when `dimension === 'nether'`. Pass `dimension` into `MapDisplayControls` and only show village toggles when `dimension !== 'nether'`.
+
 ### Phase 4: Testing and Bug Fixes
 
 #### Test Cases
@@ -143,13 +148,14 @@ Nether world size is independent of overworld size. The user selects the nether 
    - Verify spawn region is excluded (nether doesn't support spawn)
    - Verify villages are excluded from nether exports (villages don't exist in nether)
 
-4. **regions-meta.yml Export**:
-   - Export regions-meta.yml for Nether regions
+4. **regions-meta Export**:
+   - Export regions-meta for Nether: filename must be **`nether-regions-meta.yml`** (prepend `nether-` when dimension is nether). Overworld remains `regions-meta.yml`.
    - Verify nether regions use correct `recipeId` values: `nether_region`, `nether_heart` (NOT `nether_village`)
    - Verify `onboarding` section is never included for nether
    - Verify `spawnCenter` section is never included for nether
    - Verify root `world` field uses `"nether"` (dimension name, not server world name)
    - Verify villages are completely excluded from nether exports
+   - Verify **`villageBandStrategy: easy`** is **not** included in `levelledMobs` for nether (villages don't exist; only `regionBands` when applicable).
 
 5. **Achievements/Events**:
    - Generate achievements YAML for Nether regions
@@ -175,8 +181,11 @@ Nether world size is independent of overworld size. The user selects the nether 
 - [ ] Remove "Coming soon" text from Nether option in `SeedInfoHeading.tsx`
 - [ ] Remove `disabled` from Nether option in `MapLoaderControls.tsx`
 - [ ] Remove "Coming soon" text from Nether option in `MapLoaderControls.tsx`
-- [ ] Update spawn visibility checks in `AdvancedPanel.tsx` to use `dimension !== 'nether'`
-- [ ] Update spawn export checks in `ExportPanel.tsx` to use `dimension !== 'nether'`
+- [ ] Hide **entire** Spawn collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
+- [ ] Hide **entire** Villages collapsible section in `AdvancedPanel.tsx` when `dimension === 'nether'`
+- [ ] Update spawn export checks in `ExportPanel.tsx` to use `dimension !== 'nether'`; hide "Include Spawn Region" for nether
+- [ ] Hide spawn marker on map for nether: `MapCanvas` passes `spawnCoordinates={null}` to `RegionOverlay` when nether
+- [ ] Hide Villages and Orphaned Villages in Display dropup for nether: `MapDisplayControls` accepts `dimension`, shows village toggles only when `dimension !== 'nether'`
 - [ ] Verify region name generation uses `dimension` (should work automatically after refactor)
 - [ ] Test that Nether can be selected in both locations
 
@@ -184,6 +193,10 @@ Nether world size is independent of overworld size. The user selects the nether 
 - [ ] Remove `nether_village` case from `getRecipeId()` function in `src/utils/exportUtils.ts`
 - [ ] Update `exportRegionsMetaYAML()` to skip villages when `dimension === 'nether'`
 - [ ] Test that villages are never exported for nether dimension
+
+### Regions-meta export (nether-specific)
+- [ ] Use filename `nether-regions-meta.yml` when exporting for nether; `regions-meta.yml` otherwise
+- [ ] Omit `villageBandStrategy: 'easy'` from `levelledMobs` when dimension is nether
 
 ### Phase 3: World Size Slider
 - [ ] Update world size slider condition in `MapLoaderControls.tsx` to include Nether
@@ -207,10 +220,10 @@ Nether world size is independent of overworld size. The user selects the nether 
 - [ ] Test world size slider functionality
 - [ ] Document any bugs found
 
-### Phase 5: Bug Fixes
-- [ ] Remove `nether_village` from `getRecipeId()` function in `src/utils/exportUtils.ts`
-- [ ] Ensure `exportRegionsMetaYAML()` skips villages when `dimension === 'nether'` (villages don't exist in nether)
-- [ ] Verify spawn/onboarding UI elements are hidden (not just disabled) for nether
+### Phase 5: Bug Fixes & General Export Behaviour
+- [ ] Remove `nether_village` from `getRecipeId()`; ensure `exportRegionsMetaYAML()` skips villages when `dimension === 'nether'`
+- [ ] Verify spawn/village UI elements are **hidden** (not just disabled) for nether
+- [ ] **Hearts (not nether-specific):** Export hearts only when `region.centerPoint != null`. Apply in both `generateRegionYAML` (regions YAML) and `exportRegionsMetaYAML` (regions-meta).
 - [ ] Fix any other bugs discovered during testing
 - [ ] Re-test fixed functionality
 - [ ] Update documentation if needed
@@ -232,7 +245,8 @@ Nether world size is independent of overworld size. The user selects the nether 
 - [ ] Event conditions generation works for Nether
 - [ ] Spawn regions are excluded for Nether
 - [ ] Villages are excluded from nether exports
-- [ ] regions-meta.yml export works correctly for Nether (correct recipeIds, no onboarding/spawnCenter)
+- [ ] regions-meta export works correctly for Nether (correct recipeIds, no onboarding/spawnCenter, no villageBandStrategy, filename `nether-regions-meta.yml`)
+- [ ] Spawn marker not shown on map for nether; Villages/Orphaned hidden in Display dropup for nether
 - [ ] Export/import preserves Nether dimension
 
 ### Edge Cases
@@ -245,10 +259,11 @@ Nether world size is independent of overworld size. The user selects the nether 
 ## Known Limitations
 
 1. **End Dimension**: Remains disabled and will be handled in separate spec
-2. **Spawn Regions**: Nether does not support spawn regions (by design). Spawn button, "Has Spawn" checkbox, and spawn region export options are hidden for nether.
+2. **Spawn Regions**: Nether does not support spawn regions (by design). The entire Spawn section in Advanced Tools, spawn marker on map, "Has Spawn" checkbox, and spawn region export options are hidden for nether.
 3. **Onboarding**: Nether does not support onboarding (first-join teleport). Onboarding section is never exported for nether.
-4. **Villages**: Villages don't exist in nether and should not be exported for nether dimension. The `nether_village` recipeId does not exist and must be removed from code.
+4. **Villages**: Villages don't exist in nether. The Villages section in Advanced Tools and the Villages (and Orphaned Villages) options in the Display dropup are hidden for nether. Villages are never exported for nether. The `nether_village` recipeId does not exist and must be removed from code.
 5. **Nether Size**: Nether world size is independent of overworld size. Users select the size they need (2k-16k), and portal restrictions are handled in-game.
+6. **Hearts**: (Not nether-specific.) Hearts are only exported (regions YAML and regions-meta) when a region has a **set** heart (`centerPoint != null`). Regions without a set heart do not get a `heart_of_*` entry.
 
 ## Success Criteria
 
@@ -262,6 +277,20 @@ Nether world size is independent of overworld size. The user selects the nether 
 ## Dependencies
 
 - **Prerequisite**: `remove-worldtype-setting-spec.md` must be completed first. After the refactor, `dimension` will be the single source of truth, making this implementation straightforward.
+
+## Post-Implementation Updates
+
+The following decisions and changes were made during implementation and are now part of the spec:
+
+| Change | Location | Notes |
+|--------|----------|--------|
+| Hide **entire** Spawn section for nether | `AdvancedPanel` | Whole "Spawn" collapsible omitted when `dimension === 'nether'`. |
+| Hide **entire** Villages section for nether | `AdvancedPanel` | Whole "Villages" collapsible omitted when `dimension === 'nether'`. |
+| Hide spawn marker on map for nether | `MapCanvas` → `RegionOverlay` | Pass `spawnCoordinates={null}` when nether so red spawn marker + label are not drawn. |
+| Hide Villages / Orphaned in Display dropup for nether | `MapDisplayControls` | Accept `dimension` prop; show village toggles only when `dimension !== 'nether'`. |
+| regions-meta filename for nether | `exportUtils.exportRegionsMetaYAML` | Use **`nether-regions-meta.yml`** when `dim === 'nether'`; otherwise `regions-meta.yml`. |
+| Omit `villageBandStrategy` for nether | `exportUtils.exportRegionsMetaYAML` | In `levelledMobs`, include `villageBandStrategy: 'easy'` only when `dim !== 'nether'`. |
+| Export hearts only when set | `polygonUtils.generateRegionYAML`, `exportUtils.exportRegionsMetaYAML` | **Not nether-specific.** Only output `heart_of_*` when `region.centerPoint != null`. Applies to both regions YAML and regions-meta. |
 
 ## Next Steps
 
