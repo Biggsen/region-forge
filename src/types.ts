@@ -10,6 +10,7 @@ export type Region = {
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel
   hasSpawn?: boolean
+  disabled?: boolean
 }
 
 export type Subregion = {

@@ -6,7 +6,7 @@ import { YAMLDisplay } from './YAMLDisplay'
 import { VillageManager } from './VillageManager'
 import { Button } from './Button'
 import { DeleteRegionModal } from './DeleteRegionModal'
-import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Hand, Paintbrush, Move, Scissors, CircleDotDashed, Trash2 } from 'lucide-react'
+import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Hand, Paintbrush, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff } from 'lucide-react'
 
 interface RegionDetailsViewProps {
   selectedRegion: Region
@@ -472,7 +472,17 @@ export function RegionDetailsView({
         </>
       )}
 
-      <div className="mt-6 pt-4 border-t border-gunmetal">
+      <div className="mt-6 pt-4 border-t border-gunmetal space-y-2">
+        <Button
+          variant="secondary-outline"
+          onClick={() => {
+            onUpdateRegion(selectedRegion.id, { disabled: !selectedRegion.disabled })
+          }}
+          leftIcon={selectedRegion.disabled ? <Eye size={16} /> : <EyeOff size={16} />}
+          className="w-full"
+        >
+          {selectedRegion.disabled ? 'Enable Region' : 'Disable Region'}
+        </Button>
         <Button
           variant="secondary-outline"
           onClick={() => setShowDeleteModal(true)}

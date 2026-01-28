@@ -88,7 +88,8 @@ export function RegionOverlay({
       const isSplitting = editMode.isSplittingRegion && editMode.splittingRegionId === region.id
       const isHighlighted = highlightMode.highlightAll
       const showChallengeLevels = highlightMode.showChallengeLevels
-      drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered)
+      const isDisabled = region.disabled === true
+      drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled)
       
       // Draw center point for each region
       if (highlightMode.showCenterPoints) {
@@ -133,7 +134,8 @@ export function RegionOverlay({
     isHighlighted: boolean = false,
     showChallengeLevels: boolean = false,
     isMoving: boolean = false,
-    isHovered: boolean = false
+    isHovered: boolean = false,
+    isDisabled: boolean = false
   ) => {
     if (region.points.length < 2) return
 
@@ -192,6 +194,13 @@ export function RegionOverlay({
     ctx.strokeStyle = strokeColor
     ctx.lineWidth = isMoving ? 4 : isSelected ? 3 : isHighlighted ? 4 : isHovered ? 3 : 2
     
+    // Use dashed line for disabled regions
+    if (isDisabled) {
+      ctx.setLineDash([5, 5])
+    } else {
+      ctx.setLineDash([])
+    }
+    
     ctx.beginPath()
     ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
     for (let i = 1; i < canvasPoints.length; i++) {
@@ -201,6 +210,9 @@ export function RegionOverlay({
       ctx.closePath()
     }
     ctx.stroke()
+    
+    // Reset line dash
+    ctx.setLineDash([])
 
     // Draw points only when region is selected or being edited
     if (isSelected || isEditing || isDrawing) {

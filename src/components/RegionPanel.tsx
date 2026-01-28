@@ -300,10 +300,13 @@ export function RegionPanel() {
           <div className="flex-1 overflow-y-auto space-y-2" style={{ maxHeight: 'calc(100vh - 400px)' }}>
             {sortedRegions.map(region => {
               const area = calculatePolygonArea(region.points)
+              const isDisabled = region.disabled === true
               return (
                 <div
                   key={region.id}
-                  className="p-2 rounded cursor-pointer border-2 bg-gunmetal border-gunmetal hover:bg-brunswick-green hover:border-viridian"
+                  className={`p-2 rounded cursor-pointer border-2 bg-gunmetal hover:bg-brunswick-green hover:border-viridian ${
+                    isDisabled ? 'border-dashed border-gray-500 opacity-60' : 'border-gunmetal'
+                  }`}
                   onClick={() => {
                     setHoveredRegionId(null)
                     setSelectedRegionId(region.id)
@@ -313,7 +316,10 @@ export function RegionPanel() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-white font-medium">{region.name}</span>
+                      <span className={`font-medium ${isDisabled ? 'text-gray-400' : 'text-white'}`}>
+                        {region.name}
+                        {isDisabled && <span className="text-xs text-gray-500 ml-2">(disabled)</span>}
+                      </span>
                       <div className="text-gray-400 text-xs">
                         Size: {formatArea(area)}
                       </div>

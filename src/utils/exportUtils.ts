@@ -137,7 +137,11 @@ export function exportRegionsYAML(
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): void {
   const effectiveDimension = dimension === 'end' ? 'overworld' : (dimension || 'overworld')
-  if (regions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether')) {
+  
+  // Filter out disabled regions
+  const enabledRegions = regions.filter(region => !region.disabled)
+  
+  if (enabledRegions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether')) {
     onShowToast('No regions to export', 'error')
     return
   }
@@ -148,15 +152,15 @@ export function exportRegionsYAML(
   if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension !== 'nether') {
     const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; radius: number }, useModernWorldHeight)
     yamlContent += spawnRegion
-    if (regions.length > 0) {
+    if (enabledRegions.length > 0) {
       yamlContent += '\n'
     }
   }
   
-  regions.forEach((region, index) => {
+  enabledRegions.forEach((region, index) => {
     yamlContent += generateRegionYAML(region, includeVillages, randomMobSpawn, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
     // Add a blank line between regions (except after the last one)
-    if (index < regions.length - 1) {
+    if (index < enabledRegions.length - 1) {
       yamlContent += '\n'
     }
   })
@@ -252,6 +256,9 @@ export function exportRegionsMetaYAML(
   const hasSpawnCoords = !!spawnState.coordinates
   const hasSpawnRegion = dim === 'overworld' && includeSpawnRegion && hasSpawnCoords && !!spawnState.radius
 
+  // Filter out disabled regions
+  const enabledRegions = regions.filter(region => !region.disabled)
+
   const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string } }[] = []
 
   if (hasSpawnRegion) {
@@ -263,7 +270,7 @@ export function exportRegionsMetaYAML(
     })
   }
 
-  for (const region of regions) {
+  for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
     metaRegions.push({
       id: mainId,
@@ -315,9 +322,9 @@ export function exportRegionsMetaYAML(
     }
   }
 
-  const hasSpawnRegionWithHasSpawn = dim === 'overworld' && hasSpawnCoords && regions.some(r => r.hasSpawn === true)
+  const hasSpawnRegionWithHasSpawn = dim === 'overworld' && hasSpawnCoords && enabledRegions.some(r => r.hasSpawn === true)
   if (hasSpawnRegionWithHasSpawn) {
-    const startRegion = regions.find(r => r.hasSpawn === true)!
+    const startRegion = enabledRegions.find(r => r.hasSpawn === true)!
     root.onboarding = {
       startRegionId: toRegionId(startRegion.name),
       teleport: {
@@ -329,12 +336,12 @@ export function exportRegionsMetaYAML(
   }
 
   const regionBands: Record<string, string> = {}
-  for (const r of regions) {
+  for (const r of enabledRegions) {
     if (r.challengeLevel && CHALLENGE_TO_BAND[r.challengeLevel]) {
       regionBands[toRegionId(r.name)] = CHALLENGE_TO_BAND[r.challengeLevel]
     }
   }
-  const hasVillagesForLevelled = includeVillages && regions.some(r => r.subregions?.some(s => s.type === 'village'))
+  const hasVillagesForLevelled = includeVillages && enabledRegions.some(r => r.subregions?.some(s => s.type === 'village'))
   if (Object.keys(regionBands).length > 0 || hasVillagesForLevelled) {
     root.levelledMobs = {
       ...(dim !== 'nether' ? { villageBandStrategy: 'easy' as const } : {}),
