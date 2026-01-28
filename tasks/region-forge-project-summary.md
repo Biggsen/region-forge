@@ -9,7 +9,7 @@
   "status": "active",
   "domain": "minecraft",
   "type": "webapp",
-  "lastUpdated": "2026-01-12",
+  "lastUpdated": "2026-01-27",
   "links": {
     "prod": "https://www.minecraftregionforge.com/",
     "staging": null
@@ -42,6 +42,11 @@
 
 ## Project Overview
 
+<!-- 
+  This section provides a high-level description of the project.
+  Include: purpose, main goals, target audience, key value proposition.
+-->
+
 **Region Forge** is a professional browser-based tool for defining and managing polygonal exploration regions over Minecraft biome map images. Draw regions directly on the map, manage complex configurations, and export WorldGuard-style region data.
 
 The MVP is complete and deployed to production (Vercel). The application is fully functional and ready for users.
@@ -52,11 +57,16 @@ The MVP is complete and deployed to production (Vercel). The application is full
 - **Region Drawing**: Draw polygonal regions by clicking points on the map with comprehensive editing tools
 - **YAML Export**: Generate WorldGuard-compatible region configurations
 - **Project Management**: Save and load complete projects with embedded map images
-- **Multi-Dimension Support**: Work with Overworld, Nether, and End maps
+- **Multi-Dimension Support**: Full support for Overworld and Nether dimensions (End dimension pending)
 
 ---
 
 ## Tech Stack
+
+<!-- 
+  Document the technologies, frameworks, and tools used in the project.
+  This helps with understanding dependencies and technical context.
+-->
 
 - **Frontend**: React 18 + TypeScript, Tailwind CSS, Vite
 - **Backend**: Express.js (image proxy server)
@@ -71,11 +81,25 @@ The MVP is complete and deployed to production (Vercel). The application is full
 
 ## Current Focus
 
-Currently focused on bug fixes, security improvements, and dimension unification work. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience. Planning for overworld/nether dimension unification to simplify the codebase.
+<!-- 
+  Describe what you're actively working on right now.
+  This helps track immediate priorities and current development state.
+-->
+
+Currently focused on bug fixes, security improvements, and End dimension support. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience. Dimension unification (removing redundant worldType setting) has been completed.
 
 ---
 
 ## Features (Done)
+
+<!-- 
+  WORK ITEM TYPE: Features
+  
+  List completed features and major accomplishments.
+  Use checkboxes to mark completed items if desired.
+  Items in this section will be tagged as "Features" by the parser.
+  The parser will identify TODO items (- [ ] and - [x]) throughout the document.
+-->
 
 ### Core Functionality
 - [x] Map Loading - Generate maps from seeds or load from URLs via integrated microservice
@@ -91,6 +115,8 @@ Currently focused on bug fixes, security improvements, and dimension unification
 - [x] Custom Markers - Place and manage custom markers on the map
 - [x] Multi-Dimension Support - Work with Overworld, Nether, and End maps
 - [x] Region Statistics - Calculate region areas and display center points
+- [x] Nether Dimension Support - Nether fully enabled with world size slider, nether-specific name generation, and proper export handling
+- [x] Dimension Unification - Removed redundant worldType setting; dimension is now the single source of truth
 
 ### UI/UX
 - [x] Tab-Based Interface - Organized Map → Regions → Export workflow
@@ -121,11 +147,27 @@ Currently focused on bug fixes, security improvements, and dimension unification
 
 ## Features (In Progress)
 
+<!-- 
+  WORK ITEM TYPE: Features
+  
+  List features currently being developed.
+  Include estimated completion or progress indicators if helpful.
+  Items in this section will be tagged as "Features" by the parser.
+-->
+
 None - MVP is complete and deployed.
 
 ---
 
 ## Enhancements
+
+<!-- 
+  WORK ITEM TYPE: Enhancements
+  
+  List improvements and enhancements to existing features.
+  These are not new features, but improvements to what already exists.
+  Items in this section will be tagged as "Enhancements" by the parser.
+-->
 
 ### High Priority Enhancements
 
@@ -153,35 +195,44 @@ None - MVP is complete and deployed.
 
 ## Known Issues
 
+<!-- 
+  WORK ITEM TYPE: Bugs
+  
+  Document bugs, problems, or issues that need to be addressed.
+  Include severity, affected areas, and workarounds if available.
+  Items in this section will be tagged as "Bugs" by the parser.
+  
+  Alternative section headings: "Active Bugs", "Outstanding Issues", "Bugs"
+-->
+
 ### Active Bugs
 
-- [ ] World Size Slider for Nether and End Dimensions - The Nether and End dimensions should have world size slider controls, similar to the Overworld dimension. Currently, world size slider may only be available for Overworld dimension. Nether and End dimensions should also allow users to adjust world size independently. (Medium Priority)
-
-### Bug Details
-
-#### World Size Slider for Nether and End Dimensions
-- **Description**: Nether and End dimensions should have world size slider controls, similar to the Overworld dimension. Currently, world size slider is only available for Overworld dimension in `MapLoaderControls.tsx`. Nether and End dimensions should also allow users to adjust world size independently.
-- **Severity**: Medium
-- **Affected Areas**: 
-  - `src/components/MapLoaderControls.tsx` - World size slider only shown for overworld (line 445)
-  - `src/components/WorldSizeHeading.tsx` - May need dimension awareness when Nether/End are enabled
-  - `src/hooks/useWorldType.ts` - Currently only supports 'overworld' and 'nether' (needs 'end' support)
-  - `src/components/SeedInfoHeading.tsx` - Nether and End options are disabled
-- **Expected Behavior**: World size slider should be available and functional for all dimensions (Overworld, Nether, End). Each dimension should maintain its own world size setting if applicable. Implementation blocked until Nether and End dimensions are enabled in the UI.
+None - All known bugs have been resolved.
 
 ---
 
 ## Outstanding Tasks
 
+<!-- 
+  WORK ITEM TYPE: Tasks
+  
+  Inbox for uncategorized work items that may later become features or enhancements.
+  Can be organized by priority, category, or timeline.
+  Items in this section will be tagged as "Tasks" by the parser.
+  
+  Alternative section headings: "Tasks", "Outstanding Tasks", "Todo"
+-->
+
 ### High Priority
 
-- [ ] Complete File Upload Functionality - Drag & drop file upload for local images, file validation (PNG, JPG format), display upload progress/loading state, handle upload errors gracefully. Note: URL loading and seed generation cover all essential use cases. File upload depends on user accounts feature (see `spec/user-accounts-spec.md`)
+- [ ] Complete File Upload Functionality - Drag & drop file upload for local images, file validation (PNG, JPG format), display upload progress/loading state, handle upload errors gracefully. Note: URL loading and seed generation cover all essential use cases. File upload depends on user accounts feature (see `tasks/user-accounts-spec.md`)
 
 ### Medium Priority
 
 - [ ] Complete Security Enhancements - File upload validation, security headers, frontend URL validation, logging utility
 - [ ] Enhanced Drawing Tools - Chunk snapping, rectangle/circle tools
 - [ ] UI Improvements - Zoom to fit, mini-map, keyboard shortcuts
+- [ ] End Dimension Support - Add End dimension support (see `tasks/end-dimension-addition-spec.md`)
 
 ### Low Priority / Future
 
@@ -195,26 +246,36 @@ None - MVP is complete and deployed.
 
 ## Project Status
 
+<!-- 
+  Optional section for project health indicators.
+  Can include metrics, completion percentages, or status summaries.
+-->
+
 **Overall Status**: Active Development  
 **Completion**: ~90% (MVP Complete)  
 **Last Major Update**: January 2026
 
 ### Metrics
 
-- **Open Issues**: 1 (Medium Priority)
+- **Open Issues**: 0
 - **Active Features**: 0
-- **Completed Features**: 18+
+- **Completed Features**: 20+ (including Nether support and dimension unification)
 - **Security Status**: Critical vulnerabilities addressed, some medium-priority items remain
 
 ---
 
 ## Next Steps
 
+<!-- 
+  Outline immediate next actions and priorities.
+  Helps track what should be worked on next.
+-->
+
 ### Immediate (Next 1-2 weeks)
 
-1. Fix World Size Slider bug for Nether and End dimensions
-2. Complete file upload validation enhancements
-3. Add missing security headers
+1. Complete file upload validation enhancements
+2. Add missing security headers
+3. Begin End dimension support implementation
 
 ### Short-term (Next 1-3 months)
 
@@ -225,17 +286,22 @@ None - MVP is complete and deployed.
 
 ### Long-term (3+ months)
 
-1. Overworld/Nether dimension unification (see `tasks/overworld-nether-unification-spec.md`)
-2. End dimension support addition (after unification)
-3. User accounts implementation
-4. Cloud storage and project sharing
-5. Onboarding system
-6. Comprehensive testing suite
-7. Performance optimization
+1. Complete End dimension support (see `tasks/end-dimension-addition-spec.md`)
+2. User accounts implementation
+3. Cloud storage and project sharing
+4. Onboarding system
+5. Comprehensive testing suite
+6. Performance optimization
+7. Challenge level rename (currently on hold - see `tasks/challenge-level-rename-spec.md`)
 
 ---
 
 ## Notes
+
+<!-- 
+  Additional notes, decisions, or context that doesn't fit elsewhere.
+  Can include architecture decisions, lessons learned, or future considerations.
+-->
 
 - **MVP Status**: ✅ Complete and deployed
 - **Production Ready**: Yes, fully functional
@@ -253,7 +319,10 @@ None - MVP is complete and deployed.
 - **Bug List**: `tasks/buglist.md` - Current bugs and resolved issues
 - **MVP Plan**: `tasks/completed/MVP_DEV_PLAN.md` - Development roadmap and status
 - **Security Spec**: `tasks/enhancements/security_enhancement_spec.md` - Security vulnerabilities and fixes
-- **Dimension Unification**: `tasks/overworld-nether-unification-spec.md` - Overworld/Nether unification specification
+- **Dimension Unification**: `tasks/completed/remove-worldtype-setting-spec.md` - Completed: Removed redundant worldType setting, unified on dimension
+- **Nether Completion**: `tasks/completed/nether-completion-spec.md` - Completed: Nether dimension fully enabled
+- **End Dimension**: `tasks/end-dimension-addition-spec.md` - End dimension support specification (outstanding)
+- **Challenge Level Rename**: `tasks/challenge-level-rename-spec.md` - On hold pending LevelledMobs generator removal
 - **User Accounts Spec**: `tasks/user-accounts-spec.md` - Future user accounts feature
 - **Deployment Guide**: `docs/DEPLOYMENT.md` - Deployment instructions
 - **Seed Generator**: `docs/SEED_GENERATOR_README.md` - Map generation service docs
