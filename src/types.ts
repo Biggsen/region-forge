@@ -1,4 +1,4 @@
-export type ChallengeLevel = 'Vanilla' | 'Bronze' | 'Silver' | 'Gold' | 'Platinum'
+export type ChallengeLevel = 'easy' | 'normal' | 'hard' | 'severe' | 'deadly'
 
 export type Region = {
   id: string

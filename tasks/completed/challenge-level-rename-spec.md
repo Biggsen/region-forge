@@ -1,10 +1,8 @@
 # Challenge Level Rename Specification
 
-## Status: ON HOLD
+## Status: COMPLETED (2026-01-30)
 
-**This work is blocked until the LevelledMobs generator is purged from the codebase.**
-
-The LevelledMobs generator (`generateLevelledMobsRulesYAML` in `src/utils/exportUtils.ts`) currently references challenge level names (e.g., `challenge-vanilla`) in its output. This functionality is being moved to mc-plugin-manager, and the generator should be removed before renaming challenge levels to avoid breaking changes and unnecessary refactoring.
+All challenge level names have been renamed from Vanilla/Bronze/Silver/Gold/Platinum to easy/normal/hard/severe/deadly. Backward compatibility is maintained through migration logic that converts old names when loading from localStorage or importing project files.
 
 ---
 

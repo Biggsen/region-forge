@@ -207,12 +207,20 @@ function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; radiu
   return yaml
 }
 
-const CHALLENGE_TO_BAND: Record<string, string> = {
+// Challenge levels are now stored directly as difficulty band names (easy, normal, hard, severe, deadly)
+// This mapping provides backward compatibility for imports with old names
+const LEGACY_CHALLENGE_TO_BAND: Record<string, string> = {
   Vanilla: 'easy',
   Bronze: 'normal',
   Silver: 'hard',
   Gold: 'severe',
   Platinum: 'deadly'
+}
+
+// Migrate old challenge level name to new difficulty band name
+function migrateChallengLevel(level?: string): string | undefined {
+  if (!level) return undefined
+  return LEGACY_CHALLENGE_TO_BAND[level] || level
 }
 
 function toRegionId(name: string): string {
@@ -337,8 +345,12 @@ export function exportRegionsMetaYAML(
 
   const regionBands: Record<string, string> = {}
   for (const r of enabledRegions) {
-    if (r.challengeLevel && CHALLENGE_TO_BAND[r.challengeLevel]) {
-      regionBands[toRegionId(r.name)] = CHALLENGE_TO_BAND[r.challengeLevel]
+    if (r.challengeLevel) {
+      // Challenge levels are now stored as band names directly, but handle legacy imports
+      const band = migrateChallengLevel(r.challengeLevel)
+      if (band) {
+        regionBands[toRegionId(r.name)] = band
+      }
     }
   }
   const hasVillagesForLevelled = includeVillages && enabledRegions.some(r => r.subregions?.some(s => s.type === 'village'))
@@ -382,6 +394,12 @@ export function importMapData(file: File): Promise<MapExportData> {
         if (!data.worldName) {
           data.worldName = 'world'
         }
+        
+        // Migrate old challenge level names to new difficulty band names
+        data.regions = data.regions.map(region => ({
+          ...region,
+          challengeLevel: migrateChallengLevel(region.challengeLevel) as Region['challengeLevel']
+        }))
         
         resolve(data)
       } catch (error) {

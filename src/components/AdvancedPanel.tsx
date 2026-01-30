@@ -355,15 +355,15 @@ export function AdvancedPanel() {
                 {regions.selectedRegionId ? (
                   <div className="space-y-2">
                     <select
-                      value={regions.regions.find(r => r.id === regions.selectedRegionId)?.challengeLevel || 'Vanilla'}
+                      value={regions.regions.find(r => r.id === regions.selectedRegionId)?.challengeLevel || 'easy'}
                       onChange={(e) => regions.updateRegion(regions.selectedRegionId!, { challengeLevel: e.target.value as ChallengeLevel })}
                       className="w-full bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:border-lapis-lighter focus:outline-none placeholder:text-gray-500"
                     >
-                      <option value="Vanilla">Vanilla</option>
-                      <option value="Bronze">Bronze</option>
-                      <option value="Silver">Silver</option>
-                      <option value="Gold">Gold</option>
-                      <option value="Platinum">Platinum</option>
+                      <option value="easy">Easy</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Hard</option>
+                      <option value="severe">Severe</option>
+                      <option value="deadly">Deadly</option>
                     </select>
                     <p className="text-gray-400 text-xs">
                       Sets the difficulty level for LevelledMobs plugin

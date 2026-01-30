@@ -40,11 +40,24 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     const savedRegions = loadRegions()
     const savedSelectedRegion = loadSelectedRegion()
     
+    // Migrate old challenge level names to new difficulty band names
+    const migrateChallengLevel = (level?: string): ChallengeLevel => {
+      const oldToNew: Record<string, ChallengeLevel> = {
+        'Vanilla': 'easy',
+        'Bronze': 'normal',
+        'Silver': 'hard',
+        'Gold': 'severe',
+        'Platinum': 'deadly'
+      }
+      if (!level) return 'easy'
+      return oldToNew[level] || (level as ChallengeLevel)
+    }
+
     // Migrate existing regions to include centerPoint, challengeLevel, hasSpawn, originalPoints, and scaleFactor properties
     const migratedRegions = savedRegions.map(region => ({
       ...region,
       centerPoint: region.centerPoint || null,
-      challengeLevel: region.challengeLevel || 'Vanilla',
+      challengeLevel: migrateChallengLevel(region.challengeLevel),
       hasSpawn: region.hasSpawn || false,
       originalPoints: region.originalPoints || region.points, // Use current points as original if not set
       scaleFactor: region.scaleFactor || 1.0 // Default to 100% scale
@@ -140,7 +153,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       name,
       points: [],
       centerPoint: null,
-      challengeLevel: 'Vanilla',
+      challengeLevel: 'easy',
       hasSpawn: false
     }
     setDrawingRegion(newRegion)
@@ -724,11 +737,11 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     
     // Define the balanced distribution
     const distribution = {
-      Platinum: 2,
-      Gold: 4,
-      Silver: 6,
-      Bronze: 8,
-      Vanilla: Math.max(0, regionsToRandomize.length - 20) // Rest go to vanilla
+      deadly: 2,
+      severe: 4,
+      hard: 6,
+      normal: 8,
+      easy: Math.max(0, regionsToRandomize.length - 20) // Rest go to easy
     }
     
     // Create array of challenge levels based on distribution
@@ -744,13 +757,13 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     
     // Apply challenge levels to non-spawn regions
     regionsToRandomize.forEach((region, index) => {
-      const challengeLevel = shuffledLevels[index] || 'Vanilla'
+      const challengeLevel = shuffledLevels[index] || 'easy'
       updateRegion(region.id, { challengeLevel })
     })
     
-    // Ensure spawn regions are always vanilla
+    // Ensure spawn regions are always easy
     spawnRegions.forEach(region => {
-      updateRegion(region.id, { challengeLevel: 'Vanilla' })
+      updateRegion(region.id, { challengeLevel: 'easy' })
     })
   }, [regions, updateRegion])
 

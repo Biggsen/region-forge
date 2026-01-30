@@ -4,15 +4,15 @@ import { generateSubregionYAML } from './villageUtils'
 // Map challenge levels to their color codes and descriptions
 function getChallengeLevelColor(challengeLevel: ChallengeLevel): string {
   switch (challengeLevel) {
-    case 'Vanilla':
+    case 'easy':
       return '§aA safe haven from stronger mobs'
-    case 'Bronze':
+    case 'normal':
       return '§eMobs here are a little bit stronger'
-    case 'Silver':
+    case 'hard':
       return '§6Mobs put up a decent fight here'
-    case 'Gold':
+    case 'severe':
       return '§cMobs here hit hard — be ready'
-    case 'Platinum':
+    case 'deadly':
       return '§4Mobs here are extremely dangerous'
     default:
       return '§aMobs here fight as usual'

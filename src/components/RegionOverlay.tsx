@@ -3,11 +3,11 @@ import { MapState, Region, EditMode, HighlightMode, Subregion, WorldCoordinate, 
 import { worldToPixel, imageToCanvas, canvasToImage, pixelToWorld } from '../utils/coordinateUtils'
 
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
-  Vanilla: { fill: 'rgba(34, 139, 34, 0.7)', stroke: 'rgba(34, 139, 34, 0.9)' }, // Forest Green
-  Bronze: { fill: 'rgba(255, 140, 0, 0.7)', stroke: 'rgba(255, 140, 0, 0.9)' }, // Dark Orange
-  Silver: { fill: 'rgba(255, 69, 0, 0.7)', stroke: 'rgba(255, 69, 0, 0.9)' }, // Red Orange
-  Gold: { fill: 'rgba(200, 0, 0, 0.7)', stroke: 'rgba(200, 0, 0, 0.9)' }, // Pure Red
-  Platinum: { fill: 'rgba(80, 0, 0, 0.7)', stroke: 'rgba(80, 0, 0, 0.9)' } // Very Dark Red
+  easy: { fill: 'rgba(34, 139, 34, 0.7)', stroke: 'rgba(34, 139, 34, 0.9)' }, // Forest Green
+  normal: { fill: 'rgba(255, 140, 0, 0.7)', stroke: 'rgba(255, 140, 0, 0.9)' }, // Dark Orange
+  hard: { fill: 'rgba(255, 69, 0, 0.7)', stroke: 'rgba(255, 69, 0, 0.9)' }, // Red Orange
+  severe: { fill: 'rgba(200, 0, 0, 0.7)', stroke: 'rgba(200, 0, 0, 0.9)' }, // Pure Red
+  deadly: { fill: 'rgba(80, 0, 0, 0.7)', stroke: 'rgba(80, 0, 0, 0.9)' } // Very Dark Red
 }
 
 interface RegionOverlayProps {
@@ -158,7 +158,7 @@ export function RegionOverlay({
     } else if (isHovered) {
       fillColor = 'rgba(0, 255, 255, 0.35)' // Cyan highlight for hovered regions
     } else if (showChallengeLevels) {
-      const challengeLevel = region.challengeLevel || 'Vanilla'
+      const challengeLevel = region.challengeLevel || 'easy'
       fillColor = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
     } else {
       fillColor = 'rgba(0, 100, 255, 0.2)'
@@ -186,7 +186,7 @@ export function RegionOverlay({
     } else if (isHovered) {
       strokeColor = 'rgba(0, 255, 255, 0.9)' // Cyan outline for hovered regions
     } else if (showChallengeLevels) {
-      const challengeLevel = region.challengeLevel || 'Vanilla'
+      const challengeLevel = region.challengeLevel || 'easy'
       strokeColor = CHALLENGE_LEVEL_COLORS[challengeLevel].stroke
     } else {
       strokeColor = 'rgba(0, 100, 255, 0.8)'
