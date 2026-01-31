@@ -32,7 +32,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     showVillages: true,
     showCenterPoints: true,
     showChallengeLevels: false,
-    showGrid: false
+    showGrid: false,
+    showNames: true
   })
 
   // Load saved data on mount
@@ -471,6 +472,10 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     setHighlightMode(prev => ({ ...prev, showGrid: !prev.showGrid }))
   }, [])
 
+  const toggleShowNames = useCallback(() => {
+    setHighlightMode(prev => ({ ...prev, showNames: !prev.showNames }))
+  }, [])
+
   const importVillagesFromCSV = useCallback((csvContent: string) => {
     try {
       const villages = parseVillageCSV(csvContent)
@@ -732,8 +737,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
 
   const randomizeChallengeLevels = useCallback(() => {
     // Find regions with spawn and exclude them from randomization
-    const spawnRegions = regions.filter(region => region.hasSpawn)
-    const regionsToRandomize = regions.filter(region => !region.hasSpawn)
+    // Also exclude disabled regions - they keep their current level
+    const spawnRegions = regions.filter(region => region.hasSpawn && !region.disabled)
+    const regionsToRandomize = regions.filter(region => !region.hasSpawn && !region.disabled)
     
     // Define the balanced distribution
     const distribution = {
@@ -806,6 +812,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     toggleShowCenterPoints,
     toggleShowChallengeLevels,
     toggleShowGrid,
+    toggleShowNames,
     importVillagesFromCSV,
     removeSubregionFromRegion,
     updateSubregionName,

@@ -72,6 +72,7 @@ export type HighlightMode = {
   showCenterPoints: boolean
   showChallengeLevels: boolean
   showGrid: boolean
+  showNames: boolean
 }
 
 export type CustomMarker = {

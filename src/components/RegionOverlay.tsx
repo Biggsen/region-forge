@@ -73,7 +73,7 @@ export function RegionOverlay({
       regions.forEach(region => {
         if (region.subregions) {
           region.subregions.forEach(subregion => {
-            drawVillage(ctx, subregion, mapState, region.id === selectedRegionId)
+            drawVillage(ctx, subregion, mapState, region.id === selectedRegionId, highlightMode.showNames)
           })
         }
       })
@@ -89,7 +89,7 @@ export function RegionOverlay({
       const isHighlighted = highlightMode.highlightAll
       const showChallengeLevels = highlightMode.showChallengeLevels
       const isDisabled = region.disabled === true
-      drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled)
+      drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames)
       
       // Draw center point for each region
       if (highlightMode.showCenterPoints) {
@@ -104,7 +104,7 @@ export function RegionOverlay({
 
     // Draw drawing region
     if (drawingRegion && drawingRegion.points.length > 0) {
-      drawRegion(ctx, drawingRegion, mapState, false, true, false, false)
+      drawRegion(ctx, drawingRegion, mapState, false, true, false, false, false, false, false, false, highlightMode.showNames)
       
       // Draw center point for drawing region
       if (highlightMode.showCenterPoints) {
@@ -135,7 +135,8 @@ export function RegionOverlay({
     showChallengeLevels: boolean = false,
     isMoving: boolean = false,
     isHovered: boolean = false,
-    isDisabled: boolean = false
+    isDisabled: boolean = false,
+    showNames: boolean = true
   ) => {
     if (region.points.length < 2) return
 
@@ -157,7 +158,7 @@ export function RegionOverlay({
       fillColor = 'rgba(255, 255, 0, 0.4)'
     } else if (isHovered) {
       fillColor = 'rgba(0, 255, 255, 0.35)' // Cyan highlight for hovered regions
-    } else if (showChallengeLevels) {
+    } else if (showChallengeLevels && !isDisabled) {
       const challengeLevel = region.challengeLevel || 'easy'
       fillColor = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
     } else {
@@ -185,7 +186,7 @@ export function RegionOverlay({
       strokeColor = 'rgba(255, 255, 0, 1)'
     } else if (isHovered) {
       strokeColor = 'rgba(0, 255, 255, 0.9)' // Cyan outline for hovered regions
-    } else if (showChallengeLevels) {
+    } else if (showChallengeLevels && !isDisabled) {
       const challengeLevel = region.challengeLevel || 'easy'
       strokeColor = CHALLENGE_LEVEL_COLORS[challengeLevel].stroke
     } else {
@@ -275,7 +276,7 @@ export function RegionOverlay({
     }
 
     // Draw region name
-    if (canvasPoints.length > 0) {
+    if (showNames && canvasPoints.length > 0) {
       const centerX = canvasPoints.reduce((sum, p) => sum + p.x, 0) / canvasPoints.length
       const centerY = canvasPoints.reduce((sum, p) => sum + p.y, 0) / canvasPoints.length
       
@@ -353,7 +354,8 @@ export function RegionOverlay({
     ctx: CanvasRenderingContext2D,
     subregion: Subregion,
     mapState: MapState,
-    isParentSelected: boolean = false
+    isParentSelected: boolean = false,
+    showNames: boolean = true
   ) => {
     // Convert village world coordinates to canvas coordinates
     const pixelPos = worldToPixel(subregion.x, subregion.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
@@ -377,7 +379,7 @@ export function RegionOverlay({
     ctx.stroke()
     
     // Draw village name
-    if (isParentSelected) {
+    if (showNames && isParentSelected) {
       ctx.font = '10px Arial'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

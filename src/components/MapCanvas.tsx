@@ -581,6 +581,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             toggleShowCenterPoints={regions.toggleShowCenterPoints}
             toggleShowChallengeLevels={regions.toggleShowChallengeLevels}
             toggleShowGrid={regions.toggleShowGrid}
+            toggleShowNames={regions.toggleShowNames}
           />
             
             <div className="bg-gray-900/90 backdrop-blur-sm border border-gunmetal rounded-lg px-3 py-2 shadow-lg">

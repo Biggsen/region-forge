@@ -9,6 +9,7 @@ interface MapDisplayControlsProps {
     showCenterPoints: boolean
     showChallengeLevels: boolean
     showGrid: boolean
+    showNames: boolean
   }
   orphanedVillageMarkers: any[]
   showOrphanedVillages: boolean
@@ -20,6 +21,7 @@ interface MapDisplayControlsProps {
   toggleShowCenterPoints: () => void
   toggleShowChallengeLevels: () => void
   toggleShowGrid: () => void
+  toggleShowNames: () => void
 }
 
 export function MapDisplayControls({
@@ -33,7 +35,8 @@ export function MapDisplayControls({
   toggleShowOrphanedVillages,
   toggleShowCenterPoints,
   toggleShowChallengeLevels,
-  toggleShowGrid
+  toggleShowGrid,
+  toggleShowNames
 }: MapDisplayControlsProps) {
   const showVillagesOption = dimension !== 'nether'
   const [isExpanded, setIsExpanded] = useState(false)
@@ -85,6 +88,14 @@ export function MapDisplayControls({
             title="Show/hide regions on map"
           >
             Regions
+          </ToggleButton>
+          
+          <ToggleButton
+            isActive={highlightMode.showNames}
+            onClick={toggleShowNames}
+            title="Show/hide region and village names on map"
+          >
+            Names
           </ToggleButton>
           
           {showAdvanced && showVillagesOption && (
