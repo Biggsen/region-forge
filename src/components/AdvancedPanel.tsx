@@ -6,7 +6,7 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen } from 'lucide-react'
 import { ClearDataModal } from './ClearDataModal'
 
 export function AdvancedPanel() {
@@ -150,7 +150,10 @@ export function AdvancedPanel() {
               onClick={() => setIsOtherRegionTypesExpanded(!isOtherRegionTypesExpanded)}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
-              <span>Spawn</span>
+              <span className="flex items-center gap-2">
+                <LocateFixed className="w-4 h-4" />
+                Spawn
+              </span>
               <svg
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isOtherRegionTypesExpanded ? 'rotate-90' : ''
@@ -161,10 +164,68 @@ export function AdvancedPanel() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </button>
+          </button>
             {isOtherRegionTypesExpanded && (
-              <div className="space-y-2 ml-4">
-                <SpawnButton />
+              <div className="space-y-4 ml-4">
+                <div className="space-y-2">
+                  <SpawnButton />
+                </div>
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Spawn Region</h5>
+                  
+                  {regions.selectedRegionId ? (
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={regions.regions.find(r => r.id === regions.selectedRegionId)?.hasSpawn || false}
+                          onChange={(e) => {
+                            const regionId = regions.selectedRegionId!
+                            if (e.target.checked) {
+                              regions.regions.forEach(region => {
+                                if (region.id !== regionId && region.hasSpawn) {
+                                  regions.updateRegion(region.id, { hasSpawn: false })
+                                }
+                              })
+                            }
+                            regions.updateRegion(regionId, { hasSpawn: e.target.checked })
+                          }}
+                          className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
+                        />
+                        <span className="text-sm text-gray-300">Has Spawn</span>
+                      </label>
+                      {!regions.regions.find(r => r.id === regions.selectedRegionId)?.hasSpawn && (
+                        <div className="text-sm text-gray-400">
+                          {(() => {
+                            const spawnRegion = regions.regions.find(r => r.hasSpawn)
+                            return spawnRegion ? (
+                              <>
+                                <span className="text-white">{spawnRegion.name}</span>
+                                {' has spawn'}
+                              </>
+                            ) : (
+                              'Spawn has not been set'
+                            )
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-400 pb-3 bg-eerie-back/50 rounded-md">
+                      {(() => {
+                        const spawnRegion = regions.regions.find(r => r.hasSpawn)
+                        return spawnRegion ? (
+                          <>
+                            <span className="text-white">{spawnRegion.name}</span>
+                            {' has spawn'}
+                          </>
+                        ) : (
+                          'Spawn has not been set'
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -176,7 +237,10 @@ export function AdvancedPanel() {
             onClick={() => setIsPluginsExpanded(!isPluginsExpanded)}
             className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
           >
-            <span>Plugins</span>
+            <span className="flex items-center gap-2">
+              <Skull className="w-4 h-4" />
+              Levelled Mobs
+            </span>
             <svg
               className={`w-4 h-4 transition-transform duration-200 ${
                 isPluginsExpanded ? 'rotate-90' : ''
@@ -191,7 +255,29 @@ export function AdvancedPanel() {
           {isPluginsExpanded && (
             <div className="space-y-4 ml-4">
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">LevelledMobs</h5>
+                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Region Challenge Level</h5>
+
+                {regions.selectedRegionId ? (
+                  <div className="space-y-2">
+                    <select
+                      value={regions.regions.find(r => r.id === regions.selectedRegionId)?.challengeLevel || 'easy'}
+                      onChange={(e) => regions.updateRegion(regions.selectedRegionId!, { challengeLevel: e.target.value as ChallengeLevel })}
+                      className="w-full bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:border-lapis-lighter focus:outline-none placeholder:text-gray-500"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Hard</option>
+                      <option value="severe">Severe</option>
+                      <option value="deadly">Deadly</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                    No region selected
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
                 <RegionActions
                   regions={availableRegions}
                   onRandomizeChallengeLevels={handleRandomizeChallengeLevels}
@@ -208,7 +294,10 @@ export function AdvancedPanel() {
               onClick={() => setIsVillagesExpanded(!isVillagesExpanded)}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
-              <span>Villages</span>
+              <span className="flex items-center gap-2">
+                <Home className="w-4 h-4" />
+                Villages
+              </span>
               <svg
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isVillagesExpanded ? 'rotate-90' : ''
@@ -274,13 +363,16 @@ export function AdvancedPanel() {
           </div>
         )}
 
-        {/* Import */}
+        {/* Import regions */}
         <div>
           <button
             onClick={() => setIsImportExpanded(!isImportExpanded)}
             className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
           >
-            <span>Import</span>
+            <span className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4" />
+              Import regions
+            </span>
             <svg
               className={`w-4 h-4 transition-transform duration-200 ${
                 isImportExpanded ? 'rotate-90' : ''
@@ -295,11 +387,6 @@ export function AdvancedPanel() {
           {isImportExpanded && (
             <div className="ml-4 space-y-4">
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import Regions</h5>
-                <div className="text-sm text-gray-300">
-                  Import regions from JSON project files
-                </div>
-                
                 <button
                   onClick={triggerFileInput}
                   disabled={isImporting}
@@ -326,13 +413,16 @@ export function AdvancedPanel() {
           )}
         </div>
 
-        {/* Region Specific */}
+        {/* Region Hearts */}
         <div>
           <button
             onClick={() => setIsRegionSpecificExpanded(!isRegionSpecificExpanded)}
             className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
           >
-            <span>Region Specific</span>
+            <span className="flex items-center gap-2">
+              <Heart className="w-4 h-4" />
+              Region Hearts
+            </span>
             <svg
               className={`w-4 h-4 transition-transform duration-200 ${
                 isRegionSpecificExpanded ? 'rotate-90' : ''
@@ -347,83 +437,6 @@ export function AdvancedPanel() {
           {isRegionSpecificExpanded && (
             <div className="ml-4 space-y-4">
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Challenge Level</h5>
-                <div className="text-sm text-gray-300">
-                  Set the difficulty level for the selected region
-                </div>
-                
-                {regions.selectedRegionId ? (
-                  <div className="space-y-2">
-                    <select
-                      value={regions.regions.find(r => r.id === regions.selectedRegionId)?.challengeLevel || 'easy'}
-                      onChange={(e) => regions.updateRegion(regions.selectedRegionId!, { challengeLevel: e.target.value as ChallengeLevel })}
-                      className="w-full bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:border-lapis-lighter focus:outline-none placeholder:text-gray-500"
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="normal">Normal</option>
-                      <option value="hard">Hard</option>
-                      <option value="severe">Severe</option>
-                      <option value="deadly">Deadly</option>
-                    </select>
-                    <p className="text-gray-400 text-xs">
-                      Sets the difficulty level for LevelledMobs plugin
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
-                    Select a region to set its challenge level
-                  </div>
-                )}
-              </div>
-
-              {seedInfo.seedInfo.dimension !== 'nether' && (
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Spawn Region</h5>
-                  <div className="text-sm text-gray-300">
-                    Mark this region as containing the world spawn point
-                  </div>
-                  
-                  {regions.selectedRegionId ? (
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={regions.regions.find(r => r.id === regions.selectedRegionId)?.hasSpawn || false}
-                          onChange={(e) => {
-                            const regionId = regions.selectedRegionId!
-                            if (e.target.checked) {
-                              // If checking this region, uncheck all other regions first
-                              regions.regions.forEach(region => {
-                                if (region.id !== regionId && region.hasSpawn) {
-                                  regions.updateRegion(region.id, { hasSpawn: false })
-                                }
-                              })
-                            }
-                            // Then update the selected region
-                            regions.updateRegion(regionId, { hasSpawn: e.target.checked })
-                          }}
-                          className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
-                        />
-                        <span className="text-sm text-gray-300">Has Spawn</span>
-                      </label>
-                      <p className="text-gray-400 text-xs">
-                        Only one region can have spawn (only one region can have spawn)
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
-                      Select a region to set its spawn status
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide flex items-center gap-2">
-                  <Heart className="w-4 h-4" />
-                  Region Heart
-                </h5>
-                
                 {regions.selectedRegionId ? (
                   <div className="space-y-2">
                     {!showCustomCenterForm ? (
@@ -434,8 +447,10 @@ export function AdvancedPanel() {
                           return null
                         }
                         return (
-                          <div className="p-4 border border-gunmetal rounded">
-                            <div className="flex justify-between items-center">
+                          <>
+                            <div className="text-sm font-medium text-white">{selectedRegion!.name}</div>
+                            <div className="p-4 border border-gunmetal rounded">
+                              <div className="flex justify-between items-center">
                               <div className="text-sm font-mono">
                                 <span className="text-gray-400">X:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.x)}</span>{' '}
                                 <span className="text-gray-400 ml-3">Z:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.z)}</span>
@@ -468,7 +483,8 @@ export function AdvancedPanel() {
                                 </button>
                               </div>
                             </div>
-                          </div>
+                            </div>
+                          </>
                         )
                       })()
                     ) : (
@@ -564,7 +580,7 @@ export function AdvancedPanel() {
                     })()}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                  <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
                     Select a region to set its heart
                   </div>
                 )}
@@ -572,7 +588,9 @@ export function AdvancedPanel() {
                   {(() => {
                     const customHearts = regions.regions.filter(r => r.centerPoint != null).length
                     const totalRegions = regions.regions.length
-                    return `${customHearts} region hearts set out of ${totalRegions} regions`
+                    return customHearts === totalRegions && totalRegions > 0
+                      ? 'All regions have hearts'
+                      : `${customHearts} region hearts set out of ${totalRegions} regions`
                   })()}
                 </div>
               </div>
