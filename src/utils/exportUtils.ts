@@ -121,6 +121,14 @@ export async function exportCompleteMap(
   }
 }
 
+// Build filename prefix from world name, dimension and date (same pattern as project save)
+function exportFilenamePrefix(worldName: string, dimension: 'overworld' | 'nether' | 'end'): string {
+  const worldNameSlug = worldName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+  const date = new Date().toISOString().split('T')[0]
+  const dimensionSlug = dimension || 'overworld'
+  return `${worldNameSlug}-${dimensionSlug}-${date}`
+}
+
 // Export all regions to YAML file in WorldGuard format
 export function exportRegionsYAML(
   regions: Region[], 
@@ -130,6 +138,7 @@ export function exportRegionsYAML(
   includeSpawnRegion: boolean = false,
   spawnCoordinates?: { x: number; z: number; radius?: number } | null,
   dimension?: 'overworld' | 'nether' | 'end',
+  worldName: string = 'world',
   useModernWorldHeight: boolean = true,
   useGreetingsAndFarewells: boolean = false,
   greetingSize: 'large' | 'small' | 'chat' = 'large',
@@ -166,10 +175,10 @@ export function exportRegionsYAML(
   })
 
   const dataBlob = new Blob([yamlContent], { type: 'text/yaml' })
-  
+  const prefix = exportFilenamePrefix(worldName, effectiveDimension)
   const link = document.createElement('a')
   link.href = URL.createObjectURL(dataBlob)
-  link.download = `regions.yml`
+  link.download = `${prefix}-regions.yml`
   link.click()
   
   URL.revokeObjectURL(link.href)
@@ -361,7 +370,8 @@ export function exportRegionsMetaYAML(
     }
   }
 
-  const filename = dim === 'nether' ? 'nether-regions-meta.yml' : 'regions-meta.yml'
+  const prefix = exportFilenamePrefix(worldName, dim)
+  const filename = `${prefix}-regions-meta.yml`
   try {
     const yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
     const blob = new Blob([yamlStr], { type: 'text/yaml' })
