@@ -1,44 +1,112 @@
 const prefixes = [
-  'Dra', 'Mys', 'Sha', 'Gol', 'Cry', 'Dar', 'Lig', 'Sac', 'Hid', 'Los',
-  'For', 'Ete', 'Anc', 'Mys', 'Enc', 'Ble', 'Cur', 'Hol', 'Pro', 'Whi',
-  'Sil', 'Thu', 'Fro', 'Bur', 'Eme', 'Sap', 'Rub', 'Dia', 'Iro', 'Ste',
-  'Bro', 'Sil', 'Gol', 'Obs', 'Gra', 'Mar', 'Jad', 'Ara', 'Val', 'Nor',
-  'Eas', 'Wes', 'Sou', 'Nor', 'Mid', 'Upp', 'Low', 'Out', 'Inn', 'Cen',
-  'Sum', 'Kra', 'Dem', 'Hel', 'Kam', 'Zor', 'Vex', 'Nyx', 'Rav', 'Sol',
-  'Lun', 'Ast', 'Cos', 'Neb', 'Gal', 'Sta', 'Com', 'Met', 'Aur', 'Ion',
-  'Ony', 'Top', 'Ame', 'Tur', 'Qua', 'Plu', 'Cob', 'Tin', 'Cop', 'Zin'
+  'Aby', 'Ame', 'Anc', 'Ara', 'Ash', 'Ast', 'Aur',
+  'Bal', 'Ban', 'Bas', 'Bla', 'Ble', 'Bri', 'Bro', 'Brim', 'Bur',
+  'Cal', 'Cen', 'Cob', 'Com', 'Cop', 'Cor', 'Cos', 'Cry', 'Crys', 'Cur',
+  'Dae', 'Dar', 'Dem', 'Dia', 'Dra', 'Dus',
+  'Eas', 'Eld', 'Eme', 'Enc', 'Ete',
+  'Fal', 'Fel', 'For', 'Fro',
+  'Gal', 'Gla', 'Gol', 'Gra', 'Grim',
+  'Har', 'Hel', 'Hex', 'Hid', 'Hol',
+  'Inn', 'Ion', 'Iro',
+  'Jad',
+  'Kam', 'Kel', 'Kra',
+  'Lig', 'Los', 'Low', 'Lun', 'Lux',
+  'Mal', 'Mar', 'Met', 'Mid', 'Mor', 'Mort', 'Mys',
+  'Neb', 'Nex', 'Nor', 'Nyx',
+  'Oba', 'Obs', 'Ony', 'Oth', 'Out',
+  'Plu', 'Pro', 'Pyra', 'Pyro',
+  'Quae', 'Qua',
+  'Rav', 'Rex', 'Rub', 'Rune',
+  'Sac', 'Sap', 'Sha', 'Sil', 'Ska', 'Sol', 'Soli', 'Ste', 'Sum',
+  'Tal', 'Thu', 'Tin', 'Top', 'Tur',
+  'Umb', 'Umbra', 'Upp',
+  'Vaal', 'Val', 'Ven', 'Verd', 'Vex', 'Vor',
+  'Whi', 'Wes', 'Wyrm',
+  'Xer',
+  'Yll',
+  'Zan', 'Zeph', 'Zin', 'Zor'
 ]
 
 const suffixes = [
-  'monia', 'taria', 'doria', 'landia', 'aria', 'oria', 'enia', 'ania', 'onia', 'eria',
-  'land', 'realm', 'kingdom', 'empire', 'domain', 'territory', 'province', 'region', 'zone', 'area',
-  'hold', 'keep', 'fort', 'castle', 'tower', 'citadel', 'palace', 'sanctuary', 'haven', 'refuge',
-  'vale', 'peak', 'ridge', 'hollow', 'grove', 'forest', 'marsh', 'swamp', 'moor', 'heath',
-  'glade', 'meadow', 'field', 'plains', 'hills', 'mountains', 'valley', 'canyon', 'ravine',
-  'spring', 'falls', 'lake', 'river', 'stream', 'pond', 'bay', 'cove', 'harbor', 'port',
-  'esi', 'ado', 'ish', 'itha', 'masa', 'dora', 'nara', 'kora', 'lara', 'vara',
-  'thos', 'mos', 'dos', 'tos', 'nos', 'ros', 'kos', 'los', 'vos', 'zos',
-  'uria', 'ethia', 'noria', 'calia', 'donia', 'cliff', 'bluff', 'crest', 'summit', 'plateau'
+  'ado', 'ania', 'area', 'aria',
+  'badlands', 'basin', 'bastion', 'bay', 'bluff', 'bounds',
+  'calia', 'canyon', 'castle', 'citadel', 'cliff', 'cove', 'crest', 'crown', 'crossing',
+  'depths', 'demesne', 'descent', 'domain', 'donia',
+  'empire', 'enclave', 'enia', 'eria', 'esi', 'ethia', 'expanse',
+  'falls', 'field', 'fissure', 'forest', 'fort', 'frontier',
+  'gate', 'glade', 'grove',
+  'harbor', 'haven', 'heartland', 'heath', 'highlands', 'hills', 'hold', 'hollow',
+  'ithia',
+  'keep', 'kingdom', 'kora',
+  'lake', 'land', 'landia', 'lara', 'lowlands',
+  'marches', 'marsh', 'meadow', 'moor', 'mountains',
+  'nara', 'noria',
+  'onia', 'oria', 'outpost',
+  'palace', 'passage', 'peak', 'plains', 'plateau', 'pond', 'port', 'province',
+  'quarter',
+  'ravine', 'reach', 'realm', 'region', 'reliquary', 'reliquum', 'refuge', 'ridge', 'rift', 'rise', 'river',
+  'sanctuary', 'sanctum', 'scar', 'seat', 'shelf', 'shire', 'spring', 'span', 'steppes', 'stream', 'stretch', 'summit', 'swamp',
+  'territory', 'threshold', 'throne', 'tower', 'tos',
+  'uria',
+  'vale', 'valley', 'vara', 'verge', 'vos',
+  'ward', 'wastes', 'watch', 'wilds', 'wound',
+  'zone'
 ]
 
 const themes = [
-  'Dragon', 'Phoenix', 'Wolf', 'Eagle', 'Lion', 'Bear', 'Stag', 'Hawk', 'Raven', 'Owl',
-  'Serpent', 'Wyvern', 'Griffin', 'Unicorn', 'Centaur', 'Troll', 'Giant', 'Dwarf', 'Elf',
-  'Knight', 'Wizard', 'Sage', 'Warrior', 'Hunter', 'Ranger', 'Mage', 'Priest', 'Monk',
-  'Storm', 'Thunder', 'Lightning', 'Fire', 'Ice', 'Wind', 'Earth', 'Water', 'Light', 'Shadow',
-  'Dawn', 'Dusk', 'Midnight', 'Noon', 'Twilight', 'Sunrise', 'Sunset', 'Moon', 'Star', 'Comet',
-  'Crystal', 'Magic', 'Mystic', 'Ancient', 'Eternal', 'Sacred', 'Blessed', 'Cursed', 'Holy', 'Profane',
-  'Kama', 'Lida', 'Masa', 'Nara', 'Kora', 'Lara', 'Vara', 'Thos', 'Mos', 'Dos',
-  'Basilisk', 'Pegasus', 'Minotaur', 'Bard', 'Paladin', 'Frost', 'Mist', 'Aurora', 'Divine', 'Zara'
+  'Ancient', 'Aurora', 'Bard', 'Basilisk', 'Bear', 'Blessed',
+  'Cartographer', 'Centaur', 'Champion', 'Chimera', 'Chronicler', 'Comet', 'Conqueror', 'Crown', 'Crystal', 'Cursed',
+  'Dawn', 'Destiny', 'Divine', 'Dragon', 'Dusk', 'Dwarf',
+  'Eagle', 'Earth', 'Echo', 'Eclipse', 'Elf', 'Ember', 'Eternal', 'Exile', 'Explorer',
+  'Fate', 'Fire', 'Frost',
+  'Giant', 'Glacier', 'Gorgon', 'Griffin',
+  'Hawk', 'Herald', 'Holy', 'Horizon', 'Hunter', 'Hydra',
+  'Ice', 'Inferno',
+  'Knight',
+  'Legacy', 'Leviathan', 'Light', 'Lion', 'Lightning',
+  'Mage', 'Magic', 'Maelstrom', 'Midnight', 'Minotaur', 'Mist', 'Monk', 'Moon', 'Mystic', 'Myth',
+  'Nomad', 'Noon',
+  'Omen', 'Oracle', 'Owl',
+  'Paladin', 'Pathfinder', 'Pegasus', 'Phoenix', 'Pilgrim', 'Priest', 'Profane',
+  'Ranger', 'Raven', 'Relic',
+  'Sacred', 'Sage', 'Sentinel', 'Seer', 'Serpent', 'Shadow', 'Silence', 'Sovereign', 'Star', 'Stillness', 'Storm', 'Sunrise', 'Sunset',
+  'Tempest', 'Throne', 'Thunder', 'Tide', 'Twilight',
+  'Unicorn',
+  'Void', 'Voyager',
+  'Warden', 'Wanderer', 'Warrior', 'Watcher', 'Water', 'Wind', 'Wizard', 'Wolf',
+  'Wyvern',
+  'Zenith'
 ]
 
 const connectors = ['of', 'the', 'in', 'at', 'by', 'near', 'beyond', 'within', 'under', 'over']
 
 const complexSyllables = [
-  'ka', 'ma', 'li', 'da', 'mu', 'sa', 'na', 'ra', 'ko', 'la', 'va', 'tho', 'mo', 'do', 'to', 'no', 'ro', 'ko', 'lo', 'vo', 'zo',
-  'dra', 'mys', 'sha', 'gol', 'cry', 'dar', 'lig', 'sac', 'hid', 'los', 'for', 'ete', 'anc', 'enc', 'ble', 'cur', 'hol', 'pro', 'whi', 'sil',
-  'thu', 'fro', 'bur', 'eme', 'sap', 'rub', 'dia', 'iro', 'ste', 'bro', 'obs', 'gra', 'mar', 'jad', 'ara', 'val', 'nor', 'eas', 'wes', 'sou',
-  'ony', 'top', 'ame', 'tur', 'qua', 'plu', 'cob', 'tin', 'cop', 'zin'
+  'ame', 'anc', 'ara',
+  'bal', 'ble', 'bro', 'bur',
+  'cob', 'cop', 'cry', 'cur',
+  'da', 'dar', 'dia', 'do', 'dra', 'drae',
+  'eme', 'enc', 'ete',
+  'fen', 'for', 'fro',
+  'gol', 'gra', 'gyr',
+  'hal', 'hid', 'hol',
+  'iro', 'isk',
+  'jad', 'jol',
+  'ka', 'kael', 'kel', 'ko', 'kora', 'kyr',
+  'la', 'li', 'lir', 'lo', 'lun',
+  'ma', 'mar', 'mo', 'mor', 'mu', 'myn',
+  'na', 'nar', 'nor', 'no',
+  'obs', 'ony',
+  'plu', 'pro',
+  'qua', 'qor',
+  'ra', 'rav', 'rin', 'ro', 'ryl',
+  'sa', 'sac', 'sap', 'sar', 'sen', 'sek', 'sha', 'sil', 'ste',
+  'tho', 'thra', 'tin', 'to', 'tor', 'tyr',
+  'uln',
+  'va', 'vak', 'val', 'vel', 'vo', 'vor', 'vu',
+  'whi', 'wyr',
+  'xa', 'xel',
+  'yi', 'yra',
+  'ze', 'zin', 'zor', 'zyn', 'zo'
 ]
 
 // Medieval village name generator - Clean historical place names
@@ -211,23 +279,23 @@ export function generateMedievalName(): string {
   
   // Different name patterns with different probabilities
   if (random < 0.3) {
-    // Pattern: "Prefix + Suffix" (e.g., "Dramonia", "Mystaria")
+    // Pattern: "Prefix + Suffix" (e.g., "Dramonia", "Mystaria") - 30%
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
     return `${prefix}${suffix}`
-  } else if (random < 0.5) {
-    // Pattern: "Prefix + Syllable + Suffix" (e.g., "Drakamonia", "Myslaria")
+  } else if (random < 0.55) {
+    // Pattern: "Prefix + Syllable + Suffix" (e.g., "Drakamonia", "Myslaria") - 25%
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
     const syllable = complexSyllables[Math.floor(Math.random() * complexSyllables.length)]
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
     return `${prefix}${syllable}${suffix}`
-  } else if (random < 0.7) {
-    // Pattern: "Theme + Suffix" (e.g., "Dragonland", "Crystalrealm")
+  } else if (random < 0.75) {
+    // Pattern: "Theme + Suffix" (e.g., "Dragonland", "Crystalrealm") - 20%
     const theme = themes[Math.floor(Math.random() * themes.length)]
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
     return `${theme}${suffix}`
-  } else if (random < 0.9) {
-    // Pattern: Complex multi-syllable name (e.g., "Kamalidumasana")
+  } else if (random < 0.95) {
+    // Pattern: Complex multi-syllable name (e.g., "Kamalidumasana") - 20%
     const syllableCount = Math.floor(Math.random() * 2) + 3 // 3-4 syllables
     let complexName = ''
     for (let i = 0; i < syllableCount; i++) {
@@ -237,7 +305,7 @@ export function generateMedievalName(): string {
     // Capitalize first letter
     return complexName.charAt(0).toUpperCase() + complexName.slice(1)
   } else {
-    // Pattern: "Theme + of + Theme" (e.g., "Dragon of Fire")
+    // Pattern: "Theme + of + Theme" (e.g., "Dragon of Fire") - 5%
     const theme1 = themes[Math.floor(Math.random() * themes.length)]
     const theme2 = themes[Math.floor(Math.random() * themes.length)]
     return `${theme1} of ${theme2}`
