@@ -238,40 +238,103 @@ const netherPrefixes = [
 ]
 
 const netherSuffixes = [
-  // Otherworldly/eldritch suffixes
-  'abyss', 'rift', 'void', 'scar', 'coil', 'expanse', 'sprawl', 'depths', 'mire', 'forge',
-  'marrow', 'nexus', 'gate', 'portal', 'chasm', 'pit', 'core', 'heart', 'soul',
-  // Dark medieval/cursed vibes
-  'maw', 'dominion', 'crucible', 'descent', 'bastion', 'veins', 'reach', 'marches',
-  'wasteland', 'barrens', 'waste', 'ruins', 'graveyard', 'cemetery', 'ossuary',
-  'dungeon', 'prison', 'torture', 'suffering', 'torment', 'agony', 'despair',
-  'plague', 'pestilence', 'blight', 'curse', 'bane', 'doom', 'ruin', 'destruction',
-  // Traditional nether elements (no blocks)
-  'realm', 'domain', 'land', 'world', 'dimension', 'plane',
-  'fire', 'flame', 'ember', 'ash', 'cinder', 'smoke', 'fume', 'lava', 'magma',
-  'fortress', 'ruin', 'desert', 'heights', 'peaks', 'valleys', 'caverns', 'tunnels', 'corridors',
-  'halls', 'chambers', 'vaults', 'crypts', 'tombs', 'graves', 'mausoleums',
-  'sanctuary', 'shrine', 'altar', 'temple', 'cathedral', 'monastery', 'abbey',
-  'keep', 'tower', 'citadel', 'stronghold', 'battlements', 'ramparts', 'walls'
+  // Otherworldly / eldritch
+  'Abyss', 'Abyssal', 'Rift', 'Void', 'Null', 'Scar', 'Coil', 'Expanse', 'Sprawl',
+  'Depths', 'Deep', 'Mire', 'Forge', 'Marrow', 'Nexus', 'Gate', 'Portal',
+  'Breach', 'Threshold', 'Terminus', 'End', 'Core', 'Heart', 'Soul',
+  'Chasm', 'Pit', 'Hollow', 'Sink', 'Vortex', 'Maelstrom', 'Convergence',
+
+  // Dark medieval / cursed
+  'Maw', 'Dominion', 'Crucible', 'Descent', 'Bastion', 'Veins', 'Reach', 'Marches',
+  'Wasteland', 'Barrens', 'Waste', 'Ruins', 'Graveyard', 'Cemetery', 'Ossuary',
+  'Dungeon', 'Prison', 'Gaol', 'Cells',
+  'Torture', 'Suffering', 'Torment', 'Agony', 'Despair',
+  'Penance', 'Judgement', 'Condemnation', 'Exile', 'Damnation',
+  'Wrath', 'Retribution', 'Lament', 'Anguish', 'Misery',
+  'Plague', 'Pestilence', 'Blight', 'Bane', 'Doom', 'Ruin', 'Destruction',
+  'Decay', 'Corruption', 'Taint', 'Rot', 'Withering',
+
+  // World / plane descriptors
+  'Realm', 'Domain', 'Land', 'World', 'Dimension', 'Plane', 'Underreach',
+
+  // Fire / infernal (no blocks)
+  'Fire', 'Flame', 'Ember', 'Ash', 'Cinder', 'Smoke', 'Fume', 'Lava', 'Magma',
+  'Endfire', 'Dead Flame',
+
+  // Structures / traversal
+  'Fortress', 'Stronghold', 'Citadel', 'Keep', 'Tower', 'Battlements', 'Ramparts', 'Walls',
+  'Catacombs', 'Crypts', 'Tombs', 'Graves', 'Mausoleums',
+  'Halls', 'Chambers', 'Vaults', 'Archives', 'Antechambers',
+  'Corridors', 'Tunnels', 'Passages', 'Causeways', 'Bridges',
+  'Watchtowers', 'Spires', 'Pylons', 'Obelisks',
+
+  // Terrain / hostile geography
+  'Desert', 'Heights', 'Peaks', 'Valleys', 'Caverns',
+  'Caldera', 'Fissures', 'Vents', 'Basins', 'Shelves',
+  'Ledges', 'Overhangs', 'Pillars', 'Columns'
 ]
 
 const netherThemes = [
-  // Otherworldly/eldritch themes
-  'Xyrrath', 'Chthonic', 'Mor\'gath', 'Nihil', 'Ebon', 'Umbral', 'Voidscar', 'Riftmarrow', 'Khorvus', 'Azrak',
-  'The Chthonic', 'The Nihil', 'The Umbral', 'The Voidscar', 'The Riftmarrow', 'The Ebon', 'The Azrak',
-  // Dark medieval/cursed vibes
-  'The Bleak', 'The Ashen', 'The Black', 'The Infernal', 'The Scourged', 'The Bloodfire', 'The Hollow', 'The Oblivion', 'The Withered',
-  'The Cursed', 'The Forsaken', 'The Damned', 'The Blighted', 'The Corrupted', 'The Tainted', 'The Defiled', 'The Desecrated',
-  'The Ancient', 'The Forgotten', 'The Lost', 'The Abandoned', 'The Ruined', 'The Decayed', 'The Rotting', 'The Festering',
-  'The Cruel', 'The Vile', 'The Wicked', 'The Malicious', 'The Sinister', 'The Malevolent', 'The Nefarious', 'The Diabolical',
-  'Woe', 'Despair', 'Torment', 'Agony', 'Suffering', 'Plague', 'Pestilence', 'Blight', 'Curse', 'Bane',
-  // Traditional nether themes (no blocks)
-  'Infernal', 'Hellish', 'Fiery', 'Burning', 'Scorching', 'Blazing', 'Searing',
-  'Molten', 'Lava', 'Magma', 'Ash', 'Ember', 'Cinder', 'Smoke', 'Fume',
-  'Soul', 'Wither', 'Death', 'Doom', 'Chaos', 'Void', 'Abyss', 'Darkness',
-  'Shadow', 'Grim', 'Desolate', 'Barren', 'Wasted', 'Ruined',
-  'Crimson', 'Warped', 'Nether', 'Hell', 'Inferno', 'Purgatory', 'Limbo',
-  'Fortress', 'Bastion', 'Ruin', 'Waste', 'Desert', 'Barrens', 'Depths'
+  // Eldritch / named forces
+  'Xyrrath', 'Xalreth', 'Chthonic', 'Mor\'gath', 'Nihil', 'Ebon', 'Umbral',
+  'Voidscar', 'Riftmarrow', 'Khorvus', 'Azrak', 'Nyxar', 'Vorath', 'Zeraph',
+  'Kalthuun',
+
+  // Definitive entities
+  'The Chthonic', 'The Nihil', 'The Umbral', 'The Voidscar', 'The Riftmarrow',
+  'The Ebon', 'The Azrak', 'The Null', 'The Unseen', 'The Nameless',
+  'The Red Wake', 'The Black Deep', 'The Last Scar', 'The Shattered',
+
+  // Dark medieval / cursed
+  'The Bleak', 'The Ashen', 'The Black', 'The Infernal', 'The Scourged',
+  'The Bloodfire', 'The Hollow', 'The Oblivion', 'The Withered',
+  'The Cursed', 'The Forsaken', 'The Damned', 'The Blighted',
+  'The Corrupted', 'The Tainted', 'The Defiled', 'The Desecrated',
+
+  // Age / decay
+  'The Ancient', 'The Forgotten', 'The Lost', 'The Abandoned',
+  'The Ruined', 'The Decayed', 'The Rotting', 'The Festering',
+
+  // Moral / intent
+  'The Cruel', 'The Vile', 'The Wicked', 'The Malicious',
+  'The Sinister', 'The Malevolent', 'The Nefarious', 'The Diabolical',
+  'The Condemned', 'The Judged', 'The Punished', 'The Exiled',
+  'The Unforgiven', 'The Broken', 'The Shackled',
+  'The Screaming', 'The Weeping', 'The Howling',
+  'The Endless', 'The Unyielding', 'The Consuming',
+
+  // Abstract suffering
+  'Woe', 'Despair', 'Torment', 'Agony', 'Suffering',
+  'Plague', 'Pestilence', 'Blight', 'Curse', 'Bane',
+
+  // Infernal descriptors
+  'Infernal', 'Hellish', 'Fiery', 'Burning', 'Scorching',
+  'Blazing', 'Searing', 'Smouldering', 'Charred',
+  'Blistering', 'Fuming', 'Raging', 'Seething', 'Boiling',
+  'Cracked', 'Bleeding', 'Blackened',
+
+  // Fire / ash concepts
+  'Molten', 'Lava', 'Magma', 'Ash', 'Ember', 'Cinder',
+  'Smoke', 'Fume', 'Ashfall', 'Afterburn',
+  'Cinderwake', 'Graveheat', 'Endfire', 'Last Ember', 'Dead Flame',
+
+  // Existential / void
+  'Soul', 'Wither', 'Death', 'Doom', 'Chaos',
+  'Void', 'Abyss', 'Darkness', 'Shadow',
+  'Oblivion', 'Entropy', 'Ruinous',
+
+  // Desolation
+  'Grim', 'Desolate', 'Barren', 'Wasted', 'Ruined',
+
+  // Nether-aligned (no blocks)
+  'Crimson', 'Warped', 'Nether', 'Hell', 'Inferno',
+  'Purgatory', 'Limbo',
+
+  // Place-identifiers
+  'Fortress', 'Bastion', 'Citadel', 'Stronghold',
+  'Sanctum', 'Reliquary', 'Throne', 'Seat', 'Crown',
+  'March', 'Depth', 'Depths', 'Below', 'Underrealm',
+  'Waste', 'Desert', 'Barrens'
 ]
 
 export function generateMedievalName(): string {
