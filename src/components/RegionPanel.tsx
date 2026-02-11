@@ -399,6 +399,7 @@ export function RegionPanel() {
           onSetWarpRadius={setWarpRadius}
           onSetWarpStrength={setWarpStrength}
           onDeleteRegion={deleteRegion}
+          mapState={mapState}
         />
       )}
     </div>

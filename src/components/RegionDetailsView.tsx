@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { calculatePolygonArea, formatArea, calculateRegionCenter } from '../utils/polygonUtils'
 import { generateRegionName } from '../utils/nameGenerator'
-import { Region, EditMode } from '../types'
+import { Region, EditMode, MapState } from '../types'
 import { YAMLDisplay } from './YAMLDisplay'
 import { VillageManager } from './VillageManager'
 import { Button } from './Button'
 import { DeleteRegionModal } from './DeleteRegionModal'
-import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Hand, Paintbrush, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff } from 'lucide-react'
+import { scanBiomes, type BiomeBreakdownEntry } from '../utils/biomeScanner'
+import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan } from 'lucide-react'
 
 interface RegionDetailsViewProps {
   selectedRegion: Region
@@ -37,6 +38,7 @@ interface RegionDetailsViewProps {
   onSetWarpRadius: (radius: number) => void
   onSetWarpStrength: (strength: number) => void
   onDeleteRegion: (regionId: string) => void
+  mapState?: MapState | null
 }
 
 export function RegionDetailsView({
@@ -67,12 +69,17 @@ export function RegionDetailsView({
   onSetWarpRadius,
   onSetWarpStrength,
   onDeleteRegion,
-  existingRegions
+  existingRegions,
+  mapState
 }: RegionDetailsViewProps) {
   const [resizePercentage, setResizePercentage] = useState('100')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
   const [tempName, setTempName] = useState(selectedRegion.name)
+  const [biomeBreakdown, setBiomeBreakdown] = useState<BiomeBreakdownEntry[] | null>(null)
+  const [isScanningBiomes, setIsScanningBiomes] = useState(false)
+  const [showBiomeBreakdown, setShowBiomeBreakdown] = useState(false)
+  const [showAllBiomes, setShowAllBiomes] = useState(false)
   const isEditing = editMode.isEditing && editMode.editingRegionId === selectedRegion.id
   const modeIsActive = isEditing || editMode.isMovingRegion || editMode.isSplittingRegion
   
@@ -80,6 +87,11 @@ export function RegionDetailsView({
   useEffect(() => {
     setTempName(selectedRegion.name)
     setNameError(null)
+  }, [selectedRegion.id])
+
+  useEffect(() => {
+    setBiomeBreakdown(null)
+    setShowAllBiomes(false)
   }, [selectedRegion.id])
   
   // Check URL parameter for advanced features
@@ -455,6 +467,67 @@ export function RegionDetailsView({
           <span>200%</span>
         </div>
       </div>
+
+      {showAdvanced && (
+        <div>
+          <h4 className="text-sm font-medium text-gray-300 mb-2">Biomes</h4>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (!mapState?.image) return
+              setIsScanningBiomes(true)
+              setShowBiomeBreakdown(true)
+              setTimeout(() => {
+                const result = scanBiomes(
+                  selectedRegion,
+                  mapState.image!,
+                  mapState.originOffset
+                )
+                setBiomeBreakdown(result)
+                setIsScanningBiomes(false)
+              }, 0)
+            }}
+            leftIcon={<Scan className="w-4 h-4" />}
+            className="w-full"
+            disabled={!mapState?.image || isScanningBiomes}
+            title={!mapState?.image ? 'Load a map image first' : undefined}
+          >
+            {isScanningBiomes ? 'Scanning…' : 'Scan biomes'}
+          </Button>
+          {showBiomeBreakdown && (
+            <div className="mt-2 p-3 bg-eerie-back rounded border border-gunmetal">
+              {biomeBreakdown === null ? (
+                <p className="text-gray-400 text-sm">No pixels sampled. Set map origin and ensure the region overlaps the map.</p>
+              ) : biomeBreakdown.length === 0 ? (
+                <p className="text-gray-400 text-sm">No biomes detected.</p>
+              ) : (() => {
+                const threshold = 5
+                const visible = showAllBiomes ? biomeBreakdown : biomeBreakdown.filter(b => b.percentage >= threshold)
+                const hasHidden = biomeBreakdown.some(b => b.percentage < threshold)
+                return (
+                  <div className="space-y-1 text-sm">
+                    {visible.map(({ biome, percentage }) => (
+                      <div key={biome} className="flex justify-between">
+                        <span className="text-gray-300">{biome}</span>
+                        <span className="text-gray-400 font-medium">{percentage}%</span>
+                      </div>
+                    ))}
+                    {hasHidden && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllBiomes(!showAllBiomes)}
+                        className="text-lapis-lazuli hover:text-lapis-lighter text-xs mt-2 underline"
+                      >
+                        {showAllBiomes ? 'See less' : 'See more'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+        </div>
+      )}
 
       {showAdvanced && (
         <>
