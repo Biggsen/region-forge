@@ -35,6 +35,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     showGrid: false,
     showNames: true
   })
+  const [isolatedRegionId, setIsolatedRegionId] = useState<string | null>(null)
 
   // Load saved data on mount
   useEffect(() => {
@@ -131,6 +132,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     if (selectedRegionId === id) {
       setSelectedRegionId(null)
     }
+    if (isolatedRegionId === id) {
+      setIsolatedRegionId(null)
+    }
     // Exit edit mode if the deleted region was being edited
     if (editMode.editingRegionId === id) {
       setEditMode({
@@ -146,7 +150,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         splitPoints: []
       })
     }
-  }, [selectedRegionId, editMode.editingRegionId])
+  }, [selectedRegionId, editMode.editingRegionId, isolatedRegionId])
 
   const startDrawingRegion = useCallback((name: string) => {
     const newRegion: Region = {
@@ -781,6 +785,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     freehandEnabled,
     editMode,
     highlightMode,
+    isolatedRegionId,
+    setIsolatedRegionId,
     addRegion,
     updateRegion,
     deleteRegion,

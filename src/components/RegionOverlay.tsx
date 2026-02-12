@@ -30,6 +30,7 @@ interface RegionOverlayProps {
   warpRadius?: number
   mouseCoordinates?: { x: number; z: number } | null
   isMouseOverCanvas?: boolean
+  isolatedMode?: boolean
 }
 
 export function RegionOverlay({ 
@@ -51,7 +52,8 @@ export function RegionOverlay({
   isWarping = false,
   warpRadius = 40,
   mouseCoordinates = null,
-  isMouseOverCanvas = false
+  isMouseOverCanvas = false,
+  isolatedMode = false
 }: RegionOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
 
@@ -79,28 +81,52 @@ export function RegionOverlay({
       })
     }
 
-    // Draw all regions (with labels on top)
-    regions.forEach(region => {
-      const isSelected = region.id === selectedRegionId
-      const isHovered = region.id === hoveredRegionId
-      const isEditing = editMode.isEditing && editMode.editingRegionId === region.id
-      const isMoving = editMode.isMovingRegion && editMode.movingRegionId === region.id
-      const isSplitting = editMode.isSplittingRegion && editMode.splittingRegionId === region.id
-      const isHighlighted = highlightMode.highlightAll
-      const showChallengeLevels = highlightMode.showChallengeLevels
-      const isDisabled = region.disabled === true
-      drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames)
-      
-      // Draw center point for each region
-      if (highlightMode.showCenterPoints) {
-        drawCenterPoint(ctx, region, mapState, isSelected)
-      }
+    // Draw all regions (with labels on top) - skip boundaries when isolated, but keep label
+    if (!isolatedMode) {
+      regions.forEach(region => {
+        const isSelected = region.id === selectedRegionId
+        const isHovered = region.id === hoveredRegionId
+        const isEditing = editMode.isEditing && editMode.editingRegionId === region.id
+        const isMoving = editMode.isMovingRegion && editMode.movingRegionId === region.id
+        const isSplitting = editMode.isSplittingRegion && editMode.splittingRegionId === region.id
+        const isHighlighted = highlightMode.highlightAll
+        const showChallengeLevels = highlightMode.showChallengeLevels
+        const isDisabled = region.disabled === true
+        drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames)
+        
+        // Draw center point for each region
+        if (highlightMode.showCenterPoints) {
+          drawCenterPoint(ctx, region, mapState, isSelected)
+        }
 
-      // Draw split points and line if splitting this region
-      if (isSplitting) {
-        drawSplitPoints(ctx, mapState, editMode.splitPoints)
-      }
-    })
+        // Draw split points and line if splitting this region
+        if (isSplitting) {
+          drawSplitPoints(ctx, mapState, editMode.splitPoints)
+        }
+      })
+    } else if (highlightMode.showNames && regions.length > 0) {
+      regions.forEach(region => {
+        if (region.points.length < 2) return
+        const canvasPoints = region.points.map(point => {
+          const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+          return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+        })
+        const centerX = canvasPoints.reduce((sum, p) => sum + p.x, 0) / canvasPoints.length
+        const centerY = canvasPoints.reduce((sum, p) => sum + p.y, 0) / canvasPoints.length
+        ctx.font = '12px Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        const textMetrics = ctx.measureText(region.name)
+        const textWidth = textMetrics.width
+        const padding = 8
+        const boxWidth = textWidth + padding * 2
+        const boxHeight = 20
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+        ctx.fillRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight)
+        ctx.fillStyle = 'white'
+        ctx.fillText(region.name, centerX, centerY)
+      })
+    }
 
     // Draw drawing region
     if (drawingRegion && drawingRegion.points.length > 0) {
@@ -122,7 +148,7 @@ export function RegionOverlay({
       drawWarpBrush(ctx, mouseCoordinates, mapState, warpRadius)
     }
 
-  }, [canvas, mapState, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas])
+  }, [canvas, mapState, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas, isolatedMode])
 
   const drawRegion = (
     ctx: CanvasRenderingContext2D, 

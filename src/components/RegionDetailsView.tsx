@@ -7,7 +7,7 @@ import { VillageManager } from './VillageManager'
 import { Button } from './Button'
 import { DeleteRegionModal } from './DeleteRegionModal'
 import { scanBiomes, type BiomeBreakdownEntry } from '../utils/biomeScanner'
-import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan } from 'lucide-react'
+import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan, Focus, Layers } from 'lucide-react'
 
 interface RegionDetailsViewProps {
   selectedRegion: Region
@@ -38,6 +38,9 @@ interface RegionDetailsViewProps {
   onSetWarpRadius: (radius: number) => void
   onSetWarpStrength: (strength: number) => void
   onDeleteRegion: (regionId: string) => void
+  isolatedRegionId: string | null
+  onIsolateRegion: (regionId: string) => void
+  onClearIsolate: () => void
   mapState?: MapState | null
 }
 
@@ -70,6 +73,9 @@ export function RegionDetailsView({
   onSetWarpStrength,
   onDeleteRegion,
   existingRegions,
+  isolatedRegionId,
+  onIsolateRegion,
+  onClearIsolate,
   mapState
 }: RegionDetailsViewProps) {
   const [resizePercentage, setResizePercentage] = useState('100')
@@ -82,6 +88,7 @@ export function RegionDetailsView({
   const [showAllBiomes, setShowAllBiomes] = useState(false)
   const isEditing = editMode.isEditing && editMode.editingRegionId === selectedRegion.id
   const modeIsActive = isEditing || editMode.isMovingRegion || editMode.isSplittingRegion
+  const editingDisabled = isolatedRegionId === selectedRegion.id
   
   // Update tempName when selectedRegion changes
   useEffect(() => {
@@ -220,10 +227,6 @@ export function RegionDetailsView({
         </div>
       </div>
 
-
-
-
-
             {!isEditing && (
               <div className="flex space-x-2">
                 <Button
@@ -231,6 +234,8 @@ export function RegionDetailsView({
                   onClick={() => onStartEditMode(selectedRegion.id)}
                   leftIcon={<VectorSquare size={16} />}
                   className="flex-1"
+                  disabled={editingDisabled}
+                  title={editingDisabled ? 'Show all regions to edit the shape' : undefined}
                 >
                   Edit Shape
                 </Button>
@@ -271,9 +276,9 @@ export function RegionDetailsView({
               onSetWarping(true)
             }
           }}
-          disabled={modeIsActive}
+          disabled={modeIsActive || editingDisabled}
           className={`w-full font-medium py-2 px-4 rounded-full transition-all border-2 flex items-center justify-center gap-2 ${
-            modeIsActive
+            modeIsActive || editingDisabled
               ? 'bg-transparent text-gray-500 border-persimmon/50 cursor-not-allowed opacity-50'
               : isWarping && warpRadius === 200 && warpStrength === 40
               ? 'bg-orange-600 text-white border-persimmon'
@@ -294,9 +299,9 @@ export function RegionDetailsView({
               onSetWarping(true)
             }
           }}
-          disabled={modeIsActive}
+          disabled={modeIsActive || editingDisabled}
           className={`w-full font-medium py-2 px-4 rounded-full transition-all border-2 flex items-center justify-center gap-2 ${
-            modeIsActive
+            modeIsActive || editingDisabled
               ? 'bg-transparent text-gray-500 border-persimmon/50 cursor-not-allowed opacity-50'
               : isWarping && warpRadius === 80 && warpStrength === 40
               ? 'bg-orange-600 text-white border-persimmon'
@@ -317,6 +322,7 @@ export function RegionDetailsView({
             onClick={() => onSimplifyRegionVertices(selectedRegion.id, 10)}
             leftIcon={<BrushCleaning className="w-4 h-4" />}
             className="flex-1"
+            disabled={editingDisabled}
           >
             Simplify
           </Button>
@@ -325,6 +331,7 @@ export function RegionDetailsView({
             onClick={() => onDoubleRegionVertices(selectedRegion.id)}
             leftIcon={<Plus className="w-4 h-4" />}
             className="flex-1"
+            disabled={editingDisabled}
           >
             Double
           </Button>
@@ -333,6 +340,7 @@ export function RegionDetailsView({
             onClick={() => onHalveRegionVertices(selectedRegion.id)}
             leftIcon={<Minus className="w-4 h-4" />}
             className="flex-1"
+            disabled={editingDisabled}
           >
             Halve
           </Button>
@@ -348,12 +356,12 @@ export function RegionDetailsView({
           <Button
             variant="secondary"
             onClick={() => {
-              // Start move mode - user will click on map to set new position
               const center = calculateRegionCenter(selectedRegion)
               onStartMoveRegion(selectedRegion.id, center.x, center.z)
             }}
             leftIcon={<Move className="w-4 h-4" />}
             className="flex-1"
+            disabled={editingDisabled}
           >
             Move Region
           </Button>
@@ -394,11 +402,10 @@ export function RegionDetailsView({
         <div className="flex space-x-2">
           <Button
             variant="secondary"
-            onClick={() => {
-              onStartSplitRegion(selectedRegion.id)
-            }}
+            onClick={() => onStartSplitRegion(selectedRegion.id)}
             leftIcon={<Scissors className="w-4 h-4" />}
             className="flex-1"
+            disabled={editingDisabled}
           >
             Split Region
           </Button>
@@ -457,7 +464,7 @@ export function RegionDetailsView({
             min="10"
             max="200"
             step="1"
-            disabled={editMode.isMovingRegion}
+            disabled={editMode.isMovingRegion || editingDisabled}
             className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
@@ -546,6 +553,42 @@ export function RegionDetailsView({
       )}
 
       <div className="mt-6 pt-4 border-t border-gunmetal space-y-2">
+        {editingDisabled ? (
+          <div className="p-3 bg-saffron border border-saffron rounded space-y-2">
+            <div className="flex items-center gap-2">
+              <Focus className="text-gray-900" size={18} />
+              <p className="text-gray-900 text-base">
+                <strong>Isolation Mode</strong>
+              </p>
+            </div>
+            <p className="text-gray-900 text-sm">
+              Viewing this region only. Show all regions to edit the shape.
+            </p>
+            <Button
+              variant="primary"
+              onClick={onClearIsolate}
+              leftIcon={<Layers size={16} />}
+              className="w-full mt-2"
+            >
+              Exit isolation mode
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="primary"
+            onClick={() => {
+              onStopEditMode()
+              onCancelMoveRegion()
+              onCancelSplitRegion()
+              onSetWarping(false)
+              onIsolateRegion(selectedRegion.id)
+            }}
+            leftIcon={<Focus size={16} />}
+            className="w-full"
+          >
+            Isolate Region
+          </Button>
+        )}
         <Button
           variant="secondary-outline"
           onClick={() => {

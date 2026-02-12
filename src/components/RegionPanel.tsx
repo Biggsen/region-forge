@@ -38,7 +38,9 @@ export function RegionPanel() {
     resizeRegion,
     startSplitRegion,
     finishSplitRegion,
-    cancelSplitRegion
+    cancelSplitRegion,
+    isolatedRegionId,
+    setIsolatedRegionId
   } = regions
 
   const { startSettingCenterPoint, stopSettingCenterPoint } = useAppContext().mapCanvas
@@ -375,6 +377,7 @@ export function RegionPanel() {
           onBack={() => {
             setHoveredRegionId(null)
             setSelectedRegionId(null)
+            setIsolatedRegionId(null)
             setIsWarping(false)
             stopSettingCenterPoint()
           }}
@@ -399,6 +402,9 @@ export function RegionPanel() {
           onSetWarpRadius={setWarpRadius}
           onSetWarpStrength={setWarpStrength}
           onDeleteRegion={deleteRegion}
+          isolatedRegionId={isolatedRegionId}
+          onIsolateRegion={setIsolatedRegionId}
+          onClearIsolate={() => setIsolatedRegionId(null)}
           mapState={mapState}
         />
       )}

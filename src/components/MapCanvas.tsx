@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { canvasToImage, pixelToWorld, isPointInPolygon } from '../utils/coordinateUtils'
+import { canvasToImage, pixelToWorld, worldToPixel, imageToCanvas, isPointInPolygon } from '../utils/coordinateUtils'
 import { SIDEBAR_WIDTH } from '../utils/constants'
 import { GridOverlay } from './GridOverlay'
 import { RegionOverlay } from './RegionOverlay'
@@ -24,6 +24,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     selectedRegionId,
     editMode,
     highlightMode,
+    isolatedRegionId,
     startDraggingPoint,
     stopDraggingPoint,
     updatePointPosition,
@@ -122,16 +123,37 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Draw image with opacity
-    // Transform order matters: translate first to move to offset position,
-    // then scale from that position, then draw the image
+    if (isolatedRegionId && mapState.originOffset) {
+      const isolatedRegion = regions.regions.find(r => r.id === isolatedRegionId)
+      if (isolatedRegion && isolatedRegion.points.length >= 3) {
+        ctx.save()
+        ctx.beginPath()
+        const canvasPoints = isolatedRegion.points.map(point => {
+          const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+          return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+        })
+        ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
+        for (let i = 1; i < canvasPoints.length; i++) {
+          ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
+        }
+        ctx.closePath()
+        ctx.clip()
+        ctx.globalAlpha = mapState.imageOpacity
+        ctx.translate(mapState.offsetX, mapState.offsetY)
+        ctx.scale(mapState.scale, mapState.scale)
+        ctx.drawImage(mapState.image, 0, 0)
+        ctx.restore()
+        return
+      }
+    }
+
     ctx.save()
     ctx.globalAlpha = mapState.imageOpacity
     ctx.translate(mapState.offsetX, mapState.offsetY)
     ctx.scale(mapState.scale, mapState.scale)
     ctx.drawImage(mapState.image, 0, 0)
     ctx.restore()
-  }, [mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.imageOpacity])
+  }, [mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.imageOpacity, mapState.originOffset, isolatedRegionId, regions.regions])
 
   // Draw map whenever state changes
   useEffect(() => {
@@ -232,23 +254,28 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
           return
         }
 
-        // Check each region to see if the click is inside
-        for (let i = regions.regions.length - 1; i >= 0; i--) {
-          const region = regions.regions[i]
+        // Check each region to see if the click is inside (only isolated region when in isolate mode)
+        const regionsToCheck = isolatedRegionId
+          ? regions.regions.filter(r => r.id === isolatedRegionId)
+          : regions.regions
+        for (let i = regionsToCheck.length - 1; i >= 0; i--) {
+          const region = regionsToCheck[i]
           if (isPointInPolygon(worldPos, region.points)) {
             regions.setHoveredRegionId(null)
             regions.setSelectedRegionId(region.id)
-            return // Stop checking once we find a region
+            return
           }
         }
-        
-        // If no region was clicked, deselect
-        regions.setHoveredRegionId(null)
-        regions.setSelectedRegionId(null)
+
+        // If no region was clicked, deselect (but keep selection when isolated - dark area isn't clickable)
+        if (!isolatedRegionId) {
+          regions.setHoveredRegionId(null)
+          regions.setSelectedRegionId(null)
+        }
       }
       // Note: Panning is only allowed when space key is pressed (handled in the first condition)
     }
-  }, [mapState.originSelected, mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
+  }, [mapState.originSelected, mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, isolatedRegionId, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (e.button === 0) {
@@ -281,9 +308,12 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
     const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
 
-    // Check each region to see if the double-click is inside
-    for (let i = regions.regions.length - 1; i >= 0; i--) {
-      const region = regions.regions[i]
+    // Check each region to see if the double-click is inside (only isolated region when in isolate mode)
+    const regionsToCheck = isolatedRegionId
+      ? regions.regions.filter(r => r.id === isolatedRegionId)
+      : regions.regions
+    for (let i = regionsToCheck.length - 1; i >= 0; i--) {
+      const region = regionsToCheck[i]
       if (isPointInPolygon(worldPos, region.points)) {
         regions.setSelectedRegionId(region.id)
         if (onNavigateToRegions) {
@@ -292,7 +322,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         return
       }
     }
-  }, [mapState.image, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, editMode.isEditing, editMode.isMovingRegion, editMode.isSplittingRegion, drawingRegion, isSpacePressed, regions, onNavigateToRegions])
+  }, [mapState.image, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, editMode.isEditing, editMode.isMovingRegion, editMode.isSplittingRegion, drawingRegion, isSpacePressed, regions, isolatedRegionId, onNavigateToRegions])
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -433,6 +463,14 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         </div>
       )}
 
+      {isolatedRegionId && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-saffron border-2 border-saffron rounded-lg px-4 py-2 shadow-lg">
+          <p className="text-gray-900 font-semibold text-sm">
+            Isolation mode
+          </p>
+        </div>
+      )}
+      
       {editMode.isEditing && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-saffron border-2 border-saffron rounded-lg px-4 py-2 shadow-lg">
           <p className="text-gray-900 font-semibold text-sm">
@@ -530,6 +568,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             canvas={canvasRef.current}
             mapState={mapState}
             isVisible={highlightMode.showGrid}
+            clipRegion={isolatedRegionId ? regions.regions.find(r => r.id === isolatedRegionId) ?? null : null}
           />
           {highlightMode.showRegions && (
             <RegionOverlay
@@ -540,7 +579,8 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
               hoveredRegionId={regions.hoveredRegionId}
               editMode={editMode}
               highlightMode={highlightMode}
-              regions={regions.regions}
+              regions={isolatedRegionId ? (regions.regions.filter(r => r.id === isolatedRegionId)) : regions.regions}
+              isolatedMode={!!isolatedRegionId}
               spawnCoordinates={seedInfo.seedInfo.dimension === 'nether' ? null : spawnState.coordinates}
               isSpacePressed={isSpacePressed}
               onPointMouseDown={handlePointMouseDown}

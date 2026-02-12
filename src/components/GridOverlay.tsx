@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { MapState } from '../types'
+import { MapState, Region } from '../types'
 import { worldToPixel, imageToCanvas } from '../utils/coordinateUtils'
 
 interface GridOverlayProps {
   canvas: HTMLCanvasElement | null
   mapState: MapState
   isVisible: boolean
+  clipRegion?: Region | null
 }
 
-export function GridOverlay({ canvas, mapState, isVisible }: GridOverlayProps) {
+export function GridOverlay({ canvas, mapState, isVisible, clipRegion }: GridOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -21,8 +22,22 @@ export function GridOverlay({ canvas, mapState, isVisible }: GridOverlayProps) {
     const ctx = overlay.getContext('2d')
     if (!ctx) return
 
-    // Clear overlay
     ctx.clearRect(0, 0, overlay.width, overlay.height)
+
+    if (clipRegion && clipRegion.points.length >= 3 && mapState.originOffset) {
+      ctx.save()
+      ctx.beginPath()
+      const canvasPoints = clipRegion.points.map(point => {
+        const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+        return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+      })
+      ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
+      for (let i = 1; i < canvasPoints.length; i++) {
+        ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
+      }
+      ctx.closePath()
+      ctx.clip()
+    }
 
     // Draw chunk grid (16x16 blocks)
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
@@ -100,7 +115,10 @@ export function GridOverlay({ canvas, mapState, isVisible }: GridOverlayProps) {
       ctx.stroke()
     }
 
-  }, [canvas, mapState, isVisible])
+    if (clipRegion) {
+      ctx.restore()
+    }
+  }, [canvas, mapState, isVisible, clipRegion])
 
   if (!isVisible) return null
 
