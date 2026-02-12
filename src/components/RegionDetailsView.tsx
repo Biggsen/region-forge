@@ -7,7 +7,7 @@ import { VillageManager } from './VillageManager'
 import { Button } from './Button'
 import { DeleteRegionModal } from './DeleteRegionModal'
 import { scanBiomes, type BiomeBreakdownEntry } from '../utils/biomeScanner'
-import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan, Focus, Layers } from 'lucide-react'
+import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan, Focus, Layers, Wrench } from 'lucide-react'
 
 interface RegionDetailsViewProps {
   selectedRegion: Region
@@ -86,6 +86,7 @@ export function RegionDetailsView({
   const [isScanningBiomes, setIsScanningBiomes] = useState(false)
   const [showBiomeBreakdown, setShowBiomeBreakdown] = useState(false)
   const [showAllBiomes, setShowAllBiomes] = useState(false)
+  const [isToolsExpanded, setIsToolsExpanded] = useState(true)
   const isEditing = editMode.isEditing && editMode.editingRegionId === selectedRegion.id
   const modeIsActive = isEditing || editMode.isMovingRegion || editMode.isSplittingRegion
   const editingDisabled = isolatedRegionId === selectedRegion.id
@@ -263,6 +264,26 @@ export function RegionDetailsView({
         </div>
       )}
 
+      <div>
+        <button
+          onClick={() => setIsToolsExpanded(!isToolsExpanded)}
+          className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+        >
+          <span className="flex items-center gap-2">
+            <Wrench className="w-4 h-4" />
+            Tools
+          </span>
+          <svg
+            className={`w-4 h-4 transition-transform duration-200 ${isToolsExpanded ? 'rotate-90' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        {isToolsExpanded && (
+        <div className="space-y-4">
       <div>
         <h4 className="text-sm font-medium text-gray-300 mb-2">Brushes</h4>
         <div className="grid grid-cols-2 gap-2">
@@ -474,10 +495,13 @@ export function RegionDetailsView({
           <span>200%</span>
         </div>
       </div>
+        </div>
+        )}
+      </div>
 
       {showAdvanced && (
-        <div>
-          <h4 className="text-sm font-medium text-gray-300 mb-2">Biomes</h4>
+        <div className="pt-4 border-t border-gunmetal">
+          <h3 className="text-lg font-semibold text-white mb-2">Biomes</h3>
           <Button
             variant="secondary"
             onClick={() => {
