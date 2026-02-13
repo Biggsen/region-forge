@@ -10,7 +10,6 @@ export interface ImageDetails {
 
 export interface ExportSettings {
   includeVillages: boolean
-  randomMobSpawn: boolean
   includeHeartRegions: boolean
   includeSpawnRegion: boolean
   useModernWorldHeight: boolean

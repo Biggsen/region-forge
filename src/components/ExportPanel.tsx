@@ -8,7 +8,6 @@ import { Button } from './Button'
 export function ExportPanel() {
   const { regions, spawn, seedInfo, worldName, toast } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
-  const [randomMobSpawn, setRandomMobSpawn] = useState(false)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
   const [useModernWorldHeight, setUseModernWorldHeight] = useState(true)
@@ -23,7 +22,6 @@ export function ExportPanel() {
     const savedSettings = loadExportSettings()
     if (savedSettings) {
       setIncludeVillages(savedSettings.includeVillages)
-      setRandomMobSpawn(savedSettings.randomMobSpawn)
       setIncludeHeartRegions(savedSettings.includeHeartRegions)
       setIncludeSpawnRegion(savedSettings.includeSpawnRegion)
       setUseModernWorldHeight(savedSettings.useModernWorldHeight)
@@ -39,7 +37,6 @@ export function ExportPanel() {
     const savedSettings = loadExportSettings()
     if (savedSettings) {
       setIncludeVillages(savedSettings.includeVillages)
-      setRandomMobSpawn(savedSettings.randomMobSpawn)
       setIncludeHeartRegions(savedSettings.includeHeartRegions)
       setIncludeSpawnRegion(savedSettings.includeSpawnRegion)
       setUseModernWorldHeight(savedSettings.useModernWorldHeight)
@@ -77,7 +74,6 @@ export function ExportPanel() {
     if (isInitialized) {
       saveExportSettings({
         includeVillages,
-        randomMobSpawn,
         includeHeartRegions,
         includeSpawnRegion,
         useModernWorldHeight,
@@ -89,7 +85,6 @@ export function ExportPanel() {
   }, [
     isInitialized,
     includeVillages,
-    randomMobSpawn,
     includeHeartRegions,
     includeSpawnRegion,
     useModernWorldHeight,
@@ -109,7 +104,7 @@ export function ExportPanel() {
       : 'overworld'
     // Force spawn region to false for nether since it doesn't exist
     const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
-    exportRegionsYAML(regions.regions, includeVillages, randomMobSpawn, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
+    exportRegionsYAML(regions.regions, includeVillages, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
   const handleExportRegionsMeta = () => {
@@ -334,19 +329,6 @@ export function ExportPanel() {
                 />
                 <label htmlFor="includeHeartRegions" className="ml-2 text-white">
                   Include Heart of Regions (7x7 centered subregions)
-                </label>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="randomMobSpawn"
-                  checked={randomMobSpawn}
-                  onChange={(e) => setRandomMobSpawn(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-700 border-gunmetal rounded focus:ring-blue-500 focus:ring-2"
-                />
-                <label htmlFor="randomMobSpawn" className="ml-2 text-white">
-                  Random mob spawn
                 </label>
               </div>
               

@@ -133,7 +133,6 @@ function exportFilenamePrefix(worldName: string, dimension: 'overworld' | 'nethe
 export function exportRegionsYAML(
   regions: Region[], 
   includeVillages: boolean = true, 
-  randomMobSpawn: boolean = false, 
   includeHeartRegions: boolean = true,
   includeSpawnRegion: boolean = false,
   spawnCoordinates?: { x: number; z: number; radius?: number } | null,
@@ -167,7 +166,7 @@ export function exportRegionsYAML(
   }
   
   enabledRegions.forEach((region, index) => {
-    yamlContent += generateRegionYAML(region, includeVillages, randomMobSpawn, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
+    yamlContent += generateRegionYAML(region, includeVillages, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
     // Add a blank line between regions (except after the last one)
     if (index < enabledRegions.length - 1) {
       yamlContent += '\n'

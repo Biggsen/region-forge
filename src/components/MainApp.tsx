@@ -9,7 +9,7 @@ import { ImageImportHandler } from './ImageImportHandler'
 import { MapLoaderControls } from './MapLoaderControls'
 import { ToastContainer } from './ToastContainer'
 import { exportCompleteMap, importMapData, loadImageFromSrc, loadImageFromBase64 } from '../utils/exportUtils'
-import { saveActiveTab, loadActiveTab, loadImageDetails, saveImageDetails, saveExportSettings, ImageDetails } from '../utils/persistenceUtils'
+import { saveActiveTab, loadActiveTab, loadImageDetails, saveImageDetails, saveExportSettings, ImageDetails, ExportSettings } from '../utils/persistenceUtils'
 import { validateImageDimensions } from '../utils/imageValidation'
 import { Map, Edit3, Download, FolderOpen, Save, Settings } from 'lucide-react'
 import { ImportConfirmationModal } from './ImportConfirmationModal'
@@ -202,7 +202,8 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
 
       // Restore export settings if they exist in import data
       if (importData.exportSettings) {
-        saveExportSettings(importData.exportSettings)
+        const { randomMobSpawn: _rm, ...sanitized } = importData.exportSettings as ExportSettings & { randomMobSpawn?: boolean }
+        saveExportSettings(sanitized as ExportSettings)
         // Dispatch custom event to notify ExportPanel to reload settings
         window.dispatchEvent(new Event('exportSettingsUpdated'))
       }

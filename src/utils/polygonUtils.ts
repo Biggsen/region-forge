@@ -19,27 +19,7 @@ function getChallengeLevelColor(challengeLevel: ChallengeLevel): string {
   }
 }
 
-// Mob list for random spawn generation
-const MOB_LIST = [
-  'ZOMBIE', 'ZOMBIE_VILLAGER', 'HUSK', 'DROWNED', 'SKELETON', 'STRAY', 'BOGGED', 
-  'CREEPER', 'SPIDER', 'CAVE_SPIDER', 'ENDERMAN', 'WITCH', 'SLIME', 'PHANTOM', 
-  'SILVERFISH', 'PILLAGER', 'VINDICATOR', 'EVOKER', 'VEX', 'RAVAGER', 'ILLUSIONER', 
-  'GUARDIAN', 'ELDER_GUARDIAN', 'DOLPHIN', 'SQUID', 'GLOW_SQUID', 'COD', 'SALMON', 
-  'TROPICAL_FISH', 'PUFFERFISH', 'AXOLOTL', 'TURTLE', 'VILLAGER', 'WANDERING_TRADER', 
-  'IRON_GOLEM', 'SNOW_GOLEM', 'ALLAY', 'SHEEP', 'COW', 'MUSHROOM_COW', 'PIG', 
-  'CHICKEN', 'RABBIT', 'HORSE', 'DONKEY', 'MULE', 'LLAMA', 'TRADER_LLAMA', 'CAMEL', 
-  'CAT', 'OCELOT', 'WOLF', 'FOX', 'PANDA', 'POLAR_BEAR', 'GOAT', 'SNIFFER', 
-  'ARMADILLO', 'PARROT', 'BAT', 'BEE', 'FROG', 'TADPOLE'
-]
-
-// Generate a random list of mobs for deny-spawn
-function generateRandomMobList(): string[] {
-  const count = Math.floor(Math.random() * 8) + 1 // 1 to 8 mobs
-  const shuffled = [...MOB_LIST].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, count)
-}
-
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, randomMobSpawn: boolean = false, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -65,12 +45,7 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
       }
       const hasChallenge = isMainRegion && region.challengeLevel && includeChallengeLevelSubheading
       const greetingStr = hasChallenge ? `"${greetingMsg.replace(/"/g, '\\"')}"` : greetingMsg
-      if (randomMobSpawn) {
-        const randomMobs = generateRandomMobList()
-        flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
-      } else {
-        flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow`
-      }
+      flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow`
     } else if (isMainRegion && region.challengeLevel) {
       // Main regions with challenge levels get the new multi-line format
       // Large: challenge on greeting-title line 2 when option on. Small: greeting-title for title; greeting: (chat) for challenge when option on. Never in farewell/farewell-title.
@@ -101,28 +76,14 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
       const smallGreetingChat = (includeChallengeLevelSubheading && greetingSize === 'small')
         ? `\n    greeting: ${getChallengeLevelColor(region.challengeLevel)}`
         : ''
-      if (randomMobSpawn) {
-        const randomMobs = generateRandomMobList()
-        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow\n    deny-spawn: [${randomMobs.join(',')}]`
-      } else {
-        flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
-      }
+      flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
     } else {
       // Other regions (spawn, hearts, villages) keep the old format (unless chat is selected)
       flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow}`
-      if (randomMobSpawn) {
-        const randomMobs = generateRandomMobList()
-        flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow, deny-spawn: [${randomMobs.join(',')}]}`
-        }
-      }
+    }
   } else {
     // No greetings/farewells - only passthrough flag
-    if (randomMobSpawn) {
-      const randomMobs = generateRandomMobList()
-      flags = `{passthrough: allow, deny-spawn: [${randomMobs.join(',')}]}`
-    } else {
-      flags = `{passthrough: allow}`
-    }
+    flags = `{passthrough: allow}`
   }
 
   // Convert region name to lowercase with underscores (same format for all world types)
