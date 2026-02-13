@@ -643,6 +643,7 @@ export function RegionDetailsView({
         }}
         onCancel={() => setShowDeleteModal(false)}
       />
+
     </div>
   )
 }

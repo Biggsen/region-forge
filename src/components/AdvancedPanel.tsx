@@ -6,8 +6,9 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText } from 'lucide-react'
 import { ClearDataModal } from './ClearDataModal'
+import { RegionDescriptionModal } from './RegionDescriptionModal'
 
 export function AdvancedPanel() {
   const { regions, seedInfo, mapCanvas, toast, worldName, spawn } = useAppContext()
@@ -22,10 +23,12 @@ export function AdvancedPanel() {
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
+  const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false)
 
   const handleRandomizeChallengeLevels = () => {
     regions.randomizeChallengeLevels()
@@ -413,6 +416,73 @@ export function AdvancedPanel() {
           )}
         </div>
 
+        {/* Region Description */}
+        <div>
+          <button
+            onClick={() => setIsRegionDescriptionExpanded(!isRegionDescriptionExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Region Description
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isRegionDescriptionExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isRegionDescriptionExpanded && (
+            <div className="ml-4 space-y-4">
+              {regions.selectedRegionId ? (
+                <div className="space-y-2">
+                  {(() => {
+                    const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
+                    if (!selectedRegion) return null
+                    return (
+                      <>
+                        {selectedRegion.description ? (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Region Description</label>
+                            <p className="text-sm text-white px-3 py-2 bg-black rounded border border-gunmetal whitespace-pre-wrap">
+                              {selectedRegion.description}
+                            </p>
+                          </div>
+                        ) : null}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            onClick={() => setShowDescriptionModal(true)}
+                            leftIcon={<FileText size={16} />}
+                            className="flex-1 justify-start"
+                          >
+                            {selectedRegion.description ? 'Edit Region Description' : 'Add Region Description'}
+                          </Button>
+                          {selectedRegion.description && (
+                            <Button
+                              variant="secondary-outline"
+                              onClick={() => regions.updateRegion(regions.selectedRegionId!, { description: undefined })}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-400 pb-3 bg-eerie-back/50 rounded-md">
+                  No region selected
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Region Hearts */}
         <div>
           <button
@@ -623,6 +693,15 @@ export function AdvancedPanel() {
         onConfirm={handleConfirmClearData}
         onCancel={() => setShowClearDataModal(false)}
       />
+
+      {regions.selectedRegionId && (
+        <RegionDescriptionModal
+          isOpen={showDescriptionModal}
+          description={regions.regions.find(r => r.id === regions.selectedRegionId)?.description ?? ''}
+          onSave={(description) => regions.updateRegion(regions.selectedRegionId!, { description: description || undefined })}
+          onClose={() => setShowDescriptionModal(false)}
+        />
+      )}
     </div>
   )
 }

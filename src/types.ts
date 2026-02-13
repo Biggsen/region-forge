@@ -3,6 +3,7 @@ export type ChallengeLevel = 'easy' | 'normal' | 'hard' | 'severe' | 'deadly'
 export type Region = {
   id: string
   name: string
+  description?: string
   points: { x: number; z: number }[]
   originalPoints?: { x: number; z: number }[]
   scaleFactor?: number
