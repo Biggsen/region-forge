@@ -7,8 +7,9 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
+import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
@@ -29,6 +30,7 @@ export function AdvancedPanel() {
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
   const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
+  const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(false)
   const [showAllBiomes, setShowAllBiomes] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
@@ -37,6 +39,7 @@ export function AdvancedPanel() {
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [editCategory, setEditCategory] = useState('')
   const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
+  const [editThemePairs, setEditThemePairs] = useState<{ a: string; b: string }[]>([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
 
   const handleRandomizeChallengeLevels = () => {
     regions.randomizeChallengeLevels()
@@ -153,6 +156,8 @@ export function AdvancedPanel() {
   }, [selectedRegion, biomeImage, originOffset])
 
   const allItems = useMemo(() => getAllItems(), [])
+  const themeAValues = useMemo(() => getAValues(), [])
+  const themeBValues = useMemo(() => getBValues(), [])
   const selectedRegionData = regions.selectedRegionId
     ? regions.regions.find(r => r.id === regions.selectedRegionId)
     : null
@@ -165,9 +170,16 @@ export function AdvancedPanel() {
         selectedRegionData.minecraftItems?.[1] ?? null,
         selectedRegionData.minecraftItems?.[2] ?? null
       ])
+      const theme = selectedRegionData.regionTheme ?? []
+      setEditThemePairs([
+        theme[0] ?? { a: '', b: '' },
+        theme[1] ?? { a: '', b: '' },
+        theme[2] ?? { a: '', b: '' }
+      ])
     } else {
       setEditCategory('')
       setEditItems([null, null, null])
+      setEditThemePairs([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
     }
   }, [regions.selectedRegionId])
 
@@ -189,6 +201,36 @@ export function AdvancedPanel() {
     setEditCategory(category)
     setEditItems([items[0] ?? null, items[1] ?? null, items[2] ?? null])
     toast.showToast(`Assigned ${category}: ${items.map(i => i.name).join(', ')}`, 'success')
+  }
+
+  const handleSaveRegionTheme = () => {
+    if (!regions.selectedRegionId) return
+    const pairs = editThemePairs.filter(p => p.a.trim() || p.b.trim()).map(p => ({ a: p.a.trim(), b: p.b.trim() }))
+    regions.updateRegion(regions.selectedRegionId, {
+      regionTheme: pairs.length > 0 ? pairs : undefined
+    })
+    toast.showToast('Region theme saved', 'success')
+  }
+
+  const handleAssignThemeToSelected = () => {
+    if (!regions.selectedRegionId) return
+    const pairs = pickRandomThemePairs()
+    regions.updateRegion(regions.selectedRegionId, { regionTheme: pairs })
+    setEditThemePairs([
+      pairs[0] ?? { a: '', b: '' },
+      pairs[1] ?? { a: '', b: '' },
+      pairs[2] ?? { a: '', b: '' }
+    ])
+    toast.showToast(`Assigned: ${pairs.map(p => `${p.a} + ${p.b}`).join('; ')}`, 'success')
+  }
+
+  const handleAssignThemeToAll = () => {
+    const targets = regions.regions.filter(r => !r.disabled && r.points.length >= 3)
+    targets.forEach(region => {
+      const pairs = pickRandomThemePairs()
+      regions.updateRegion(region.id, { regionTheme: pairs })
+    })
+    toast.showToast(`Assigned theme to ${targets.length} region(s)`, 'success')
   }
 
   const handleAssignMinecraftToAll = () => {
@@ -710,6 +752,114 @@ export function AdvancedPanel() {
                   disabled={availableRegions.length === 0}
                   className="w-full"
                   leftIcon={<Sparkles size={16} />}
+                >
+                  Assign random to all regions
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Region Theme */}
+        <div>
+          <button
+            onClick={() => setIsRegionThemeExpanded(!isRegionThemeExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Region Theme
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isRegionThemeExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isRegionThemeExpanded && (
+            <div className="ml-4 space-y-4">
+              <div className="space-y-2">
+                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Storyteller&apos;s Automaton</h5>
+                <p className="text-sm text-gray-300">
+                  Assign 3 theme pairs (A + B) to regions for narrative flavor. Roll on the table or edit manually.
+                </p>
+                {regions.selectedRegionId ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-2">Theme pairs (up to 3)</label>
+                      <div className="space-y-2">
+                        {[0, 1, 2].map(i => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <select
+                              value={editThemePairs[i].a}
+                              onChange={e => {
+                                const next = [...editThemePairs]
+                                next[i] = { ...next[i], a: e.target.value }
+                                setEditThemePairs(next)
+                              }}
+                              className="flex-1 px-3 py-2 rounded border border-input-border bg-input-bg text-input-text text-sm focus:border-lapis-lazuli focus:outline-none"
+                            >
+                              <option value="">— A —</option>
+                              {themeAValues.map(v => (
+                                <option key={v} value={v}>{v}</option>
+                              ))}
+                            </select>
+                            <span className="text-gray-500">+</span>
+                            <select
+                              value={editThemePairs[i].b}
+                              onChange={e => {
+                                const next = [...editThemePairs]
+                                next[i] = { ...next[i], b: e.target.value }
+                                setEditThemePairs(next)
+                              }}
+                              className="flex-1 px-3 py-2 rounded border border-input-border bg-input-bg text-input-text text-sm focus:border-lapis-lazuli focus:outline-none"
+                            >
+                              <option value="">— B —</option>
+                              {themeBValues.map(v => (
+                                <option key={v} value={v}>{v}</option>
+                              ))}
+                            </select>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="primary" onClick={handleSaveRegionTheme}>
+                        Save
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={handleAssignThemeToSelected}
+                        leftIcon={<BookOpen size={16} />}
+                      >
+                        Random
+                      </Button>
+                      <Button
+                        variant="secondary-outline"
+                        onClick={() => {
+                          regions.updateRegion(regions.selectedRegionId!, { regionTheme: undefined })
+                          setEditThemePairs([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
+                        }}
+                        disabled={!editThemePairs.some(p => p.a || p.b)}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                    Select a region to assign theme pairs, or assign to all below.
+                  </div>
+                )}
+                <Button
+                  variant="secondary"
+                  onClick={handleAssignThemeToAll}
+                  disabled={availableRegions.length === 0}
+                  className="w-full"
+                  leftIcon={<BookOpen size={16} />}
                 >
                   Assign random to all regions
                 </Button>

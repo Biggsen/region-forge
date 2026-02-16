@@ -43,6 +43,7 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `biomes` | array  | No       | Biome breakdown for this region (from map scan). See §3.6. Only present for `kind: region` when a biome map is available. |
 | `category` | string | No     | Minecraft item category (e.g. `ores`, `stone`, `wood`, `food`). Used for economy plugins or discovery rewards. VZ price guide categories. |
 | `items`  | array  | No       | Up to 3 Minecraft items for this region. See §3.7. Used for economy plugins or discovery rewards. VZ price guide item IDs. |
+| `theme`  | array  | No       | Up to 3 theme pairs (A + B) for narrative flavor. See §3.8. Storyteller's Automaton table. |
 
 Unknown keys on a region object are ignored.
 
@@ -104,6 +105,15 @@ Up to 3 Minecraft items associated with this region. Region Forge populates thes
 |--------|--------|----------|-------------|
 | `id`   | string | **Yes**  | Minecraft item ID (e.g. `diamond`, `acacia_planks`). |
 | `name` | string | **Yes**  | Display name (e.g. `diamond`, `acacia planks`). |
+
+### 3.8 `theme` (array, optional)
+
+Up to 3 theme pairs (A + B) from the Storyteller's Automaton table. Region Forge populates these for narrative flavor; mc-plugin-manager may use them for region descriptions, quest hooks, or discovery text.
+
+| Field  | Type   | Required | Description |
+|--------|--------|----------|-------------|
+| `a`    | string | **Yes**  | First word (e.g. `Return`, `Seek`, `Hidden`). |
+| `b`    | string | **Yes**  | Second word (e.g. `Death`, `Truth`, `Conquest`). |
 
 ---
 
@@ -241,6 +251,11 @@ regions:
         name: gold ingot
       - id: coal
         name: coal
+    theme:
+      - a: Seek
+        b: Truth
+      - a: Hidden
+        b: Conquest
     biomes:
       - biome: plains
         percentage: 45
@@ -319,6 +334,7 @@ regions:
 | 1      | Initial schema: regions, onboarding, spawnCenter, levelledMobs. |
 | 1.1    | Added optional `biomes` array on region objects (§3.6): biome breakdown from map scan for `kind: region`. |
 | 1.2    | Added optional `category` and `items` on region objects (§3.7): Minecraft category and up to 3 items from VZ price guide. |
+| 1.3    | Added optional `theme` on region objects (§3.8): up to 3 theme pairs (A + B) from Storyteller's Automaton table. |
 
 ---
 

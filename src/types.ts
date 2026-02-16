@@ -14,6 +14,7 @@ export type Region = {
   disabled?: boolean
   minecraftCategory?: string
   minecraftItems?: { id: string; name: string }[]
+  regionTheme?: { a: string; b: string }[]
 }
 
 export type Subregion = {
