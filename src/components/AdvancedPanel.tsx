@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
@@ -7,7 +7,9 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles } from 'lucide-react'
+import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
+import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
@@ -26,12 +28,15 @@ export function AdvancedPanel() {
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
+  const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
   const [showAllBiomes, setShowAllBiomes] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
+  const [editCategory, setEditCategory] = useState('')
+  const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
 
   const handleRandomizeChallengeLevels = () => {
     regions.randomizeChallengeLevels()
@@ -146,6 +151,54 @@ export function AdvancedPanel() {
     if (!selectedRegion || !biomeImage || selectedRegion.points.length < 3) return null
     return scanBiomes(selectedRegion, biomeImage, originOffset)
   }, [selectedRegion, biomeImage, originOffset])
+
+  const allItems = useMemo(() => getAllItems(), [])
+  const selectedRegionData = regions.selectedRegionId
+    ? regions.regions.find(r => r.id === regions.selectedRegionId)
+    : null
+
+  useEffect(() => {
+    if (selectedRegionData) {
+      setEditCategory(selectedRegionData.minecraftCategory ?? '')
+      setEditItems([
+        selectedRegionData.minecraftItems?.[0] ?? null,
+        selectedRegionData.minecraftItems?.[1] ?? null,
+        selectedRegionData.minecraftItems?.[2] ?? null
+      ])
+    } else {
+      setEditCategory('')
+      setEditItems([null, null, null])
+    }
+  }, [regions.selectedRegionId])
+
+  const handleSaveMinecraftData = () => {
+    if (!regions.selectedRegionId) return
+    const items = editItems.filter((i): i is { id: string; name: string } => i != null)
+    const category = editCategory.trim() || undefined
+    regions.updateRegion(regions.selectedRegionId, {
+      minecraftCategory: category,
+      minecraftItems: items.length > 0 ? items : undefined
+    })
+    toast.showToast('Minecraft data saved', 'success')
+  }
+
+  const handleAssignMinecraftToSelected = () => {
+    if (!regions.selectedRegionId) return
+    const { category, items } = pickRandomMinecraftData()
+    regions.updateRegion(regions.selectedRegionId, { minecraftCategory: category, minecraftItems: items })
+    setEditCategory(category)
+    setEditItems([items[0] ?? null, items[1] ?? null, items[2] ?? null])
+    toast.showToast(`Assigned ${category}: ${items.map(i => i.name).join(', ')}`, 'success')
+  }
+
+  const handleAssignMinecraftToAll = () => {
+    const targets = regions.regions.filter(r => !r.disabled && r.points.length >= 3)
+    targets.forEach(region => {
+      const { category, items } = pickRandomMinecraftData()
+      regions.updateRegion(region.id, { minecraftCategory: category, minecraftItems: items })
+    })
+    toast.showToast(`Assigned Minecraft data to ${targets.length} region(s)`, 'success')
+  }
 
   const handleClearData = () => {
     setShowClearDataModal(true)
@@ -557,6 +610,110 @@ export function AdvancedPanel() {
                   No region selected
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Minecraft Data */}
+        <div>
+          <button
+            onClick={() => setIsMinecraftDataExpanded(!isMinecraftDataExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Minecraft Data
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isMinecraftDataExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isMinecraftDataExpanded && (
+            <div className="ml-4 space-y-4">
+              <div className="space-y-2">
+                <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">VZ Price Guide Items</h5>
+                <p className="text-sm text-gray-300">
+                  Assign a random category and 3 items to regions for economy plugins or discovery rewards.
+                </p>
+                {regions.selectedRegionId ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Category</label>
+                      <select
+                        value={editCategory}
+                        onChange={e => setEditCategory(e.target.value)}
+                        className="w-full px-3 py-2 rounded border border-input-border bg-input-bg text-input-text text-sm focus:border-lapis-lazuli focus:outline-none"
+                      >
+                        <option value="">— None —</option>
+                        {MINECRAFT_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>
+                            {cat.replace(/_/g, ' ')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Items (up to 3)</label>
+                      <div className="space-y-2">
+                        {[0, 1, 2].map(i => (
+                          <MinecraftItemPicker
+                            key={i}
+                            value={editItems[i]}
+                            options={allItems}
+                            onChange={item => {
+                              const next = [...editItems]
+                              next[i] = item
+                              setEditItems(next)
+                            }}
+                            placeholder="Select item..."
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="primary" onClick={handleSaveMinecraftData}>
+                        Save
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={handleAssignMinecraftToSelected}
+                        leftIcon={<Sparkles size={16} />}
+                      >
+                        Random
+                      </Button>
+                      <Button
+                        variant="secondary-outline"
+                        onClick={() => {
+                          regions.updateRegion(regions.selectedRegionId!, { minecraftCategory: undefined, minecraftItems: undefined })
+                          setEditCategory('')
+                          setEditItems([null, null, null])
+                        }}
+                        disabled={!editCategory && !editItems.some(Boolean)}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                    Select a region to assign Minecraft data, or assign to all below.
+                  </div>
+                )}
+                <Button
+                  variant="secondary"
+                  onClick={handleAssignMinecraftToAll}
+                  disabled={availableRegions.length === 0}
+                  className="w-full"
+                  leftIcon={<Sparkles size={16} />}
+                >
+                  Assign random to all regions
+                </Button>
+              </div>
             </div>
           )}
         </div>

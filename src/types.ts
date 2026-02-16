@@ -12,6 +12,8 @@ export type Region = {
   challengeLevel?: ChallengeLevel
   hasSpawn?: boolean
   disabled?: boolean
+  minecraftCategory?: string
+  minecraftItems?: { id: string; name: string }[]
 }
 
 export type Subregion = {

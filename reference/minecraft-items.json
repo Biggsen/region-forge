@@ -1,0 +1,8330 @@
+{
+  "music_disc_11": {
+    "name": "11 disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "music_disc_13": {
+    "name": "13 disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "music_disc_5": {
+    "name": "5 disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "disc_fragment_5": {
+    "name": "5 disc fragment",
+    "category": "discs",
+    "stack": 64
+  },
+  "acacia_boat": {
+    "name": "acacia boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "acacia_chest_boat": {
+    "name": "acacia boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "acacia_button": {
+    "name": "acacia button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "acacia_door": {
+    "name": "acacia door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "acacia_fence": {
+    "name": "acacia fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "acacia_fence_gate": {
+    "name": "acacia fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "acacia_hanging_sign": {
+    "name": "acacia hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "acacia_leaves": {
+    "name": "acacia leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "acacia_log": {
+    "name": "acacia log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "acacia_planks": {
+    "name": "acacia planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "acacia_pressure_plate": {
+    "name": "acacia pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "acacia_sapling": {
+    "name": "acacia sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "acacia_shelf": {
+    "name": "acacia shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "acacia_sign": {
+    "name": "acacia sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "acacia_slab": {
+    "name": "acacia slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "acacia_stairs": {
+    "name": "acacia stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "acacia_trapdoor": {
+    "name": "acacia trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "acacia_wood": {
+    "name": "acacia wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "activator_rail": {
+    "name": "activator rail",
+    "category": "transport",
+    "stack": 64
+  },
+  "allium": {
+    "name": "allium",
+    "category": "plants",
+    "stack": 64
+  },
+  "amethyst_cluster": {
+    "name": "amethyst cluster",
+    "category": "ores",
+    "stack": 64
+  },
+  "amethyst_shard": {
+    "name": "amethyst shard",
+    "category": "ores",
+    "stack": 64
+  },
+  "ancient_debris": {
+    "name": "ancient debris",
+    "category": "ores",
+    "stack": 64
+  },
+  "andesite": {
+    "name": "andesite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "andesite_slab": {
+    "name": "andesite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "andesite_stairs": {
+    "name": "andesite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "andesite_wall": {
+    "name": "andesite wall",
+    "category": "stone",
+    "stack": "64"
+  },
+  "angler_pottery_sherd": {
+    "name": "angler pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "anvil": {
+    "name": "anvil",
+    "category": "utility",
+    "stack": 64
+  },
+  "apple": {
+    "name": "apple",
+    "category": "food",
+    "stack": "64"
+  },
+  "archer_pottery_sherd": {
+    "name": "archer pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "armadillo_scute": {
+    "name": "armadillo scute",
+    "category": "drops",
+    "stack": 64
+  },
+  "armor_stand": {
+    "name": "armor stand",
+    "category": "armor",
+    "stack": 16
+  },
+  "arms_up_pottery_sherd": {
+    "name": "arms up pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "arrow": {
+    "name": "arrow",
+    "category": "weapons",
+    "stack": 64
+  },
+  "arrow_of_fire_resistance_1": {
+    "name": "arrow of fire resistance",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_fire_resistance_extended": {
+    "name": "arrow of fire resistance (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_harming_1": {
+    "name": "arrow of harming",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_harming_2": {
+    "name": "arrow of harming II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_healing_1": {
+    "name": "arrow of healing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_healing_2": {
+    "name": "arrow of healing II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_infestation_1": {
+    "name": "arrow of infestation",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_invisibility_1": {
+    "name": "arrow of invisibility",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_invisibility_extended": {
+    "name": "arrow of invisibility (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_leaping_1": {
+    "name": "arrow of leaping",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_leaping_extended": {
+    "name": "arrow of leaping (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_leaping_2": {
+    "name": "arrow of leaping II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_night_vision_1": {
+    "name": "arrow of night vision",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_night_vision_extended": {
+    "name": "arrow of night vision (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_oozing_1": {
+    "name": "arrow of oozing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_poison_1": {
+    "name": "arrow of poison",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_poison_extended": {
+    "name": "arrow of poison (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_poison_2": {
+    "name": "arrow of poison II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_regeneration_1": {
+    "name": "arrow of regeneration",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_regeneration_extended": {
+    "name": "arrow of regeneration (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_regeneration_2": {
+    "name": "arrow of regeneration II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_slow_falling_1": {
+    "name": "arrow of slow falling",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_slow_falling_extended": {
+    "name": "arrow of slow falling (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_slowness_1": {
+    "name": "arrow of slowness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_slowness_extended": {
+    "name": "arrow of slowness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_slowness_2": {
+    "name": "arrow of slowness IV",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_strength_1": {
+    "name": "arrow of strength",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_strength_extended": {
+    "name": "arrow of strength (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_strength_2": {
+    "name": "arrow of strength II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_swiftness_1": {
+    "name": "arrow of swiftness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_swiftness_extended": {
+    "name": "arrow of swiftness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_swiftness_2": {
+    "name": "arrow of swiftness II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_the_turtle_master_1": {
+    "name": "arrow of the turtle master",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_the_turtle_master_extended": {
+    "name": "arrow of the turtle master (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_the_turtle_master_2": {
+    "name": "arrow of the turtle master II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_water_breathing_1": {
+    "name": "arrow of water breathing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_water_breathing_extended": {
+    "name": "arrow of water breathing (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_weakness_1": {
+    "name": "arrow of weakness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_weakness_extended": {
+    "name": "arrow of weakness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_weaving_1": {
+    "name": "arrow of weaving",
+    "category": "brewing",
+    "stack": 1
+  },
+  "arrow_of_wind_charging_1": {
+    "name": "arrow of wind charging",
+    "category": "brewing",
+    "stack": 1
+  },
+  "awkward_lingering_potion": {
+    "name": "awkward lingering potion",
+    "category": "brewing",
+    "stack": 1
+  },
+  "awkward_potion": {
+    "name": "awkward potion",
+    "category": "brewing",
+    "stack": 1
+  },
+  "awkward_splash_potion": {
+    "name": "awkward splash potion",
+    "category": "brewing",
+    "stack": 1
+  },
+  "azalea": {
+    "name": "azalea",
+    "category": "plants",
+    "stack": 64
+  },
+  "azalea_leaves": {
+    "name": "azalea leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "azure_bluet": {
+    "name": "azure bluet",
+    "category": "plants",
+    "stack": 64
+  },
+  "baked_potato": {
+    "name": "baked potato",
+    "category": "food",
+    "stack": "64"
+  },
+  "bamboo": {
+    "name": "bamboo",
+    "category": "plants",
+    "stack": 64
+  },
+  "bamboo_button": {
+    "name": "bamboo button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "bamboo_door": {
+    "name": "bamboo door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "bamboo_fence": {
+    "name": "bamboo fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "bamboo_fence_gate": {
+    "name": "bamboo fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "bamboo_hanging_sign": {
+    "name": "bamboo hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "bamboo_mosaic": {
+    "name": "bamboo mosaic",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_mosaic_slab": {
+    "name": "bamboo mosaic slab",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_mosaic_stairs": {
+    "name": "bamboo mosaic stairs",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_planks": {
+    "name": "bamboo planks",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_pressure_plate": {
+    "name": "bamboo pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "bamboo_raft": {
+    "name": "bamboo raft",
+    "category": "transport",
+    "stack": 1
+  },
+  "bamboo_chest_raft": {
+    "name": "bamboo raft with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "bamboo_shelf": {
+    "name": "bamboo shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "bamboo_sign": {
+    "name": "bamboo sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "bamboo_slab": {
+    "name": "bamboo slab",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_stairs": {
+    "name": "bamboo stairs",
+    "category": "wood",
+    "stack": 64
+  },
+  "bamboo_trapdoor": {
+    "name": "bamboo trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "globe_banner_pattern": {
+    "name": "banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "barrel": {
+    "name": "barrel",
+    "category": "utility",
+    "stack": "64"
+  },
+  "basalt": {
+    "name": "basalt",
+    "category": "nether",
+    "stack": 64
+  },
+  "beacon": {
+    "name": "beacon",
+    "category": "utility",
+    "stack": 64
+  },
+  "bee_nest": {
+    "name": "bee nest",
+    "category": "drops",
+    "stack": 64
+  },
+  "beehive": {
+    "name": "beehive",
+    "category": "utility",
+    "stack": 64
+  },
+  "beetroot": {
+    "name": "beetroot",
+    "category": "food",
+    "stack": "64"
+  },
+  "beetroot_seeds": {
+    "name": "beetroot seeds",
+    "category": "plants",
+    "stack": 64
+  },
+  "beetroot_soup": {
+    "name": "beetroot soup",
+    "category": "food",
+    "stack": 1
+  },
+  "bell": {
+    "name": "bell",
+    "category": "utility",
+    "stack": 64
+  },
+  "big_dripleaf": {
+    "name": "big dripleaf",
+    "category": "plants",
+    "stack": 64
+  },
+  "birch_boat": {
+    "name": "birch boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "birch_chest_boat": {
+    "name": "birch boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "birch_button": {
+    "name": "birch button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "birch_door": {
+    "name": "birch door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "birch_fence": {
+    "name": "birch fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "birch_fence_gate": {
+    "name": "birch fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "birch_hanging_sign": {
+    "name": "birch hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "birch_leaves": {
+    "name": "birch leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "birch_log": {
+    "name": "birch log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "birch_planks": {
+    "name": "birch planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "birch_pressure_plate": {
+    "name": "birch pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "birch_sapling": {
+    "name": "birch sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "birch_shelf": {
+    "name": "birch shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "birch_sign": {
+    "name": "birch sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "birch_slab": {
+    "name": "birch slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "birch_stairs": {
+    "name": "birch stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "birch_trapdoor": {
+    "name": "birch trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "birch_wood": {
+    "name": "birch wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "black_banner": {
+    "name": "black banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "black_bed": {
+    "name": "black bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "black_bundle": {
+    "name": "black bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "black_candle": {
+    "name": "black candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_carpet": {
+    "name": "black carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_concrete": {
+    "name": "black concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_concrete_powder": {
+    "name": "black concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_dye": {
+    "name": "black dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_glazed_terracotta": {
+    "name": "black glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_harness": {
+    "name": "black harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "black_shulker_box": {
+    "name": "black shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "black_stained_glass": {
+    "name": "black stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_stained_glass_pane": {
+    "name": "black stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_terracotta": {
+    "name": "black terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "black_wool": {
+    "name": "black wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blackstone": {
+    "name": "blackstone",
+    "category": "nether",
+    "stack": 64
+  },
+  "blackstone_slab": {
+    "name": "blackstone slab",
+    "category": "nether",
+    "stack": 64
+  },
+  "blackstone_stairs": {
+    "name": "blackstone stairs",
+    "category": "nether",
+    "stack": 64
+  },
+  "blackstone_wall": {
+    "name": "blackstone wall",
+    "category": "nether",
+    "stack": 64
+  },
+  "blade_pottery_sherd": {
+    "name": "blade pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "blast_furnace": {
+    "name": "blast furnace",
+    "category": "utility",
+    "stack": "64"
+  },
+  "blaze_powder": {
+    "name": "blaze powder",
+    "category": "drops",
+    "stack": 64
+  },
+  "blaze_rod": {
+    "name": "blaze rod",
+    "category": "drops",
+    "stack": "64"
+  },
+  "amethyst_block": {
+    "name": "block of amethyst",
+    "category": "ores",
+    "stack": 64
+  },
+  "bamboo_block": {
+    "name": "block of bamboo",
+    "category": "wood",
+    "stack": 64
+  },
+  "coal_block": {
+    "name": "block of coal",
+    "category": "ores",
+    "stack": "64"
+  },
+  "copper_block": {
+    "name": "block of copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "diamond_block": {
+    "name": "block of diamond",
+    "category": "ores",
+    "stack": "64"
+  },
+  "emerald_block": {
+    "name": "block of emerald",
+    "category": "ores",
+    "stack": "64"
+  },
+  "gold_block": {
+    "name": "block of gold",
+    "category": "ores",
+    "stack": "64"
+  },
+  "iron_block": {
+    "name": "block of iron",
+    "category": "ores",
+    "stack": "64"
+  },
+  "netherite_block": {
+    "name": "block of netherite",
+    "category": "ores",
+    "stack": 64
+  },
+  "quartz_block": {
+    "name": "block of quartz",
+    "category": "nether",
+    "stack": 64
+  },
+  "raw_copper_block": {
+    "name": "block of raw copper",
+    "category": "ores",
+    "stack": 64
+  },
+  "raw_gold_block": {
+    "name": "block of raw gold",
+    "category": "ores",
+    "stack": 64
+  },
+  "raw_iron_block": {
+    "name": "block of raw iron",
+    "category": "ores",
+    "stack": 64
+  },
+  "redstone_block": {
+    "name": "block of redstone",
+    "category": "ores",
+    "stack": "64"
+  },
+  "resin_block": {
+    "name": "block of resin",
+    "category": "drops",
+    "stack": 64
+  },
+  "stripped_bamboo_block": {
+    "name": "block of stripped bamboo",
+    "category": "wood",
+    "stack": 64
+  },
+  "music_disc_blocks": {
+    "name": "blocks disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "blue_banner": {
+    "name": "blue banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "blue_bed": {
+    "name": "blue bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "blue_bundle": {
+    "name": "blue bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "blue_candle": {
+    "name": "blue candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_carpet": {
+    "name": "blue carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_concrete": {
+    "name": "blue concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_concrete_powder": {
+    "name": "blue concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_dye": {
+    "name": "blue dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_egg": {
+    "name": "blue egg",
+    "category": "food",
+    "stack": 16
+  },
+  "blue_glazed_terracotta": {
+    "name": "blue glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_harness": {
+    "name": "blue harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "blue_ice": {
+    "name": "blue ice",
+    "category": "ice",
+    "stack": 64
+  },
+  "blue_orchid": {
+    "name": "blue orchid",
+    "category": "plants",
+    "stack": 64
+  },
+  "blue_shulker_box": {
+    "name": "blue shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "blue_stained_glass": {
+    "name": "blue stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_stained_glass_pane": {
+    "name": "blue stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_terracotta": {
+    "name": "blue terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "blue_wool": {
+    "name": "blue wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "bolt_armor_trim_smithing_template": {
+    "name": "bolt armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "bone": {
+    "name": "bone",
+    "category": "drops",
+    "stack": "64"
+  },
+  "bone_block": {
+    "name": "bone block",
+    "category": "plants",
+    "stack": 64
+  },
+  "bone_meal": {
+    "name": "bone meal",
+    "category": "plants",
+    "stack": 64
+  },
+  "book": {
+    "name": "book",
+    "category": "utility",
+    "stack": 64
+  },
+  "writable_book": {
+    "name": "book and quill",
+    "category": "utility",
+    "stack": 1
+  },
+  "bookshelf": {
+    "name": "bookshelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "bordure_indented_banner_pattern": {
+    "name": "bordure indented banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "experience_bottle": {
+    "name": "bottle o' enchanting",
+    "category": "utility",
+    "stack": 64
+  },
+  "bow": {
+    "name": "bow",
+    "category": "weapons",
+    "stack": 1
+  },
+  "bowl": {
+    "name": "bowl",
+    "category": "utility",
+    "stack": 64
+  },
+  "brain_coral": {
+    "name": "brain coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "brain_coral_block": {
+    "name": "brain coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "brain_coral_fan": {
+    "name": "brain coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "bread": {
+    "name": "bread",
+    "category": "food",
+    "stack": 64
+  },
+  "breeze_rod": {
+    "name": "breeze rod",
+    "category": "drops",
+    "stack": 64
+  },
+  "brewer_pottery_sherd": {
+    "name": "brewer pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "brewing_stand": {
+    "name": "brewing stand",
+    "category": "utility",
+    "stack": "64"
+  },
+  "brick": {
+    "name": "brick",
+    "category": "brick",
+    "stack": "64"
+  },
+  "brick_slab": {
+    "name": "brick slab",
+    "category": "brick",
+    "stack": "64"
+  },
+  "brick_stairs": {
+    "name": "brick stairs",
+    "category": "brick",
+    "stack": "64"
+  },
+  "brick_wall": {
+    "name": "brick wall",
+    "category": "brick",
+    "stack": "64"
+  },
+  "bricks": {
+    "name": "bricks",
+    "category": "brick",
+    "stack": "64"
+  },
+  "brown_banner": {
+    "name": "brown banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "brown_bed": {
+    "name": "brown bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "brown_bundle": {
+    "name": "brown bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "brown_candle": {
+    "name": "brown candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_carpet": {
+    "name": "brown carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_concrete": {
+    "name": "brown concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_concrete_powder": {
+    "name": "brown concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_dye": {
+    "name": "brown dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_egg": {
+    "name": "brown egg",
+    "category": "food",
+    "stack": 16
+  },
+  "brown_glazed_terracotta": {
+    "name": "brown glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_harness": {
+    "name": "brown harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "brown_mushroom": {
+    "name": "brown mushroom",
+    "category": "plants",
+    "stack": 64
+  },
+  "brown_mushroom_block": {
+    "name": "brown mushroom block",
+    "category": "plants",
+    "stack": 64
+  },
+  "brown_shulker_box": {
+    "name": "brown shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "brown_stained_glass": {
+    "name": "brown stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_stained_glass_pane": {
+    "name": "brown stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_terracotta": {
+    "name": "brown terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brown_wool": {
+    "name": "brown wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "brush": {
+    "name": "brush",
+    "category": "archaeology",
+    "stack": 1
+  },
+  "bubble_coral": {
+    "name": "bubble coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "bubble_coral_block": {
+    "name": "bubble coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "bubble_coral_fan": {
+    "name": "bubble coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "bucket": {
+    "name": "bucket",
+    "category": "utility",
+    "stack": "16"
+  },
+  "axolotl_bucket": {
+    "name": "bucket of axolotl",
+    "category": "utility",
+    "stack": 1
+  },
+  "cod_bucket": {
+    "name": "bucket of cod",
+    "category": "utility",
+    "stack": 1
+  },
+  "pufferfish_bucket": {
+    "name": "bucket of pufferfish",
+    "category": "utility",
+    "stack": "0"
+  },
+  "salmon_bucket": {
+    "name": "bucket of salmon",
+    "category": "utility",
+    "stack": "0"
+  },
+  "tadpole_bucket": {
+    "name": "bucket of tadpole",
+    "category": "utility",
+    "stack": 1
+  },
+  "tropical_fish_bucket": {
+    "name": "bucket of tropical fish",
+    "category": "utility",
+    "stack": "0"
+  },
+  "bundle": {
+    "name": "bundle",
+    "category": "utility",
+    "stack": 1
+  },
+  "burn_pottery_sherd": {
+    "name": "burn pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "bush": {
+    "name": "bush",
+    "category": "plants",
+    "stack": 64
+  },
+  "cactus": {
+    "name": "cactus",
+    "category": "plants",
+    "stack": 64
+  },
+  "cactus_flower": {
+    "name": "cactus flower",
+    "category": "plants",
+    "stack": 64
+  },
+  "cake": {
+    "name": "cake",
+    "category": "food",
+    "stack": "0"
+  },
+  "calcite": {
+    "name": "calcite",
+    "category": "stone",
+    "stack": 64
+  },
+  "calibrated_sculk_sensor": {
+    "name": "calibrated sculk sensor",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "campfire": {
+    "name": "campfire",
+    "category": "light",
+    "stack": 64
+  },
+  "candle": {
+    "name": "candle",
+    "category": "light",
+    "stack": 64
+  },
+  "carrot": {
+    "name": "carrot",
+    "category": "food",
+    "stack": "64"
+  },
+  "carrot_on_a_stick": {
+    "name": "carrot on a stick",
+    "category": "tools",
+    "stack": 1
+  },
+  "cartography_table": {
+    "name": "cartography table",
+    "category": "utility",
+    "stack": "64"
+  },
+  "carved_pumpkin": {
+    "name": "carved pumpkin",
+    "category": "plants",
+    "stack": 64
+  },
+  "music_disc_cat": {
+    "name": "cat disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "cauldron": {
+    "name": "cauldron",
+    "category": "utility",
+    "stack": "64"
+  },
+  "chainmail_boots": {
+    "name": "chainmail boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "chainmail_chestplate": {
+    "name": "chainmail chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "chainmail_helmet": {
+    "name": "chainmail helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "chainmail_leggings": {
+    "name": "chainmail leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "charcoal": {
+    "name": "charcoal",
+    "category": "utility",
+    "stack": 64
+  },
+  "cherry_boat": {
+    "name": "cherry boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "cherry_chest_boat": {
+    "name": "cherry boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "cherry_button": {
+    "name": "cherry button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "cherry_door": {
+    "name": "cherry door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "cherry_fence": {
+    "name": "cherry fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "cherry_fence_gate": {
+    "name": "cherry fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "cherry_hanging_sign": {
+    "name": "cherry hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "cherry_leaves": {
+    "name": "cherry leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "cherry_log": {
+    "name": "cherry log",
+    "category": "wood",
+    "stack": 64
+  },
+  "cherry_planks": {
+    "name": "cherry planks",
+    "category": "wood",
+    "stack": 64
+  },
+  "cherry_pressure_plate": {
+    "name": "cherry pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "cherry_sapling": {
+    "name": "cherry sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "cherry_shelf": {
+    "name": "cherry shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "cherry_sign": {
+    "name": "cherry sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "cherry_slab": {
+    "name": "cherry slab",
+    "category": "wood",
+    "stack": 64
+  },
+  "cherry_stairs": {
+    "name": "cherry stairs",
+    "category": "wood",
+    "stack": 64
+  },
+  "cherry_trapdoor": {
+    "name": "cherry trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "cherry_wood": {
+    "name": "cherry wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "chest": {
+    "name": "chest",
+    "category": "utility",
+    "stack": "64"
+  },
+  "chipped_anvil": {
+    "name": "chipped anvil",
+    "category": "utility",
+    "stack": 64
+  },
+  "music_disc_chirp": {
+    "name": "chirp disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "chiseled_bookshelf": {
+    "name": "chiseled bookshelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "chiseled_copper": {
+    "name": "chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "chiseled_deepslate": {
+    "name": "chiseled deepslate",
+    "category": "stone",
+    "stack": 64
+  },
+  "chiseled_nether_bricks": {
+    "name": "chiseled nether bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "chiseled_polished_blackstone": {
+    "name": "chiseled polished blackstone",
+    "category": "nether",
+    "stack": 64
+  },
+  "chiseled_quartz_block": {
+    "name": "chiseled quartz block",
+    "category": "nether",
+    "stack": 64
+  },
+  "chiseled_red_sandstone": {
+    "name": "chiseled red sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "chiseled_resin_bricks": {
+    "name": "chiseled resin bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "chiseled_sandstone": {
+    "name": "chiseled sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "chiseled_stone_bricks": {
+    "name": "chiseled stone bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "chiseled_tuff": {
+    "name": "chiseled tuff",
+    "category": "stone",
+    "stack": 64
+  },
+  "chiseled_tuff_bricks": {
+    "name": "chiseled tuff bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "chorus_flower": {
+    "name": "chorus flower",
+    "category": "plants",
+    "stack": 64
+  },
+  "chorus_fruit": {
+    "name": "chorus fruit",
+    "category": "food",
+    "stack": "64"
+  },
+  "clay": {
+    "name": "clay",
+    "category": "stone",
+    "stack": "64"
+  },
+  "clay_ball": {
+    "name": "clay ball",
+    "category": "stone",
+    "stack": "64"
+  },
+  "clock": {
+    "name": "clock",
+    "category": "utility",
+    "stack": 64
+  },
+  "closed_eyeblossom": {
+    "name": "closed eyeblossom",
+    "category": "plants",
+    "stack": 64
+  },
+  "coal": {
+    "name": "coal",
+    "category": "ores",
+    "stack": "64"
+  },
+  "coal_ore": {
+    "name": "coal ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "coarse_dirt": {
+    "name": "coarse dirt",
+    "category": "earth",
+    "stack": "64"
+  },
+  "coast_armor_trim_smithing_template": {
+    "name": "coast armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "cobbled_deepslate": {
+    "name": "cobbled deepslate",
+    "category": "stone",
+    "stack": 64
+  },
+  "cobbled_deepslate_slab": {
+    "name": "cobbled deepslate slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "cobbled_deepslate_stairs": {
+    "name": "cobbled deepslate stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "cobbled_deepslate_wall": {
+    "name": "cobbled deepslate wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "cobblestone": {
+    "name": "cobblestone",
+    "category": "stone",
+    "stack": 64
+  },
+  "cobblestone_slab": {
+    "name": "cobblestone slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "cobblestone_stairs": {
+    "name": "cobblestone stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "cobblestone_wall": {
+    "name": "cobblestone wall",
+    "category": "stone",
+    "stack": "64"
+  },
+  "cobweb": {
+    "name": "cobweb",
+    "category": "utility",
+    "stack": 64
+  },
+  "cocoa_beans": {
+    "name": "cocoa beans",
+    "category": "plants",
+    "stack": 64
+  },
+  "compass": {
+    "name": "compass",
+    "category": "utility",
+    "stack": 64
+  },
+  "composter": {
+    "name": "composter",
+    "category": "utility",
+    "stack": "64"
+  },
+  "conduit": {
+    "name": "conduit",
+    "category": "ocean",
+    "stack": 64
+  },
+  "cooked_chicken": {
+    "name": "cooked chicken",
+    "category": "food",
+    "stack": "64"
+  },
+  "cooked_cod": {
+    "name": "cooked cod",
+    "category": "food",
+    "stack": "64"
+  },
+  "cooked_mutton": {
+    "name": "cooked mutton",
+    "category": "food",
+    "stack": "64"
+  },
+  "cooked_porkchop": {
+    "name": "cooked porkchop",
+    "category": "food",
+    "stack": "64"
+  },
+  "cooked_rabbit": {
+    "name": "cooked rabbit",
+    "category": "food",
+    "stack": "64"
+  },
+  "cooked_salmon": {
+    "name": "cooked salmon",
+    "category": "food",
+    "stack": "64"
+  },
+  "cookie": {
+    "name": "cookie",
+    "category": "food",
+    "stack": 64
+  },
+  "copper_axe": {
+    "name": "copper axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "copper_bars": {
+    "name": "copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "copper_boots": {
+    "name": "copper boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_bulb": {
+    "name": "copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "copper_chain": {
+    "name": "copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "copper_chest": {
+    "name": "copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "copper_chestplate": {
+    "name": "copper chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_door": {
+    "name": "copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "copper_golem_statue": {
+    "name": "copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "copper_grate": {
+    "name": "copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "copper_helmet": {
+    "name": "copper helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_hoe": {
+    "name": "copper hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "copper_horse_armor": {
+    "name": "copper horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_ingot": {
+    "name": "copper ingot",
+    "category": "ores",
+    "stack": 64
+  },
+  "copper_lantern": {
+    "name": "copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "copper_leggings": {
+    "name": "copper leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_nautilus_armor": {
+    "name": "copper nautilus armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "copper_nugget": {
+    "name": "copper nugget",
+    "category": "ores",
+    "stack": 64
+  },
+  "copper_ore": {
+    "name": "copper ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "copper_pickaxe": {
+    "name": "copper pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "copper_shovel": {
+    "name": "copper shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "copper_spear": {
+    "name": "copper spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "copper_sword": {
+    "name": "copper sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "copper_torch": {
+    "name": "copper torch",
+    "category": "light",
+    "stack": 64
+  },
+  "copper_trapdoor": {
+    "name": "copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "cornflower": {
+    "name": "cornflower",
+    "category": "plants",
+    "stack": 64
+  },
+  "cracked_deepslate_bricks": {
+    "name": "cracked deepslate bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "cracked_deepslate_tiles": {
+    "name": "cracked deepslate tiles",
+    "category": "stone",
+    "stack": 64
+  },
+  "cracked_nether_bricks": {
+    "name": "cracked nether bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "cracked_polished_blackstone_bricks": {
+    "name": "cracked polished blackstone bricks",
+    "category": "nether",
+    "stack": 64
+  },
+  "cracked_stone_bricks": {
+    "name": "cracked stone bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "crafter": {
+    "name": "crafter",
+    "category": "utility",
+    "stack": 64
+  },
+  "crafting_table": {
+    "name": "crafting table",
+    "category": "utility",
+    "stack": "64"
+  },
+  "creaking_heart": {
+    "name": "creaking heart",
+    "category": "utility",
+    "stack": 64
+  },
+  "music_disc_creator": {
+    "name": "creator disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "creeper_banner_pattern": {
+    "name": "creeper banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "creeper_head": {
+    "name": "creeper head",
+    "category": "drops",
+    "stack": 64
+  },
+  "crimson_button": {
+    "name": "crimson button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "crimson_door": {
+    "name": "crimson door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "crimson_fence": {
+    "name": "crimson fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "crimson_fence_gate": {
+    "name": "crimson fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "crimson_fungus": {
+    "name": "crimson fungus",
+    "category": "nether",
+    "stack": 64
+  },
+  "crimson_hanging_sign": {
+    "name": "crimson hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "crimson_hyphae": {
+    "name": "crimson hyphae",
+    "category": "wood",
+    "stack": "64"
+  },
+  "crimson_nylium": {
+    "name": "crimson nylium",
+    "category": "nether",
+    "stack": 64
+  },
+  "crimson_planks": {
+    "name": "crimson planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "crimson_pressure_plate": {
+    "name": "crimson pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "crimson_roots": {
+    "name": "crimson roots",
+    "category": "nether",
+    "stack": 64
+  },
+  "crimson_shelf": {
+    "name": "crimson shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "crimson_sign": {
+    "name": "crimson sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "crimson_slab": {
+    "name": "crimson slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "crimson_stairs": {
+    "name": "crimson stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "crimson_stem": {
+    "name": "crimson stem",
+    "category": "wood",
+    "stack": "64"
+  },
+  "crimson_trapdoor": {
+    "name": "crimson trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "crossbow": {
+    "name": "crossbow",
+    "category": "weapons",
+    "stack": 1
+  },
+  "crying_obsidian": {
+    "name": "crying obsidian",
+    "category": "nether",
+    "stack": 64
+  },
+  "cut_copper": {
+    "name": "cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "cut_copper_slab": {
+    "name": "cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "cut_copper_stairs": {
+    "name": "cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "cut_red_sandstone": {
+    "name": "cut red sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "cut_red_sandstone_slab": {
+    "name": "cut red sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "cut_sandstone": {
+    "name": "cut sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "cut_sandstone_slab": {
+    "name": "cut sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "cyan_banner": {
+    "name": "cyan banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "cyan_bed": {
+    "name": "cyan bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "cyan_bundle": {
+    "name": "cyan bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "cyan_candle": {
+    "name": "cyan candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_carpet": {
+    "name": "cyan carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_concrete": {
+    "name": "cyan concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_concrete_powder": {
+    "name": "cyan concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_dye": {
+    "name": "cyan dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_glazed_terracotta": {
+    "name": "cyan glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_harness": {
+    "name": "cyan harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "cyan_shulker_box": {
+    "name": "cyan shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "cyan_stained_glass": {
+    "name": "cyan stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_stained_glass_pane": {
+    "name": "cyan stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_terracotta": {
+    "name": "cyan terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "cyan_wool": {
+    "name": "cyan wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "damaged_anvil": {
+    "name": "damaged anvil",
+    "category": "utility",
+    "stack": 64
+  },
+  "dandelion": {
+    "name": "dandelion",
+    "category": "plants",
+    "stack": 64
+  },
+  "danger_pottery_sherd": {
+    "name": "danger pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "dark_oak_boat": {
+    "name": "dark oak boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "dark_oak_chest_boat": {
+    "name": "dark oak boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "dark_oak_button": {
+    "name": "dark oak button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dark_oak_door": {
+    "name": "dark oak door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dark_oak_fence": {
+    "name": "dark oak fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "dark_oak_fence_gate": {
+    "name": "dark oak fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "dark_oak_hanging_sign": {
+    "name": "dark oak hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "dark_oak_leaves": {
+    "name": "dark oak leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "dark_oak_log": {
+    "name": "dark oak log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "dark_oak_planks": {
+    "name": "dark oak planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "dark_oak_pressure_plate": {
+    "name": "dark oak pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dark_oak_sapling": {
+    "name": "dark oak sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "dark_oak_shelf": {
+    "name": "dark oak shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "dark_oak_sign": {
+    "name": "dark oak sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "dark_oak_slab": {
+    "name": "dark oak slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "dark_oak_stairs": {
+    "name": "dark oak stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "dark_oak_trapdoor": {
+    "name": "dark oak trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dark_oak_wood": {
+    "name": "dark oak wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "dark_prismarine": {
+    "name": "dark prismarine",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dark_prismarine_slab": {
+    "name": "dark prismarine slab",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dark_prismarine_stairs": {
+    "name": "dark prismarine stairs",
+    "category": "ocean",
+    "stack": 64
+  },
+  "daylight_detector": {
+    "name": "daylight detector",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dead_brain_coral": {
+    "name": "dead brain coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_brain_coral_block": {
+    "name": "dead brain coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_brain_coral_fan": {
+    "name": "dead brain coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_bubble_coral": {
+    "name": "dead bubble coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_bubble_coral_block": {
+    "name": "dead bubble coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_bubble_coral_fan": {
+    "name": "dead bubble coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_bush": {
+    "name": "dead bush",
+    "category": "plants",
+    "stack": 64
+  },
+  "dead_fire_coral": {
+    "name": "dead fire coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_fire_coral_block": {
+    "name": "dead fire coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_fire_coral_fan": {
+    "name": "dead fire coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_horn_coral": {
+    "name": "dead horn coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_horn_coral_block": {
+    "name": "dead horn coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_horn_coral_fan": {
+    "name": "dead horn coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_tube_coral": {
+    "name": "dead tube coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_tube_coral_block": {
+    "name": "dead tube coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "dead_tube_coral_fan": {
+    "name": "dead tube coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "decorated_pot": {
+    "name": "decorated pot",
+    "category": "archaeology",
+    "stack": 1
+  },
+  "deepslate": {
+    "name": "deepslate",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_brick_slab": {
+    "name": "deepslate brick slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_brick_stairs": {
+    "name": "deepslate brick stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_brick_wall": {
+    "name": "deepslate brick wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_bricks": {
+    "name": "deepslate bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_coal_ore": {
+    "name": "deepslate coal ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_copper_ore": {
+    "name": "deepslate copper ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_diamond_ore": {
+    "name": "deepslate diamond ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_emerald_ore": {
+    "name": "deepslate emerald ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_gold_ore": {
+    "name": "deepslate gold ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_iron_ore": {
+    "name": "deepslate iron ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_lapis_ore": {
+    "name": "deepslate lapis lazuli ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_redstone_ore": {
+    "name": "deepslate redstone ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "deepslate_tile_slab": {
+    "name": "deepslate tile slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_tile_stairs": {
+    "name": "deepslate tile stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_tile_wall": {
+    "name": "deepslate tile wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "deepslate_tiles": {
+    "name": "deepslate tiles",
+    "category": "stone",
+    "stack": 64
+  },
+  "detector_rail": {
+    "name": "detector rail",
+    "category": "transport",
+    "stack": 64
+  },
+  "diamond": {
+    "name": "diamond",
+    "category": "ores",
+    "stack": "64"
+  },
+  "diamond_axe": {
+    "name": "diamond axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "diamond_boots": {
+    "name": "diamond boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_chestplate": {
+    "name": "diamond chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_helmet": {
+    "name": "diamond helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_hoe": {
+    "name": "diamond hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "diamond_horse_armor": {
+    "name": "diamond horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_leggings": {
+    "name": "diamond leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_nautilus_armor": {
+    "name": "diamond nautilus armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "diamond_ore": {
+    "name": "diamond ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "diamond_pickaxe": {
+    "name": "diamond pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "diamond_shovel": {
+    "name": "diamond shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "diamond_spear": {
+    "name": "diamond spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "diamond_sword": {
+    "name": "diamond sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "diorite": {
+    "name": "diorite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "diorite_slab": {
+    "name": "diorite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "diorite_stairs": {
+    "name": "diorite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "diorite_wall": {
+    "name": "diorite wall",
+    "category": "stone",
+    "stack": "64"
+  },
+  "dirt": {
+    "name": "dirt",
+    "category": "earth",
+    "stack": 64
+  },
+  "dispenser": {
+    "name": "dispenser",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dragon_egg": {
+    "name": "dragon egg",
+    "category": "end",
+    "stack": 64
+  },
+  "dragon_head": {
+    "name": "dragon head",
+    "category": "end",
+    "stack": 64
+  },
+  "dragon_breath": {
+    "name": "dragon's breath",
+    "category": "end",
+    "stack": 64
+  },
+  "dried_ghast": {
+    "name": "dried ghast",
+    "category": "nether",
+    "stack": 64
+  },
+  "dried_kelp": {
+    "name": "dried kelp",
+    "category": "food",
+    "stack": 64
+  },
+  "dried_kelp_block": {
+    "name": "dried kelp block",
+    "category": "food",
+    "stack": 64
+  },
+  "dripstone_block": {
+    "name": "dripstone block",
+    "category": "stone",
+    "stack": 64
+  },
+  "dropper": {
+    "name": "dropper",
+    "category": "redstone",
+    "stack": 64
+  },
+  "dune_armor_trim_smithing_template": {
+    "name": "dune armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "echo_shard": {
+    "name": "echo shard",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "egg": {
+    "name": "egg",
+    "category": "food",
+    "stack": "16"
+  },
+  "elytra": {
+    "name": "elytra",
+    "category": "transport",
+    "stack": 1
+  },
+  "emerald": {
+    "name": "emerald",
+    "category": "ores",
+    "stack": "64"
+  },
+  "emerald_ore": {
+    "name": "emerald ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "map": {
+    "name": "empty map",
+    "category": "utility",
+    "stack": 64
+  },
+  "enchanted_book_aqua_affinity_1": {
+    "name": "enchanted book (aqua affinity)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_bane_of_arthropods_1": {
+    "name": "enchanted book (bane of arthropods i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_bane_of_arthropods_2": {
+    "name": "enchanted book (bane of arthropods ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_bane_of_arthropods_3": {
+    "name": "enchanted book (bane of arthropods iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_bane_of_arthropods_4": {
+    "name": "enchanted book (bane of arthropods iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_bane_of_arthropods_5": {
+    "name": "enchanted book (bane of arthropods v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_blast_protection_1": {
+    "name": "enchanted book (blast protection i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_blast_protection_2": {
+    "name": "enchanted book (blast protection ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_blast_protection_3": {
+    "name": "enchanted book (blast protection iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_blast_protection_4": {
+    "name": "enchanted book (blast protection iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_breach_1": {
+    "name": "enchanted book (breach i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_breach_2": {
+    "name": "enchanted book (breach ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_breach_3": {
+    "name": "enchanted book (breach iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_channeling_1": {
+    "name": "enchanted book (channeling)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_curse_of_binding_1": {
+    "name": "enchanted book (curse of binding)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_curse_of_vanishing_1": {
+    "name": "enchanted book (curse of vanishing)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_density_1": {
+    "name": "enchanted book (density i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_density_2": {
+    "name": "enchanted book (density ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_density_3": {
+    "name": "enchanted book (density iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_density_4": {
+    "name": "enchanted book (density iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_density_5": {
+    "name": "enchanted book (density v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_depth_strider_1": {
+    "name": "enchanted book (depth strider i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_depth_strider_2": {
+    "name": "enchanted book (depth strider ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_depth_strider_3": {
+    "name": "enchanted book (depth strider iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_efficiency_1": {
+    "name": "enchanted book (efficiency i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_efficiency_2": {
+    "name": "enchanted book (efficiency ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_efficiency_3": {
+    "name": "enchanted book (efficiency iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_efficiency_4": {
+    "name": "enchanted book (efficiency iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_efficiency_5": {
+    "name": "enchanted book (efficiency v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_feather_falling_1": {
+    "name": "enchanted book (feather falling i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_feather_falling_2": {
+    "name": "enchanted book (feather falling ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_feather_falling_3": {
+    "name": "enchanted book (feather falling iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_feather_falling_4": {
+    "name": "enchanted book (feather falling iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_aspect_1": {
+    "name": "enchanted book (fire aspect i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_aspect_2": {
+    "name": "enchanted book (fire aspect ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_protection_1": {
+    "name": "enchanted book (fire protection i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_protection_2": {
+    "name": "enchanted book (fire protection ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_protection_3": {
+    "name": "enchanted book (fire protection iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fire_protection_4": {
+    "name": "enchanted book (fire protection iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_flame_1": {
+    "name": "enchanted book (flame)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fortune_1": {
+    "name": "enchanted book (fortune i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fortune_2": {
+    "name": "enchanted book (fortune ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_fortune_3": {
+    "name": "enchanted book (fortune iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_frost_walker_1": {
+    "name": "enchanted book (frost walker i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_frost_walker_2": {
+    "name": "enchanted book (frost walker ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_impaling_1": {
+    "name": "enchanted book (impaling i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_impaling_2": {
+    "name": "enchanted book (impaling ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_impaling_3": {
+    "name": "enchanted book (impaling iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_impaling_4": {
+    "name": "enchanted book (impaling iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_impaling_5": {
+    "name": "enchanted book (impaling v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_infinity_1": {
+    "name": "enchanted book (infinity)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_knockback_1": {
+    "name": "enchanted book (knockback i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_knockback_2": {
+    "name": "enchanted book (knockback ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_looting_1": {
+    "name": "enchanted book (looting i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_looting_2": {
+    "name": "enchanted book (looting ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_looting_3": {
+    "name": "enchanted book (looting iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_loyalty_1": {
+    "name": "enchanted book (loyalty i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_loyalty_2": {
+    "name": "enchanted book (loyalty ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_loyalty_3": {
+    "name": "enchanted book (loyalty iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_luck_of_the_sea_1": {
+    "name": "enchanted book (luck of the sea i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_luck_of_the_sea_2": {
+    "name": "enchanted book (luck of the sea ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_luck_of_the_sea_3": {
+    "name": "enchanted book (luck of the sea iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_lure_1": {
+    "name": "enchanted book (lure i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_lure_2": {
+    "name": "enchanted book (lure ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_lure_3": {
+    "name": "enchanted book (lure iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_mending_1": {
+    "name": "enchanted book (mending)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_multishot_1": {
+    "name": "enchanted book (multishot)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_piercing_1": {
+    "name": "enchanted book (piercing i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_piercing_2": {
+    "name": "enchanted book (piercing ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_piercing_3": {
+    "name": "enchanted book (piercing iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_piercing_4": {
+    "name": "enchanted book (piercing iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_power_1": {
+    "name": "enchanted book (power i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_power_2": {
+    "name": "enchanted book (power ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_power_3": {
+    "name": "enchanted book (power iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_power_4": {
+    "name": "enchanted book (power iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_power_5": {
+    "name": "enchanted book (power v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_projectile_protection_1": {
+    "name": "enchanted book (projectile protection i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_projectile_protection_2": {
+    "name": "enchanted book (projectile protection ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_projectile_protection_3": {
+    "name": "enchanted book (projectile protection iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_projectile_protection_4": {
+    "name": "enchanted book (projectile protection iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_protection_1": {
+    "name": "enchanted book (protection i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_protection_2": {
+    "name": "enchanted book (protection ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_protection_3": {
+    "name": "enchanted book (protection iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_protection_4": {
+    "name": "enchanted book (protection iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_punch_1": {
+    "name": "enchanted book (punch i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_punch_2": {
+    "name": "enchanted book (punch ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_quick_charge_1": {
+    "name": "enchanted book (quick charge i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_quick_charge_2": {
+    "name": "enchanted book (quick charge ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_quick_charge_3": {
+    "name": "enchanted book (quick charge iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_respiration_1": {
+    "name": "enchanted book (respiration i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_respiration_2": {
+    "name": "enchanted book (respiration ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_respiration_3": {
+    "name": "enchanted book (respiration iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_riptide_1": {
+    "name": "enchanted book (riptide i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_riptide_2": {
+    "name": "enchanted book (riptide ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_riptide_3": {
+    "name": "enchanted book (riptide iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sharpness_1": {
+    "name": "enchanted book (sharpness i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sharpness_2": {
+    "name": "enchanted book (sharpness ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sharpness_3": {
+    "name": "enchanted book (sharpness iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sharpness_4": {
+    "name": "enchanted book (sharpness iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sharpness_5": {
+    "name": "enchanted book (sharpness v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_silk_touch_1": {
+    "name": "enchanted book (silk touch)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_smite_1": {
+    "name": "enchanted book (smite i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_smite_2": {
+    "name": "enchanted book (smite ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_smite_3": {
+    "name": "enchanted book (smite iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_smite_4": {
+    "name": "enchanted book (smite iv)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_smite_5": {
+    "name": "enchanted book (smite v)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_soul_speed_1": {
+    "name": "enchanted book (soul speed i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_soul_speed_2": {
+    "name": "enchanted book (soul speed ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_soul_speed_3": {
+    "name": "enchanted book (soul speed iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sweeping_edge_1": {
+    "name": "enchanted book (sweeping edge i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sweeping_edge_2": {
+    "name": "enchanted book (sweeping edge ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_sweeping_edge_3": {
+    "name": "enchanted book (sweeping edge iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_swift_sneak_1": {
+    "name": "enchanted book (swift sneak i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_swift_sneak_2": {
+    "name": "enchanted book (swift sneak ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_swift_sneak_3": {
+    "name": "enchanted book (swift sneak iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_thorns_1": {
+    "name": "enchanted book (thorns i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_thorns_2": {
+    "name": "enchanted book (thorns ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_thorns_3": {
+    "name": "enchanted book (thorns iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_unbreaking_1": {
+    "name": "enchanted book (unbreaking i)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_unbreaking_2": {
+    "name": "enchanted book (unbreaking ii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_book_unbreaking_3": {
+    "name": "enchanted book (unbreaking iii)",
+    "category": "enchantments",
+    "stack": 1
+  },
+  "enchanted_golden_apple": {
+    "name": "enchanted golden apple",
+    "category": "food",
+    "stack": "64"
+  },
+  "enchanting_table": {
+    "name": "enchanting table",
+    "category": "utility",
+    "stack": 64
+  },
+  "end_crystal": {
+    "name": "end crystal",
+    "category": "end",
+    "stack": 64
+  },
+  "end_rod": {
+    "name": "end rod",
+    "category": "light",
+    "stack": 64
+  },
+  "end_stone": {
+    "name": "end stone",
+    "category": "end",
+    "stack": 64
+  },
+  "end_stone_brick_slab": {
+    "name": "end stone brick slab",
+    "category": "end",
+    "stack": 64
+  },
+  "end_stone_brick_stairs": {
+    "name": "end stone brick stairs",
+    "category": "end",
+    "stack": 64
+  },
+  "end_stone_brick_wall": {
+    "name": "end stone brick wall",
+    "category": "end",
+    "stack": 64
+  },
+  "end_stone_bricks": {
+    "name": "end stone bricks",
+    "category": "end",
+    "stack": 64
+  },
+  "ender_chest": {
+    "name": "ender chest",
+    "category": "end",
+    "stack": 64
+  },
+  "ender_pearl": {
+    "name": "ender pearl",
+    "category": "drops",
+    "stack": "64"
+  },
+  "explorer_pottery_sherd": {
+    "name": "explorer pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "exposed_chiseled_copper": {
+    "name": "exposed chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper": {
+    "name": "exposed copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper_bars": {
+    "name": "exposed copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper_bulb": {
+    "name": "exposed copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "exposed_copper_chain": {
+    "name": "exposed copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper_chest": {
+    "name": "exposed copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "exposed_copper_door": {
+    "name": "exposed copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "exposed_copper_golem_statue": {
+    "name": "exposed copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper_grate": {
+    "name": "exposed copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_copper_lantern": {
+    "name": "exposed copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "exposed_copper_trapdoor": {
+    "name": "exposed copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "exposed_cut_copper": {
+    "name": "exposed cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_cut_copper_slab": {
+    "name": "exposed cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_cut_copper_stairs": {
+    "name": "exposed cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "exposed_lightning_rod": {
+    "name": "exposed lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "eye_armor_trim_smithing_template": {
+    "name": "eye armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "ender_eye": {
+    "name": "eye of ender",
+    "category": "utility",
+    "stack": 64
+  },
+  "music_disc_far": {
+    "name": "far disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "feather": {
+    "name": "feather",
+    "category": "drops",
+    "stack": "64"
+  },
+  "fermented_spider_eye": {
+    "name": "fermented spider eye",
+    "category": "food",
+    "stack": "64"
+  },
+  "fern": {
+    "name": "fern",
+    "category": "plants",
+    "stack": 64
+  },
+  "field_masoned_banner_pattern": {
+    "name": "field masoned banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "fire_charge": {
+    "name": "fire charge",
+    "category": "utility",
+    "stack": 64
+  },
+  "fire_coral": {
+    "name": "fire coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "fire_coral_block": {
+    "name": "fire coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "fire_coral_fan": {
+    "name": "fire coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "firefly_bush": {
+    "name": "firefly bush",
+    "category": "plants",
+    "stack": 64
+  },
+  "firework_rocket": {
+    "name": "firework rocket",
+    "category": "utility",
+    "stack": 64
+  },
+  "firework_star": {
+    "name": "firework star",
+    "category": "utility",
+    "stack": 64
+  },
+  "fishing_rod": {
+    "name": "fishing rod",
+    "category": "tools",
+    "stack": 1
+  },
+  "fletching_table": {
+    "name": "fletching table",
+    "category": "utility",
+    "stack": "64"
+  },
+  "flint": {
+    "name": "flint",
+    "category": "utility",
+    "stack": "64"
+  },
+  "flint_and_steel": {
+    "name": "flint and steel",
+    "category": "utility",
+    "stack": 1
+  },
+  "flow_armor_trim_smithing_template": {
+    "name": "flow armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "flow_banner_pattern": {
+    "name": "flow banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "flow_pottery_sherd": {
+    "name": "flow pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "flower_banner_pattern": {
+    "name": "flower banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "flower_pot": {
+    "name": "flower pot",
+    "category": "plants",
+    "stack": 64
+  },
+  "flowering_azalea": {
+    "name": "flowering azalea",
+    "category": "plants",
+    "stack": 64
+  },
+  "flowering_azalea_leaves": {
+    "name": "flowering azalea leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "friend_pottery_sherd": {
+    "name": "friend pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "furnace": {
+    "name": "furnace",
+    "category": "utility",
+    "stack": 64
+  },
+  "ghast_tear": {
+    "name": "ghast tear",
+    "category": "drops",
+    "stack": "64"
+  },
+  "gilded_blackstone": {
+    "name": "gilded blackstone",
+    "category": "nether",
+    "stack": 64
+  },
+  "glass": {
+    "name": "glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "glass_bottle": {
+    "name": "glass bottle",
+    "category": "utility",
+    "stack": 64
+  },
+  "glass_pane": {
+    "name": "glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "glistering_melon_slice": {
+    "name": "glistering melon slice",
+    "category": "food",
+    "stack": "64"
+  },
+  "glow_berries": {
+    "name": "glow berries",
+    "category": "food",
+    "stack": 64
+  },
+  "glow_ink_sac": {
+    "name": "glow ink sac",
+    "category": "drops",
+    "stack": 64
+  },
+  "glow_item_frame": {
+    "name": "glow item frame",
+    "category": "utility",
+    "stack": 64
+  },
+  "glow_lichen": {
+    "name": "glow lichen",
+    "category": "plants",
+    "stack": 64
+  },
+  "glowstone": {
+    "name": "glowstone",
+    "category": "light",
+    "stack": 64
+  },
+  "glowstone_dust": {
+    "name": "glowstone dust",
+    "category": "light",
+    "stack": 64
+  },
+  "goat_horn": {
+    "name": "goat horn",
+    "category": "drops",
+    "stack": 1
+  },
+  "gold_ingot": {
+    "name": "gold ingot",
+    "category": "ores",
+    "stack": "64"
+  },
+  "gold_nugget": {
+    "name": "gold nugget",
+    "category": "ores",
+    "stack": "64"
+  },
+  "gold_ore": {
+    "name": "gold ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "golden_apple": {
+    "name": "golden apple",
+    "category": "food",
+    "stack": "64"
+  },
+  "golden_axe": {
+    "name": "golden axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "golden_boots": {
+    "name": "golden boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_carrot": {
+    "name": "golden carrot",
+    "category": "food",
+    "stack": "64"
+  },
+  "golden_chestplate": {
+    "name": "golden chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_helmet": {
+    "name": "golden helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_hoe": {
+    "name": "golden hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "golden_horse_armor": {
+    "name": "golden horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_leggings": {
+    "name": "golden leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_nautilus_armor": {
+    "name": "golden nautilus armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "golden_pickaxe": {
+    "name": "golden pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "golden_shovel": {
+    "name": "golden shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "golden_spear": {
+    "name": "golden spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "golden_sword": {
+    "name": "golden sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "granite": {
+    "name": "granite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "granite_slab": {
+    "name": "granite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "granite_stairs": {
+    "name": "granite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "granite_wall": {
+    "name": "granite wall",
+    "category": "stone",
+    "stack": "64"
+  },
+  "grass_block": {
+    "name": "grass block",
+    "category": "earth",
+    "stack": "64"
+  },
+  "gravel": {
+    "name": "gravel",
+    "category": "earth",
+    "stack": "64"
+  },
+  "gray_banner": {
+    "name": "gray banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "gray_bed": {
+    "name": "gray bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "gray_bundle": {
+    "name": "gray bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "gray_candle": {
+    "name": "gray candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_carpet": {
+    "name": "gray carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_concrete": {
+    "name": "gray concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_concrete_powder": {
+    "name": "gray concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_dye": {
+    "name": "gray dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_glazed_terracotta": {
+    "name": "gray glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_harness": {
+    "name": "gray harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "gray_shulker_box": {
+    "name": "gray shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "gray_stained_glass": {
+    "name": "gray stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_stained_glass_pane": {
+    "name": "gray stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_terracotta": {
+    "name": "gray terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "gray_wool": {
+    "name": "gray wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_banner": {
+    "name": "green banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "green_bed": {
+    "name": "green bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "green_bundle": {
+    "name": "green bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "green_candle": {
+    "name": "green candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_carpet": {
+    "name": "green carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_concrete": {
+    "name": "green concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_concrete_powder": {
+    "name": "green concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_dye": {
+    "name": "green dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_glazed_terracotta": {
+    "name": "green glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_harness": {
+    "name": "green harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "green_shulker_box": {
+    "name": "green shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "green_stained_glass": {
+    "name": "green stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_stained_glass_pane": {
+    "name": "green stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_terracotta": {
+    "name": "green terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "green_wool": {
+    "name": "green wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "grindstone": {
+    "name": "grindstone",
+    "category": "utility",
+    "stack": "64"
+  },
+  "gunpowder": {
+    "name": "gunpowder",
+    "category": "drops",
+    "stack": "64"
+  },
+  "guster_banner_pattern": {
+    "name": "guster banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "guster_pottery_sherd": {
+    "name": "guster pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "hanging_roots": {
+    "name": "hanging roots",
+    "category": "plants",
+    "stack": 64
+  },
+  "hay_block": {
+    "name": "hay bale",
+    "category": "food",
+    "stack": 64
+  },
+  "heart_of_the_sea": {
+    "name": "heart of the sea",
+    "category": "ocean",
+    "stack": 64
+  },
+  "heart_pottery_sherd": {
+    "name": "heart pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "heartbreak_pottery_sherd": {
+    "name": "heartbreak pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "heavy_core": {
+    "name": "heavy core",
+    "category": "utility",
+    "stack": 64
+  },
+  "heavy_weighted_pressure_plate": {
+    "name": "heavy weighted pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "honey_block": {
+    "name": "honey block",
+    "category": "drops",
+    "stack": "64"
+  },
+  "honey_bottle": {
+    "name": "honey bottle",
+    "category": "drops",
+    "stack": "64"
+  },
+  "honeycomb": {
+    "name": "honeycomb",
+    "category": "drops",
+    "stack": 64
+  },
+  "honeycomb_block": {
+    "name": "honeycomb block",
+    "category": "drops",
+    "stack": 64
+  },
+  "hopper": {
+    "name": "hopper",
+    "category": "utility",
+    "stack": 64
+  },
+  "horn_coral": {
+    "name": "horn coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "horn_coral_block": {
+    "name": "horn coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "horn_coral_fan": {
+    "name": "horn coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "host_armor_trim_smithing_template": {
+    "name": "host armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "howl_pottery_sherd": {
+    "name": "howl pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "ice": {
+    "name": "ice",
+    "category": "ice",
+    "stack": 64
+  },
+  "ink_sac": {
+    "name": "ink sac",
+    "category": "drops",
+    "stack": "64"
+  },
+  "iron_axe": {
+    "name": "iron axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "iron_bars": {
+    "name": "iron bars",
+    "category": "utility",
+    "stack": 64
+  },
+  "iron_boots": {
+    "name": "iron boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_chain": {
+    "name": "iron chain",
+    "category": "utility",
+    "stack": 64
+  },
+  "iron_chestplate": {
+    "name": "iron chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_door": {
+    "name": "iron door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "iron_helmet": {
+    "name": "iron helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_hoe": {
+    "name": "iron hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "iron_horse_armor": {
+    "name": "iron horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_ingot": {
+    "name": "iron ingot",
+    "category": "ores",
+    "stack": "64"
+  },
+  "iron_leggings": {
+    "name": "iron leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_nautilus_armor": {
+    "name": "iron nautilus armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "iron_nugget": {
+    "name": "iron nugget",
+    "category": "ores",
+    "stack": "64"
+  },
+  "iron_ore": {
+    "name": "iron ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "iron_pickaxe": {
+    "name": "iron pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "iron_shovel": {
+    "name": "iron shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "iron_spear": {
+    "name": "iron spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "iron_sword": {
+    "name": "iron sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "iron_trapdoor": {
+    "name": "iron trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "item_frame": {
+    "name": "item frame",
+    "category": "utility",
+    "stack": 64
+  },
+  "jack_o_lantern": {
+    "name": "jack o'lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "jukebox": {
+    "name": "jukebox",
+    "category": "utility",
+    "stack": 64
+  },
+  "jungle_boat": {
+    "name": "jungle boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "jungle_chest_boat": {
+    "name": "jungle boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "jungle_button": {
+    "name": "jungle button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "jungle_door": {
+    "name": "jungle door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "jungle_fence": {
+    "name": "jungle fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "jungle_fence_gate": {
+    "name": "jungle fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "jungle_hanging_sign": {
+    "name": "jungle hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "jungle_leaves": {
+    "name": "jungle leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "jungle_log": {
+    "name": "jungle log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "jungle_planks": {
+    "name": "jungle planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "jungle_pressure_plate": {
+    "name": "jungle pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "jungle_sapling": {
+    "name": "jungle sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "jungle_shelf": {
+    "name": "jungle shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "jungle_sign": {
+    "name": "jungle sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "jungle_slab": {
+    "name": "jungle slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "jungle_stairs": {
+    "name": "jungle stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "jungle_trapdoor": {
+    "name": "jungle trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "jungle_wood": {
+    "name": "jungle wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "kelp": {
+    "name": "kelp",
+    "category": "ocean",
+    "stack": 64
+  },
+  "ladder": {
+    "name": "ladder",
+    "category": "utility",
+    "stack": 64
+  },
+  "lantern": {
+    "name": "lantern",
+    "category": "light",
+    "stack": "64"
+  },
+  "lapis_lazuli": {
+    "name": "lapis lazuli",
+    "category": "ores",
+    "stack": 64
+  },
+  "lapis_block": {
+    "name": "lapis lazuli block",
+    "category": "ores",
+    "stack": "64"
+  },
+  "lapis_ore": {
+    "name": "lapis ore",
+    "category": "ores",
+    "stack": "64"
+  },
+  "large_fern": {
+    "name": "large fern",
+    "category": "plants",
+    "stack": 64
+  },
+  "lava_bucket": {
+    "name": "lava bucket",
+    "category": "utility",
+    "stack": "0"
+  },
+  "music_disc_lava_chicken": {
+    "name": "lava chicken disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "lead": {
+    "name": "lead",
+    "category": "utility",
+    "stack": "64"
+  },
+  "leaf_litter": {
+    "name": "leaf litter",
+    "category": "plants",
+    "stack": 64
+  },
+  "leather": {
+    "name": "leather",
+    "category": "drops",
+    "stack": "64"
+  },
+  "leather_boots": {
+    "name": "leather boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "leather_helmet": {
+    "name": "leather cap",
+    "category": "armor",
+    "stack": 1
+  },
+  "leather_horse_armor": {
+    "name": "leather horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "leather_leggings": {
+    "name": "leather pants",
+    "category": "armor",
+    "stack": 1
+  },
+  "leather_chestplate": {
+    "name": "leather tunic",
+    "category": "armor",
+    "stack": 1
+  },
+  "lectern": {
+    "name": "lectern",
+    "category": "utility",
+    "stack": "64"
+  },
+  "lever": {
+    "name": "lever",
+    "category": "redstone",
+    "stack": 64
+  },
+  "light_blue_banner": {
+    "name": "light blue banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "light_blue_bed": {
+    "name": "light blue bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_blue_bundle": {
+    "name": "light blue bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_blue_candle": {
+    "name": "light blue candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_carpet": {
+    "name": "light blue carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_concrete": {
+    "name": "light blue concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_concrete_powder": {
+    "name": "light blue concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_dye": {
+    "name": "light blue dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_glazed_terracotta": {
+    "name": "light blue glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_harness": {
+    "name": "light blue harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "light_blue_shulker_box": {
+    "name": "light blue shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_blue_stained_glass": {
+    "name": "light blue stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_stained_glass_pane": {
+    "name": "light blue stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_terracotta": {
+    "name": "light blue terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_blue_wool": {
+    "name": "light blue wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_banner": {
+    "name": "light gray banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "light_gray_bed": {
+    "name": "light gray bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_gray_bundle": {
+    "name": "light gray bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_gray_candle": {
+    "name": "light gray candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_carpet": {
+    "name": "light gray carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_concrete": {
+    "name": "light gray concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_concrete_powder": {
+    "name": "light gray concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_dye": {
+    "name": "light gray dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_glazed_terracotta": {
+    "name": "light gray glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_harness": {
+    "name": "light gray harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "light_gray_shulker_box": {
+    "name": "light gray shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "light_gray_stained_glass": {
+    "name": "light gray stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_stained_glass_pane": {
+    "name": "light gray stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_terracotta": {
+    "name": "light gray terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_gray_wool": {
+    "name": "light gray wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "light_weighted_pressure_plate": {
+    "name": "light weighted pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "lightning_rod": {
+    "name": "lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "lilac": {
+    "name": "lilac",
+    "category": "plants",
+    "stack": 64
+  },
+  "lily_of_the_valley": {
+    "name": "lily of the valley",
+    "category": "plants",
+    "stack": 64
+  },
+  "lily_pad": {
+    "name": "lily pad",
+    "category": "plants",
+    "stack": 64
+  },
+  "lime_banner": {
+    "name": "lime banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "lime_bed": {
+    "name": "lime bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "lime_bundle": {
+    "name": "lime bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "lime_candle": {
+    "name": "lime candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_carpet": {
+    "name": "lime carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_concrete": {
+    "name": "lime concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_concrete_powder": {
+    "name": "lime concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_dye": {
+    "name": "lime dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_glazed_terracotta": {
+    "name": "lime glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_harness": {
+    "name": "lime harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "lime_shulker_box": {
+    "name": "lime shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "lime_stained_glass": {
+    "name": "lime stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_stained_glass_pane": {
+    "name": "lime stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_terracotta": {
+    "name": "lime terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lime_wool": {
+    "name": "lime wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "lingering_potion_of_fire_resistance_1": {
+    "name": "lingering potion of fire resistance",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_fire_resistance_extended": {
+    "name": "lingering potion of fire resistance (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_harming_1": {
+    "name": "lingering potion of harming",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_harming_2": {
+    "name": "lingering potion of harming II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_healing_1": {
+    "name": "lingering potion of healing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_healing_2": {
+    "name": "lingering potion of healing II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_infestation_1": {
+    "name": "lingering potion of infestation",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_invisibility_1": {
+    "name": "lingering potion of invisibility",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_invisibility_extended": {
+    "name": "lingering potion of invisibility (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_leaping_1": {
+    "name": "lingering potion of leaping",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_leaping_extended": {
+    "name": "lingering potion of leaping (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_leaping_2": {
+    "name": "lingering potion of leaping II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_night_vision_1": {
+    "name": "lingering potion of night vision",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_night_vision_extended": {
+    "name": "lingering potion of night vision (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_oozing_1": {
+    "name": "lingering potion of oozing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_poison_1": {
+    "name": "lingering potion of poison",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_poison_extended": {
+    "name": "lingering potion of poison (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_poison_2": {
+    "name": "lingering potion of poison II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_regeneration_1": {
+    "name": "lingering potion of regeneration",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_regeneration_extended": {
+    "name": "lingering potion of regeneration (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_regeneration_2": {
+    "name": "lingering potion of regeneration II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_slow_falling_1": {
+    "name": "lingering potion of slow falling",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_slow_falling_extended": {
+    "name": "lingering potion of slow falling (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_slowness_1": {
+    "name": "lingering potion of slowness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_slowness_extended": {
+    "name": "lingering potion of slowness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_slowness_2": {
+    "name": "lingering potion of slowness IV",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_strength_1": {
+    "name": "lingering potion of strength",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_strength_extended": {
+    "name": "lingering potion of strength (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_strength_2": {
+    "name": "lingering potion of strength II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_swiftness_1": {
+    "name": "lingering potion of swiftness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_swiftness_extended": {
+    "name": "lingering potion of swiftness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_swiftness_2": {
+    "name": "lingering potion of swiftness II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_the_turtle_master_1": {
+    "name": "lingering potion of the turtle master",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_the_turtle_master_extended": {
+    "name": "lingering potion of the turtle master (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_the_turtle_master_2": {
+    "name": "lingering potion of the turtle master II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_water_breathing_1": {
+    "name": "lingering potion of water breathing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_water_breathing_extended": {
+    "name": "lingering potion of water breathing (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_weakness_1": {
+    "name": "lingering potion of weakness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_weakness_extended": {
+    "name": "lingering potion of weakness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_weaving_1": {
+    "name": "lingering potion of weaving",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_potion_of_wind_charging_1": {
+    "name": "lingering potion of wind charging",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lingering_water_bottle": {
+    "name": "lingering water bottle",
+    "category": "brewing",
+    "stack": 1
+  },
+  "lodestone": {
+    "name": "lodestone",
+    "category": "utility",
+    "stack": 64
+  },
+  "loom": {
+    "name": "loom",
+    "category": "utility",
+    "stack": "64"
+  },
+  "mace": {
+    "name": "mace",
+    "category": "weapons",
+    "stack": 1
+  },
+  "magenta_banner": {
+    "name": "magenta banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "magenta_bed": {
+    "name": "magenta bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "magenta_bundle": {
+    "name": "magenta bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "magenta_candle": {
+    "name": "magenta candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_carpet": {
+    "name": "magenta carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_concrete": {
+    "name": "magenta concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_concrete_powder": {
+    "name": "magenta concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_dye": {
+    "name": "magenta dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_glazed_terracotta": {
+    "name": "magenta glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_harness": {
+    "name": "magenta harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "magenta_shulker_box": {
+    "name": "magenta shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "magenta_stained_glass": {
+    "name": "magenta stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_stained_glass_pane": {
+    "name": "magenta stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_terracotta": {
+    "name": "magenta terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magenta_wool": {
+    "name": "magenta wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "magma_block": {
+    "name": "magma block",
+    "category": "nether",
+    "stack": 64
+  },
+  "magma_cream": {
+    "name": "magma cream",
+    "category": "drops",
+    "stack": "64"
+  },
+  "music_disc_mall": {
+    "name": "mall disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "mangrove_boat": {
+    "name": "mangrove boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "mangrove_chest_boat": {
+    "name": "mangrove boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "mangrove_button": {
+    "name": "mangrove button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "mangrove_door": {
+    "name": "mangrove door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "mangrove_fence": {
+    "name": "mangrove fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "mangrove_fence_gate": {
+    "name": "mangrove fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "mangrove_hanging_sign": {
+    "name": "mangrove hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "mangrove_leaves": {
+    "name": "mangrove leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "mangrove_log": {
+    "name": "mangrove log",
+    "category": "wood",
+    "stack": 64
+  },
+  "mangrove_planks": {
+    "name": "mangrove planks",
+    "category": "wood",
+    "stack": 64
+  },
+  "mangrove_pressure_plate": {
+    "name": "mangrove pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "mangrove_propagule": {
+    "name": "mangrove propagule",
+    "category": "plants",
+    "stack": 64
+  },
+  "mangrove_roots": {
+    "name": "mangrove roots",
+    "category": "plants",
+    "stack": 64
+  },
+  "mangrove_shelf": {
+    "name": "mangrove shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "mangrove_sign": {
+    "name": "mangrove sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "mangrove_slab": {
+    "name": "mangrove slab",
+    "category": "wood",
+    "stack": 64
+  },
+  "mangrove_stairs": {
+    "name": "mangrove stairs",
+    "category": "wood",
+    "stack": 64
+  },
+  "mangrove_trapdoor": {
+    "name": "mangrove trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "mangrove_wood": {
+    "name": "mangrove wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "music_disc_mellohi": {
+    "name": "mellohi disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "melon": {
+    "name": "melon",
+    "category": "food",
+    "stack": "64"
+  },
+  "melon_seeds": {
+    "name": "melon seeds",
+    "category": "plants",
+    "stack": 64
+  },
+  "melon_slice": {
+    "name": "melon slice",
+    "category": "food",
+    "stack": "64"
+  },
+  "milk_bucket": {
+    "name": "milk bucket",
+    "category": "utility",
+    "stack": 1
+  },
+  "minecart": {
+    "name": "minecart",
+    "category": "transport",
+    "stack": 1
+  },
+  "chest_minecart": {
+    "name": "minecart with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "furnace_minecart": {
+    "name": "minecart with furnace",
+    "category": "transport",
+    "stack": 1
+  },
+  "hopper_minecart": {
+    "name": "minecart with hopper",
+    "category": "transport",
+    "stack": 1
+  },
+  "tnt_minecart": {
+    "name": "minecart with tnt",
+    "category": "transport",
+    "stack": 1
+  },
+  "miner_pottery_sherd": {
+    "name": "miner pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "moss_block": {
+    "name": "moss block",
+    "category": "plants",
+    "stack": 64
+  },
+  "moss_carpet": {
+    "name": "moss carpet",
+    "category": "plants",
+    "stack": 64
+  },
+  "mossy_cobblestone": {
+    "name": "mossy cobblestone",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_cobblestone_slab": {
+    "name": "mossy cobblestone slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_cobblestone_stairs": {
+    "name": "mossy cobblestone stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_cobblestone_wall": {
+    "name": "mossy cobblestone wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_stone_brick_slab": {
+    "name": "mossy stone brick slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_stone_brick_stairs": {
+    "name": "mossy stone brick stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_stone_brick_wall": {
+    "name": "mossy stone brick wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "mossy_stone_bricks": {
+    "name": "mossy stone bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "mourner_pottery_sherd": {
+    "name": "mourner pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "mud": {
+    "name": "mud",
+    "category": "earth",
+    "stack": 64
+  },
+  "mud_brick_slab": {
+    "name": "mud brick slab",
+    "category": "earth",
+    "stack": 64
+  },
+  "mud_brick_stairs": {
+    "name": "mud brick stairs",
+    "category": "earth",
+    "stack": 64
+  },
+  "mud_brick_wall": {
+    "name": "mud brick wall",
+    "category": "earth",
+    "stack": 64
+  },
+  "mud_bricks": {
+    "name": "mud bricks",
+    "category": "earth",
+    "stack": 64
+  },
+  "muddy_mangrove_roots": {
+    "name": "muddy mangrove roots",
+    "category": "plants",
+    "stack": 64
+  },
+  "mundane_potion": {
+    "name": "mundane potion",
+    "category": "brewing",
+    "stack": 1
+  },
+  "mushroom_stem": {
+    "name": "mushroom stem",
+    "category": "plants",
+    "stack": 64
+  },
+  "mushroom_stew": {
+    "name": "mushroom stew",
+    "category": "food",
+    "stack": 1
+  },
+  "music_disc_creator_music_box": {
+    "name": "music disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "mycelium": {
+    "name": "mycelium",
+    "category": "earth",
+    "stack": "64"
+  },
+  "name_tag": {
+    "name": "nametag",
+    "category": "utility",
+    "stack": "64"
+  },
+  "nautilus_shell": {
+    "name": "nautilus shell",
+    "category": "drops",
+    "stack": "64"
+  },
+  "nether_brick": {
+    "name": "nether brick",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_brick_fence": {
+    "name": "nether brick fence",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_brick_slab": {
+    "name": "nether brick slab",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_brick_stairs": {
+    "name": "nether brick stairs",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_brick_wall": {
+    "name": "nether brick wall",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_bricks": {
+    "name": "nether bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "nether_gold_ore": {
+    "name": "nether gold ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "quartz": {
+    "name": "nether quartz",
+    "category": "nether",
+    "stack": 64
+  },
+  "nether_quartz_ore": {
+    "name": "nether quartz ore",
+    "category": "nether",
+    "stack": 64
+  },
+  "nether_sprouts": {
+    "name": "nether sprouts",
+    "category": "nether",
+    "stack": 64
+  },
+  "nether_star": {
+    "name": "nether star",
+    "category": "drops",
+    "stack": 64
+  },
+  "nether_wart": {
+    "name": "nether wart",
+    "category": "nether",
+    "stack": 64
+  },
+  "nether_wart_block": {
+    "name": "nether wart block",
+    "category": "nether",
+    "stack": 64
+  },
+  "netherite_axe": {
+    "name": "netherite axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "netherite_boots": {
+    "name": "netherite boots",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_chestplate": {
+    "name": "netherite chestplate",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_helmet": {
+    "name": "netherite helmet",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_hoe": {
+    "name": "netherite hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "netherite_horse_armor": {
+    "name": "netherite horse armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_ingot": {
+    "name": "netherite ingot",
+    "category": "ores",
+    "stack": 64
+  },
+  "netherite_leggings": {
+    "name": "netherite leggings",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_nautilus_armor": {
+    "name": "netherite nautilus armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "netherite_pickaxe": {
+    "name": "netherite pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "netherite_scrap": {
+    "name": "netherite scrap",
+    "category": "ores",
+    "stack": 64
+  },
+  "netherite_shovel": {
+    "name": "netherite shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "netherite_spear": {
+    "name": "netherite spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "netherite_sword": {
+    "name": "netherite sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "netherite_upgrade_smithing_template": {
+    "name": "netherite upgrade smithing template",
+    "category": "nether",
+    "stack": 64
+  },
+  "netherrack": {
+    "name": "netherrack",
+    "category": "nether",
+    "stack": 64
+  },
+  "note_block": {
+    "name": "note block",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oak_boat": {
+    "name": "oak boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "oak_chest_boat": {
+    "name": "oak boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "oak_button": {
+    "name": "oak button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oak_door": {
+    "name": "oak door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oak_fence": {
+    "name": "oak fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "oak_fence_gate": {
+    "name": "oak fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "oak_hanging_sign": {
+    "name": "oak hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "oak_leaves": {
+    "name": "oak leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "oak_log": {
+    "name": "oak log",
+    "category": "wood",
+    "stack": 64
+  },
+  "oak_planks": {
+    "name": "oak planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "oak_pressure_plate": {
+    "name": "oak pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oak_sapling": {
+    "name": "oak sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "oak_shelf": {
+    "name": "oak shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "oak_sign": {
+    "name": "oak sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "oak_slab": {
+    "name": "oak slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "oak_stairs": {
+    "name": "oak stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "oak_trapdoor": {
+    "name": "oak trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oak_wood": {
+    "name": "oak wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "observer": {
+    "name": "observer",
+    "category": "redstone",
+    "stack": 64
+  },
+  "obsidian": {
+    "name": "obsidian",
+    "category": "nether",
+    "stack": 64
+  },
+  "ochre_froglight": {
+    "name": "ochre froglight",
+    "category": "light",
+    "stack": 64
+  },
+  "ominous_bottle": {
+    "name": "ominous bottle",
+    "category": "drops",
+    "stack": 64
+  },
+  "ominous_trial_key": {
+    "name": "ominous trial key",
+    "category": "drops",
+    "stack": 64
+  },
+  "open_eyeblossom": {
+    "name": "open eyeblossom",
+    "category": "plants",
+    "stack": 64
+  },
+  "orange_banner": {
+    "name": "orange banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "orange_bed": {
+    "name": "orange bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "orange_bundle": {
+    "name": "orange bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "orange_candle": {
+    "name": "orange candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_carpet": {
+    "name": "orange carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_concrete": {
+    "name": "orange concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_concrete_powder": {
+    "name": "orange concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_dye": {
+    "name": "orange dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_glazed_terracotta": {
+    "name": "orange glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_harness": {
+    "name": "orange harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "orange_shulker_box": {
+    "name": "orange shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "orange_stained_glass": {
+    "name": "orange stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_stained_glass_pane": {
+    "name": "orange stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_terracotta": {
+    "name": "orange terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "orange_tulip": {
+    "name": "orange tulip",
+    "category": "plants",
+    "stack": 64
+  },
+  "orange_wool": {
+    "name": "orange wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "music_disc_otherside": {
+    "name": "otherside disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "oxeye_daisy": {
+    "name": "oxeye daisy",
+    "category": "plants",
+    "stack": 64
+  },
+  "oxidized_chiseled_copper": {
+    "name": "oxidized chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper": {
+    "name": "oxidized copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper_bars": {
+    "name": "oxidized copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper_bulb": {
+    "name": "oxidized copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "oxidized_copper_chain": {
+    "name": "oxidized copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper_chest": {
+    "name": "oxidized copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "oxidized_copper_door": {
+    "name": "oxidized copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oxidized_copper_golem_statue": {
+    "name": "oxidized copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper_grate": {
+    "name": "oxidized copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_copper_lantern": {
+    "name": "oxidized copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "oxidized_copper_trapdoor": {
+    "name": "oxidized copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "oxidized_cut_copper": {
+    "name": "oxidized cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_cut_copper_slab": {
+    "name": "oxidized cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_cut_copper_stairs": {
+    "name": "oxidized cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "oxidized_lightning_rod": {
+    "name": "oxidized lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "packed_ice": {
+    "name": "packed ice",
+    "category": "ice",
+    "stack": 64
+  },
+  "packed_mud": {
+    "name": "packed mud",
+    "category": "earth",
+    "stack": 64
+  },
+  "painting": {
+    "name": "painting",
+    "category": "utility",
+    "stack": 64
+  },
+  "pale_hanging_moss": {
+    "name": "pale hanging moss",
+    "category": "plants",
+    "stack": 64
+  },
+  "pale_moss_block": {
+    "name": "pale moss block",
+    "category": "plants",
+    "stack": 64
+  },
+  "pale_moss_carpet": {
+    "name": "pale moss carpet",
+    "category": "plants",
+    "stack": 64
+  },
+  "pale_oak_boat": {
+    "name": "pale oak boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "pale_oak_chest_boat": {
+    "name": "pale oak boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "pale_oak_button": {
+    "name": "pale oak button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "pale_oak_door": {
+    "name": "pale oak door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "pale_oak_fence": {
+    "name": "pale oak fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "pale_oak_fence_gate": {
+    "name": "pale oak fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "pale_oak_hanging_sign": {
+    "name": "pale oak hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "pale_oak_leaves": {
+    "name": "pale oak leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "pale_oak_log": {
+    "name": "pale oak log",
+    "category": "wood",
+    "stack": 64
+  },
+  "pale_oak_planks": {
+    "name": "pale oak planks",
+    "category": "wood",
+    "stack": 64
+  },
+  "pale_oak_pressure_plate": {
+    "name": "pale oak pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "pale_oak_sapling": {
+    "name": "pale oak sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "pale_oak_shelf": {
+    "name": "pale oak shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "pale_oak_sign": {
+    "name": "pale oak sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "pale_oak_slab": {
+    "name": "pale oak slab",
+    "category": "wood",
+    "stack": 64
+  },
+  "pale_oak_stairs": {
+    "name": "pale oak stairs",
+    "category": "wood",
+    "stack": 64
+  },
+  "pale_oak_trapdoor": {
+    "name": "pale oak trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "pale_oak_wood": {
+    "name": "pale oak wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "paper": {
+    "name": "paper",
+    "category": "utility",
+    "stack": "64"
+  },
+  "pearlescent_froglight": {
+    "name": "pearlescent froglight",
+    "category": "light",
+    "stack": 64
+  },
+  "peony": {
+    "name": "peony",
+    "category": "plants",
+    "stack": 64
+  },
+  "phantom_membrane": {
+    "name": "phantom membrane",
+    "category": "drops",
+    "stack": "64"
+  },
+  "piglin_head": {
+    "name": "piglin head",
+    "category": "drops",
+    "stack": 64
+  },
+  "music_disc_pigstep": {
+    "name": "pigstep disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "pink_banner": {
+    "name": "pink banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "pink_bed": {
+    "name": "pink bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "pink_bundle": {
+    "name": "pink bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "pink_candle": {
+    "name": "pink candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_carpet": {
+    "name": "pink carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_concrete": {
+    "name": "pink concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_concrete_powder": {
+    "name": "pink concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_dye": {
+    "name": "pink dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_glazed_terracotta": {
+    "name": "pink glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_harness": {
+    "name": "pink harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "pink_petals": {
+    "name": "pink petals",
+    "category": "plants",
+    "stack": 64
+  },
+  "pink_shulker_box": {
+    "name": "pink shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "pink_stained_glass": {
+    "name": "pink stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_stained_glass_pane": {
+    "name": "pink stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_terracotta": {
+    "name": "pink terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "pink_tulip": {
+    "name": "pink tulip",
+    "category": "plants",
+    "stack": 64
+  },
+  "pink_wool": {
+    "name": "pink wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "piston": {
+    "name": "piston",
+    "category": "redstone",
+    "stack": 64
+  },
+  "pitcher_plant": {
+    "name": "pitcher plant",
+    "category": "plants",
+    "stack": 64
+  },
+  "pitcher_pod": {
+    "name": "pitcher pod",
+    "category": "plants",
+    "stack": 64
+  },
+  "plenty_pottery_sherd": {
+    "name": "plenty pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "podzol": {
+    "name": "podzol",
+    "category": "earth",
+    "stack": "64"
+  },
+  "pointed_dripstone": {
+    "name": "pointed dripstone",
+    "category": "stone",
+    "stack": 64
+  },
+  "poisonous_potato": {
+    "name": "poisonous potato",
+    "category": "food",
+    "stack": 64
+  },
+  "polished_andesite": {
+    "name": "polished andesite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_andesite_slab": {
+    "name": "polished andesite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_andesite_stairs": {
+    "name": "polished andesite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_basalt": {
+    "name": "polished basalt",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone": {
+    "name": "polished blackstone",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_brick_slab": {
+    "name": "polished blackstone brick slab",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_brick_stairs": {
+    "name": "polished blackstone brick stairs",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_brick_wall": {
+    "name": "polished blackstone brick wall",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_bricks": {
+    "name": "polished blackstone bricks",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_button": {
+    "name": "polished blackstone button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "polished_blackstone_pressure_plate": {
+    "name": "polished blackstone pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "polished_blackstone_slab": {
+    "name": "polished blackstone slab",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_stairs": {
+    "name": "polished blackstone stairs",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_blackstone_wall": {
+    "name": "polished blackstone wall",
+    "category": "nether",
+    "stack": 64
+  },
+  "polished_deepslate": {
+    "name": "polished deepslate",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_deepslate_slab": {
+    "name": "polished deepslate slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_deepslate_stairs": {
+    "name": "polished deepslate stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_deepslate_wall": {
+    "name": "polished deepslate wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_diorite": {
+    "name": "polished diorite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_diorite_slab": {
+    "name": "polished diorite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_diorite_stairs": {
+    "name": "polished diorite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_granite": {
+    "name": "polished granite",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_granite_slab": {
+    "name": "polished granite slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_granite_stairs": {
+    "name": "polished granite stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "polished_tuff": {
+    "name": "polished tuff",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_tuff_slab": {
+    "name": "polished tuff slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_tuff_stairs": {
+    "name": "polished tuff stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "polished_tuff_wall": {
+    "name": "polished tuff wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "popped_chorus_fruit": {
+    "name": "popped chorus fruit",
+    "category": "food",
+    "stack": "64"
+  },
+  "poppy": {
+    "name": "poppy",
+    "category": "plants",
+    "stack": 64
+  },
+  "potato": {
+    "name": "potato",
+    "category": "food",
+    "stack": "64"
+  },
+  "potion_of_fire_resistance_1": {
+    "name": "potion of fire resistance",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_fire_resistance_extended": {
+    "name": "potion of fire resistance (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_harming_1": {
+    "name": "potion of harming",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_harming_2": {
+    "name": "potion of harming II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_healing_1": {
+    "name": "potion of healing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_healing_2": {
+    "name": "potion of healing II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_infestation_1": {
+    "name": "potion of infestation",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_invisibility_1": {
+    "name": "potion of invisibility",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_invisibility_extended": {
+    "name": "potion of invisibility (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_leaping_1": {
+    "name": "potion of leaping",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_leaping_extended": {
+    "name": "potion of leaping (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_leaping_2": {
+    "name": "potion of leaping II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_night_vision_1": {
+    "name": "potion of night vision",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_night_vision_extended": {
+    "name": "potion of night vision (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_oozing_1": {
+    "name": "potion of oozing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_poison_1": {
+    "name": "potion of poison",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_poison_extended": {
+    "name": "potion of poison (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_poison_2": {
+    "name": "potion of poison II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_regeneration_1": {
+    "name": "potion of regeneration",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_regeneration_extended": {
+    "name": "potion of regeneration (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_regeneration_2": {
+    "name": "potion of regeneration II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_slow_falling_1": {
+    "name": "potion of slow falling",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_slow_falling_extended": {
+    "name": "potion of slow falling (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_slowness_1": {
+    "name": "potion of slowness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_slowness_extended": {
+    "name": "potion of slowness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_slowness_2": {
+    "name": "potion of slowness IV",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_strength_1": {
+    "name": "potion of strength",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_strength_extended": {
+    "name": "potion of strength (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_strength_2": {
+    "name": "potion of strength II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_swiftness_1": {
+    "name": "potion of swiftness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_swiftness_extended": {
+    "name": "potion of swiftness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_swiftness_2": {
+    "name": "potion of swiftness II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_the_turtle_master_1": {
+    "name": "potion of the turtle master",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_the_turtle_master_extended": {
+    "name": "potion of the turtle master (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_the_turtle_master_2": {
+    "name": "potion of the turtle master II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_water_breathing_1": {
+    "name": "potion of water breathing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_water_breathing_extended": {
+    "name": "potion of water breathing (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_weakness": {
+    "name": "potion of weakness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_weakness_extended": {
+    "name": "potion of weakness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_weaving_1": {
+    "name": "potion of weaving",
+    "category": "brewing",
+    "stack": 1
+  },
+  "potion_of_wind_charging_1": {
+    "name": "potion of wind charging",
+    "category": "brewing",
+    "stack": 1
+  },
+  "powder_snow_bucket": {
+    "name": "powder snow bucket",
+    "category": "utility",
+    "stack": 1
+  },
+  "powered_rail": {
+    "name": "powered rail",
+    "category": "transport",
+    "stack": 64
+  },
+  "music_disc_precipice": {
+    "name": "precipice disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "prismarine": {
+    "name": "prismarine",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_brick_slab": {
+    "name": "prismarine brick slab",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_brick_stairs": {
+    "name": "prismarine brick stairs",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_bricks": {
+    "name": "prismarine bricks",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_crystals": {
+    "name": "prismarine crystals",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_shard": {
+    "name": "prismarine shard",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_slab": {
+    "name": "prismarine slab",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_stairs": {
+    "name": "prismarine stairs",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prismarine_wall": {
+    "name": "prismarine wall",
+    "category": "ocean",
+    "stack": 64
+  },
+  "prize_pottery_sherd": {
+    "name": "prize pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "pufferfish": {
+    "name": "pufferfish",
+    "category": "food",
+    "stack": "64"
+  },
+  "pumpkin": {
+    "name": "pumpkin",
+    "category": "plants",
+    "stack": "64"
+  },
+  "pumpkin_pie": {
+    "name": "pumpkin pie",
+    "category": "food",
+    "stack": "64"
+  },
+  "pumpkin_seeds": {
+    "name": "pumpkin seeds",
+    "category": "plants",
+    "stack": 64
+  },
+  "purple_banner": {
+    "name": "purple banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "purple_bed": {
+    "name": "purple bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "purple_bundle": {
+    "name": "purple bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "purple_candle": {
+    "name": "purple candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_carpet": {
+    "name": "purple carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_concrete": {
+    "name": "purple concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_concrete_powder": {
+    "name": "purple concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_dye": {
+    "name": "purple dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_glazed_terracotta": {
+    "name": "purple glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_harness": {
+    "name": "purple harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "purple_shulker_box": {
+    "name": "purple shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "purple_stained_glass": {
+    "name": "purple stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_stained_glass_pane": {
+    "name": "purple stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_terracotta": {
+    "name": "purple terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purple_wool": {
+    "name": "purple wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "purpur_block": {
+    "name": "purpur block",
+    "category": "end",
+    "stack": 64
+  },
+  "purpur_pillar": {
+    "name": "purpur pillar",
+    "category": "end",
+    "stack": 64
+  },
+  "purpur_slab": {
+    "name": "purpur slab",
+    "category": "end",
+    "stack": 64
+  },
+  "purpur_stairs": {
+    "name": "purpur stairs",
+    "category": "end",
+    "stack": 64
+  },
+  "quartz_bricks": {
+    "name": "quartz bricks",
+    "category": "nether",
+    "stack": 64
+  },
+  "quartz_pillar": {
+    "name": "quartz pillar",
+    "category": "nether",
+    "stack": 64
+  },
+  "quartz_slab": {
+    "name": "quartz slab",
+    "category": "nether",
+    "stack": 64
+  },
+  "quartz_stairs": {
+    "name": "quartz stairs",
+    "category": "nether",
+    "stack": 64
+  },
+  "rabbit_hide": {
+    "name": "rabbit hide",
+    "category": "drops",
+    "stack": "64"
+  },
+  "rabbit_stew": {
+    "name": "rabbit stew",
+    "category": "food",
+    "stack": 1
+  },
+  "rabbit_foot": {
+    "name": "rabbit's foot",
+    "category": "utility",
+    "stack": 64
+  },
+  "rail": {
+    "name": "rail",
+    "category": "transport",
+    "stack": 64
+  },
+  "raiser_armor_trim_smithing_template": {
+    "name": "raiser armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "beef": {
+    "name": "raw beef",
+    "category": "food",
+    "stack": "64"
+  },
+  "chicken": {
+    "name": "raw chicken",
+    "category": "food",
+    "stack": "64"
+  },
+  "cod": {
+    "name": "raw cod",
+    "category": "food",
+    "stack": "64"
+  },
+  "raw_copper": {
+    "name": "raw copper",
+    "category": "ores",
+    "stack": 64
+  },
+  "raw_gold": {
+    "name": "raw gold",
+    "category": "ores",
+    "stack": 64
+  },
+  "raw_iron": {
+    "name": "raw iron",
+    "category": "ores",
+    "stack": 64
+  },
+  "mutton": {
+    "name": "raw mutton",
+    "category": "food",
+    "stack": "64"
+  },
+  "porkchop": {
+    "name": "raw porkchop",
+    "category": "food",
+    "stack": "64"
+  },
+  "rabbit": {
+    "name": "raw rabbit",
+    "category": "food",
+    "stack": "64"
+  },
+  "salmon": {
+    "name": "raw salmon",
+    "category": "food",
+    "stack": "64"
+  },
+  "recovery_compass": {
+    "name": "recovery compass",
+    "category": "utility",
+    "stack": 64
+  },
+  "red_banner": {
+    "name": "red banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "red_bed": {
+    "name": "red bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "red_bundle": {
+    "name": "red bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "red_candle": {
+    "name": "red candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_carpet": {
+    "name": "red carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_concrete": {
+    "name": "red concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_concrete_powder": {
+    "name": "red concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_dye": {
+    "name": "red dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_glazed_terracotta": {
+    "name": "red glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_harness": {
+    "name": "red harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "red_mushroom": {
+    "name": "red mushroom",
+    "category": "plants",
+    "stack": 64
+  },
+  "red_mushroom_block": {
+    "name": "red mushroom block",
+    "category": "plants",
+    "stack": 64
+  },
+  "red_nether_brick_slab": {
+    "name": "red nether brick slab",
+    "category": "brick",
+    "stack": 64
+  },
+  "red_nether_brick_stairs": {
+    "name": "red nether brick stairs",
+    "category": "brick",
+    "stack": 64
+  },
+  "red_nether_brick_wall": {
+    "name": "red nether brick wall",
+    "category": "brick",
+    "stack": 64
+  },
+  "red_nether_bricks": {
+    "name": "red nether bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "red_sand": {
+    "name": "red sand",
+    "category": "sand",
+    "stack": "64"
+  },
+  "red_sandstone": {
+    "name": "red sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "red_sandstone_slab": {
+    "name": "red sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "red_sandstone_stairs": {
+    "name": "red sandstone stairs",
+    "category": "sand",
+    "stack": "64"
+  },
+  "red_sandstone_wall": {
+    "name": "red sandstone wall",
+    "category": "sand",
+    "stack": "64"
+  },
+  "red_shulker_box": {
+    "name": "red shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "red_stained_glass": {
+    "name": "red stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_stained_glass_pane": {
+    "name": "red stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_terracotta": {
+    "name": "red terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "red_tulip": {
+    "name": "red tulip",
+    "category": "plants",
+    "stack": 64
+  },
+  "red_wool": {
+    "name": "red wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "comparator": {
+    "name": "redstone comparator",
+    "category": "redstone",
+    "stack": 64
+  },
+  "redstone": {
+    "name": "redstone dust",
+    "category": "ores",
+    "stack": "64"
+  },
+  "redstone_lamp": {
+    "name": "redstone lamp",
+    "category": "light",
+    "stack": 64
+  },
+  "redstone_ore": {
+    "name": "redstone ore",
+    "category": "ores",
+    "stack": 64
+  },
+  "repeater": {
+    "name": "redstone repeater",
+    "category": "redstone",
+    "stack": 64
+  },
+  "redstone_torch": {
+    "name": "redstone torch",
+    "category": "light",
+    "stack": 64
+  },
+  "music_disc_relic": {
+    "name": "relic disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "resin_brick": {
+    "name": "resin brick",
+    "category": "brick",
+    "stack": 64
+  },
+  "resin_brick_slab": {
+    "name": "resin brick slab",
+    "category": "brick",
+    "stack": 64
+  },
+  "resin_brick_stairs": {
+    "name": "resin brick stairs",
+    "category": "brick",
+    "stack": 64
+  },
+  "resin_brick_wall": {
+    "name": "resin brick wall",
+    "category": "brick",
+    "stack": 64
+  },
+  "resin_bricks": {
+    "name": "resin bricks",
+    "category": "brick",
+    "stack": 64
+  },
+  "resin_clump": {
+    "name": "resin clump",
+    "category": "drops",
+    "stack": 64
+  },
+  "rib_armor_trim_smithing_template": {
+    "name": "rib armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "rooted_dirt": {
+    "name": "rooted dirt",
+    "category": "earth",
+    "stack": 64
+  },
+  "rose_bush": {
+    "name": "rose bush",
+    "category": "plants",
+    "stack": 64
+  },
+  "rotten_flesh": {
+    "name": "rotten flesh",
+    "category": "drops",
+    "stack": 64
+  },
+  "saddle": {
+    "name": "saddle",
+    "category": "transport",
+    "stack": "64"
+  },
+  "sand": {
+    "name": "sand",
+    "category": "sand",
+    "stack": 64
+  },
+  "sandstone": {
+    "name": "sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "sandstone_slab": {
+    "name": "sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "sandstone_stairs": {
+    "name": "sandstone stairs",
+    "category": "sand",
+    "stack": "64"
+  },
+  "sandstone_wall": {
+    "name": "sandstone wall",
+    "category": "sand",
+    "stack": "64"
+  },
+  "scaffolding": {
+    "name": "scaffolding",
+    "category": "utility",
+    "stack": "64"
+  },
+  "scrape_pottery_sherd": {
+    "name": "scrape pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "sculk": {
+    "name": "sculk",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "sculk_catalyst": {
+    "name": "sculk catalyst",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "sculk_sensor": {
+    "name": "sculk sensor",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "sculk_shrieker": {
+    "name": "sculk shrieker",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "sculk_vein": {
+    "name": "sculk vein",
+    "category": "deep dark",
+    "stack": 64
+  },
+  "sea_lantern": {
+    "name": "sea lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "sea_pickle": {
+    "name": "sea pickle",
+    "category": "ocean",
+    "stack": 64
+  },
+  "seagrass": {
+    "name": "seagrass",
+    "category": "ocean",
+    "stack": 64
+  },
+  "sentry_armor_trim_smithing_template": {
+    "name": "sentry armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "shaper_armor_trim_smithing_template": {
+    "name": "shaper armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "sheaf_pottery_sherd": {
+    "name": "sheaf pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "shears": {
+    "name": "shears",
+    "category": "tools",
+    "stack": 1
+  },
+  "shelter_pottery_sherd": {
+    "name": "shelter pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "shield": {
+    "name": "shield",
+    "category": "armor",
+    "stack": 1
+  },
+  "short_dry_grass": {
+    "name": "short dry grass",
+    "category": "plants",
+    "stack": 64
+  },
+  "short_grass": {
+    "name": "short grass",
+    "category": "plants",
+    "stack": 64
+  },
+  "shroomlight": {
+    "name": "shroomlight",
+    "category": "light",
+    "stack": 64
+  },
+  "shulker_box": {
+    "name": "shulker box",
+    "category": "end",
+    "stack": 1
+  },
+  "shulker_shell": {
+    "name": "shulker shell",
+    "category": "end",
+    "stack": 64
+  },
+  "silence_armor_trim_smithing_template": {
+    "name": "silence armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "skeleton_skull": {
+    "name": "skeleton skull",
+    "category": "drops",
+    "stack": 64
+  },
+  "skull_banner_pattern": {
+    "name": "skull banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "skull_pottery_sherd": {
+    "name": "skull pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "slime_block": {
+    "name": "slime block",
+    "category": "drops",
+    "stack": "64"
+  },
+  "slime_ball": {
+    "name": "slimeball",
+    "category": "drops",
+    "stack": "64"
+  },
+  "small_dripleaf": {
+    "name": "small dripleaf",
+    "category": "plants",
+    "stack": 64
+  },
+  "smithing_table": {
+    "name": "smithing table",
+    "category": "utility",
+    "stack": "64"
+  },
+  "smoker": {
+    "name": "smoker",
+    "category": "utility",
+    "stack": "64"
+  },
+  "smooth_basalt": {
+    "name": "smooth basalt",
+    "category": "nether",
+    "stack": 64
+  },
+  "smooth_quartz": {
+    "name": "smooth quartz block",
+    "category": "nether",
+    "stack": 64
+  },
+  "smooth_quartz_slab": {
+    "name": "smooth quartz slab",
+    "category": "nether",
+    "stack": 64
+  },
+  "smooth_quartz_stairs": {
+    "name": "smooth quartz stairs",
+    "category": "nether",
+    "stack": 64
+  },
+  "smooth_red_sandstone": {
+    "name": "smooth red sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_red_sandstone_slab": {
+    "name": "smooth red sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_red_sandstone_stairs": {
+    "name": "smooth red sandstone stairs",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_sandstone": {
+    "name": "smooth sandstone",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_sandstone_slab": {
+    "name": "smooth sandstone slab",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_sandstone_stairs": {
+    "name": "smooth sandstone stairs",
+    "category": "sand",
+    "stack": "64"
+  },
+  "smooth_stone": {
+    "name": "smooth stone",
+    "category": "stone",
+    "stack": "64"
+  },
+  "smooth_stone_slab": {
+    "name": "smooth stone slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "sniffer_egg": {
+    "name": "sniffer egg",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "snort_pottery_sherd": {
+    "name": "snort pottery sherd",
+    "category": "archaeology",
+    "stack": 64
+  },
+  "snout_armor_trim_smithing_template": {
+    "name": "snout armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "piglin_banner_pattern": {
+    "name": "snout banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "snow": {
+    "name": "snow",
+    "category": "ice",
+    "stack": 64
+  },
+  "snow_block": {
+    "name": "snow block",
+    "category": "ice",
+    "stack": 64
+  },
+  "snowball": {
+    "name": "snowball",
+    "category": "ice",
+    "stack": 16
+  },
+  "soul_campfire": {
+    "name": "soul campfire",
+    "category": "light",
+    "stack": 64
+  },
+  "soul_lantern": {
+    "name": "soul lantern",
+    "category": "light",
+    "stack": "64"
+  },
+  "soul_sand": {
+    "name": "soul sand",
+    "category": "nether",
+    "stack": 64
+  },
+  "soul_soil": {
+    "name": "soul soil",
+    "category": "nether",
+    "stack": 64
+  },
+  "soul_torch": {
+    "name": "soul torch",
+    "category": "light",
+    "stack": "64"
+  },
+  "spectral_arrow": {
+    "name": "spectral arrow",
+    "category": "weapons",
+    "stack": 64
+  },
+  "spider_eye": {
+    "name": "spider eye",
+    "category": "drops",
+    "stack": "64"
+  },
+  "spire_armor_trim_smithing_template": {
+    "name": "spire armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "splash_potion_of_fire_resistance_1": {
+    "name": "splash potion of fire resistance",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_fire_resistance_extended": {
+    "name": "splash potion of fire resistance (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_harming_1": {
+    "name": "splash potion of harming",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_harming_2": {
+    "name": "splash potion of harming II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_healing_1": {
+    "name": "splash potion of healing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_healing_2": {
+    "name": "splash potion of healing II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_infestation_1": {
+    "name": "splash potion of infestation",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_invisibility_1": {
+    "name": "splash potion of invisibility",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_invisibility_extended": {
+    "name": "splash potion of invisibility (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_leaping_1": {
+    "name": "splash potion of leaping",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_leaping_extended": {
+    "name": "splash potion of leaping (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_leaping_2": {
+    "name": "splash potion of leaping II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_night_vision_1": {
+    "name": "splash potion of night vision",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_night_vision_extended": {
+    "name": "splash potion of night vision (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_oozing_1": {
+    "name": "splash potion of oozing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_poison_1": {
+    "name": "splash potion of poison",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_poison_extended": {
+    "name": "splash potion of poison (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_poison_2": {
+    "name": "splash potion of poison II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_regeneration_1": {
+    "name": "splash potion of regeneration",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_regeneration_extended": {
+    "name": "splash potion of regeneration (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_regeneration_2": {
+    "name": "splash potion of regeneration II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_slow_falling_1": {
+    "name": "splash potion of slow falling",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_slow_falling_extended": {
+    "name": "splash potion of slow falling (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_slowness_1": {
+    "name": "splash potion of slowness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_slowness_extended": {
+    "name": "splash potion of slowness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_slowness_2": {
+    "name": "splash potion of slowness IV",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_strength_1": {
+    "name": "splash potion of strength",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_strength_extended": {
+    "name": "splash potion of strength (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_strength_2": {
+    "name": "splash potion of strength II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_swiftness_1": {
+    "name": "splash potion of swiftness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_swiftness_extended": {
+    "name": "splash potion of swiftness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_swiftness_2": {
+    "name": "splash potion of swiftness II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_the_turtle_master_1": {
+    "name": "splash potion of the turtle master",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_the_turtle_master_extended": {
+    "name": "splash potion of the turtle master (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_the_turtle_master_2": {
+    "name": "splash potion of the turtle master II",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_water_breathing_1": {
+    "name": "splash potion of water breathing",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_water_breathing_extended": {
+    "name": "splash potion of water breathing (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_weakness_1": {
+    "name": "splash potion of weakness",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_weakness_extended": {
+    "name": "splash potion of weakness (extended)",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_weaving_1": {
+    "name": "splash potion of weaving",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_potion_of_wind_charging_1": {
+    "name": "splash potion of wind charging",
+    "category": "brewing",
+    "stack": 1
+  },
+  "splash_water_bottle": {
+    "name": "splash water bottle",
+    "category": "brewing",
+    "stack": 1
+  },
+  "sponge": {
+    "name": "sponge",
+    "category": "ocean",
+    "stack": 64
+  },
+  "spore_blossom": {
+    "name": "spore blossom",
+    "category": "plants",
+    "stack": 64
+  },
+  "spruce_boat": {
+    "name": "spruce boat",
+    "category": "transport",
+    "stack": 1
+  },
+  "spruce_chest_boat": {
+    "name": "spruce boat with chest",
+    "category": "transport",
+    "stack": 1
+  },
+  "spruce_button": {
+    "name": "spruce button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "spruce_door": {
+    "name": "spruce door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "spruce_fence": {
+    "name": "spruce fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "spruce_fence_gate": {
+    "name": "spruce fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "spruce_hanging_sign": {
+    "name": "spruce hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "spruce_leaves": {
+    "name": "spruce leaves",
+    "category": "plants",
+    "stack": 64
+  },
+  "spruce_log": {
+    "name": "spruce log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "spruce_planks": {
+    "name": "spruce planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "spruce_pressure_plate": {
+    "name": "spruce pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "spruce_sapling": {
+    "name": "spruce sapling",
+    "category": "plants",
+    "stack": 64
+  },
+  "spruce_shelf": {
+    "name": "spruce shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "spruce_sign": {
+    "name": "spruce sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "spruce_slab": {
+    "name": "spruce slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "spruce_stairs": {
+    "name": "spruce stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "spruce_trapdoor": {
+    "name": "spruce trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "spruce_wood": {
+    "name": "spruce wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "spyglass": {
+    "name": "spyglass",
+    "category": "utility",
+    "stack": 1
+  },
+  "music_disc_stal": {
+    "name": "stal disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "cooked_beef": {
+    "name": "steak",
+    "category": "food",
+    "stack": "64"
+  },
+  "stick": {
+    "name": "stick",
+    "category": "utility",
+    "stack": 64
+  },
+  "sticky_piston": {
+    "name": "sticky piston",
+    "category": "redstone",
+    "stack": 64
+  },
+  "stone": {
+    "name": "stone",
+    "category": "stone",
+    "stack": "64"
+  },
+  "stone_axe": {
+    "name": "stone axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "stone_brick_slab": {
+    "name": "stone brick slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "stone_brick_stairs": {
+    "name": "stone brick stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "stone_brick_wall": {
+    "name": "stone brick wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "stone_bricks": {
+    "name": "stone bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "stone_button": {
+    "name": "stone button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "stone_hoe": {
+    "name": "stone hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "stone_pickaxe": {
+    "name": "stone pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "stone_pressure_plate": {
+    "name": "stone pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "stone_shovel": {
+    "name": "stone shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "stone_slab": {
+    "name": "stone slab",
+    "category": "stone",
+    "stack": "64"
+  },
+  "stone_spear": {
+    "name": "stone spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "stone_stairs": {
+    "name": "stone stairs",
+    "category": "stone",
+    "stack": "64"
+  },
+  "stone_sword": {
+    "name": "stone sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "stonecutter": {
+    "name": "stonecutter",
+    "category": "utility",
+    "stack": "64"
+  },
+  "music_disc_strad": {
+    "name": "strad disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "string": {
+    "name": "string",
+    "category": "drops",
+    "stack": 64
+  },
+  "stripped_acacia_log": {
+    "name": "stripped acacia log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_acacia_wood": {
+    "name": "stripped acacia wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_birch_log": {
+    "name": "stripped birch log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_birch_wood": {
+    "name": "stripped birch wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_cherry_log": {
+    "name": "stripped cherry log",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_cherry_wood": {
+    "name": "stripped cherry wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_crimson_hyphae": {
+    "name": "stripped crimson hyphae",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_crimson_stem": {
+    "name": "stripped crimson stem",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_dark_oak_log": {
+    "name": "stripped dark oak log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_dark_oak_wood": {
+    "name": "stripped dark oak wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_jungle_log": {
+    "name": "stripped jungle log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_jungle_wood": {
+    "name": "stripped jungle wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_mangrove_log": {
+    "name": "stripped mangrove log",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_mangrove_wood": {
+    "name": "stripped mangrove wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_oak_log": {
+    "name": "stripped oak log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_oak_wood": {
+    "name": "stripped oak wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_pale_oak_log": {
+    "name": "stripped pale oak log",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_pale_oak_wood": {
+    "name": "stripped pale oak wood",
+    "category": "wood",
+    "stack": 64
+  },
+  "stripped_spruce_log": {
+    "name": "stripped spruce log",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_spruce_wood": {
+    "name": "stripped spruce wood",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_warped_hyphae": {
+    "name": "stripped warped hyphae",
+    "category": "wood",
+    "stack": "64"
+  },
+  "stripped_warped_stem": {
+    "name": "stripped warped stem",
+    "category": "wood",
+    "stack": "64"
+  },
+  "sugar": {
+    "name": "sugar",
+    "category": "food",
+    "stack": 64
+  },
+  "sugar_cane": {
+    "name": "sugar cane",
+    "category": "plants",
+    "stack": 64
+  },
+  "sunflower": {
+    "name": "sunflower",
+    "category": "plants",
+    "stack": 64
+  },
+  "suspicious_stew": {
+    "name": "suspicious stew",
+    "category": "food",
+    "stack": 1
+  },
+  "sweet_berries": {
+    "name": "sweet berries",
+    "category": "food",
+    "stack": 64
+  },
+  "tall_dry_grass": {
+    "name": "tall dry grass",
+    "category": "plants",
+    "stack": 64
+  },
+  "target": {
+    "name": "target",
+    "category": "redstone",
+    "stack": 64
+  },
+  "music_disc_tears": {
+    "name": "tears disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "terracotta": {
+    "name": "terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "thick_potion": {
+    "name": "thick potion",
+    "category": "brewing",
+    "stack": 1
+  },
+  "mojang_banner_pattern": {
+    "name": "thing banner pattern",
+    "category": "utility",
+    "stack": 1
+  },
+  "tide_armor_trim_smithing_template": {
+    "name": "tide armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "tinted_glass": {
+    "name": "tinted glass",
+    "category": "utility",
+    "stack": 64
+  },
+  "tnt": {
+    "name": "tnt",
+    "category": "utility",
+    "stack": "64"
+  },
+  "torch": {
+    "name": "torch",
+    "category": "light",
+    "stack": 64
+  },
+  "torchflower": {
+    "name": "torchflower",
+    "category": "plants",
+    "stack": 64
+  },
+  "torchflower_seeds": {
+    "name": "torchflower seeds",
+    "category": "plants",
+    "stack": 64
+  },
+  "totem_of_undying": {
+    "name": "totem of undying",
+    "category": "utility",
+    "stack": "0"
+  },
+  "trapped_chest": {
+    "name": "trapped chest",
+    "category": "redstone",
+    "stack": 64
+  },
+  "trial_key": {
+    "name": "trial key",
+    "category": "drops",
+    "stack": 64
+  },
+  "trident": {
+    "name": "trident",
+    "category": "weapons",
+    "stack": 1
+  },
+  "tripwire_hook": {
+    "name": "tripwire hook",
+    "category": "redstone",
+    "stack": 64
+  },
+  "tropical_fish": {
+    "name": "tropical fish",
+    "category": "food",
+    "stack": "64"
+  },
+  "tube_coral": {
+    "name": "tube coral",
+    "category": "ocean",
+    "stack": 64
+  },
+  "tube_coral_block": {
+    "name": "tube coral block",
+    "category": "ocean",
+    "stack": 64
+  },
+  "tube_coral_fan": {
+    "name": "tube coral fan",
+    "category": "ocean",
+    "stack": 64
+  },
+  "tuff": {
+    "name": "tuff",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_brick_slab": {
+    "name": "tuff brick slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_brick_stairs": {
+    "name": "tuff brick stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_brick_wall": {
+    "name": "tuff brick wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_bricks": {
+    "name": "tuff bricks",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_slab": {
+    "name": "tuff slab",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_stairs": {
+    "name": "tuff stairs",
+    "category": "stone",
+    "stack": 64
+  },
+  "tuff_wall": {
+    "name": "tuff wall",
+    "category": "stone",
+    "stack": 64
+  },
+  "turtle_egg": {
+    "name": "turtle egg",
+    "category": "ocean",
+    "stack": 64
+  },
+  "turtle_scute": {
+    "name": "turtle scute",
+    "category": "drops",
+    "stack": 64
+  },
+  "turtle_helmet": {
+    "name": "turtle shell",
+    "category": "armor",
+    "stack": 1
+  },
+  "twisting_vines": {
+    "name": "twisting vines",
+    "category": "plants",
+    "stack": 64
+  },
+  "verdant_froglight": {
+    "name": "verdant froglight",
+    "category": "light",
+    "stack": 64
+  },
+  "vex_armor_trim_smithing_template": {
+    "name": "vex armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "vine": {
+    "name": "vines",
+    "category": "plants",
+    "stack": 64
+  },
+  "music_disc_wait": {
+    "name": "wait disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "ward_armor_trim_smithing_template": {
+    "name": "ward armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "music_disc_ward": {
+    "name": "ward disc",
+    "category": "discs",
+    "stack": 1
+  },
+  "warped_button": {
+    "name": "warped button",
+    "category": "redstone",
+    "stack": 64
+  },
+  "warped_door": {
+    "name": "warped door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "warped_fence": {
+    "name": "warped fence",
+    "category": "utility",
+    "stack": 64
+  },
+  "warped_fence_gate": {
+    "name": "warped fence gate",
+    "category": "utility",
+    "stack": 64
+  },
+  "warped_fungus": {
+    "name": "warped fungus",
+    "category": "nether",
+    "stack": 64
+  },
+  "warped_fungus_on_a_stick": {
+    "name": "warped fungus on a stick",
+    "category": "tools",
+    "stack": 64
+  },
+  "warped_hanging_sign": {
+    "name": "warped hanging sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "warped_hyphae": {
+    "name": "warped hyphae",
+    "category": "wood",
+    "stack": "64"
+  },
+  "warped_nylium": {
+    "name": "warped nylium",
+    "category": "nether",
+    "stack": 64
+  },
+  "warped_planks": {
+    "name": "warped planks",
+    "category": "wood",
+    "stack": "64"
+  },
+  "warped_pressure_plate": {
+    "name": "warped pressure plate",
+    "category": "redstone",
+    "stack": 64
+  },
+  "warped_roots": {
+    "name": "warped roots",
+    "category": "nether",
+    "stack": 64
+  },
+  "warped_shelf": {
+    "name": "warped shelf",
+    "category": "utility",
+    "stack": 64
+  },
+  "warped_sign": {
+    "name": "warped sign",
+    "category": "utility",
+    "stack": 16
+  },
+  "warped_slab": {
+    "name": "warped slab",
+    "category": "wood",
+    "stack": "64"
+  },
+  "warped_stairs": {
+    "name": "warped stairs",
+    "category": "wood",
+    "stack": "64"
+  },
+  "warped_stem": {
+    "name": "warped stem",
+    "category": "wood",
+    "stack": "64"
+  },
+  "warped_trapdoor": {
+    "name": "warped trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "warped_wart_block": {
+    "name": "warped wart block",
+    "category": "nether",
+    "stack": 64
+  },
+  "water_bottle": {
+    "name": "water bottle",
+    "category": "brewing",
+    "stack": 1
+  },
+  "water_bucket": {
+    "name": "water bucket",
+    "category": "utility",
+    "stack": 1
+  },
+  "waxed_copper_block": {
+    "name": "waxed block of copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_chiseled_copper": {
+    "name": "waxed chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_copper_bars": {
+    "name": "waxed copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_copper_bulb": {
+    "name": "waxed copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_copper_chain": {
+    "name": "waxed copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_copper_chest": {
+    "name": "waxed copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_copper_door": {
+    "name": "waxed copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_copper_golem_statue": {
+    "name": "waxed copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_copper_grate": {
+    "name": "waxed copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_copper_lantern": {
+    "name": "waxed copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_copper_trapdoor": {
+    "name": "waxed copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_cut_copper": {
+    "name": "waxed cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_cut_copper_slab": {
+    "name": "waxed cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_cut_copper_stairs": {
+    "name": "waxed cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_chiseled_copper": {
+    "name": "waxed exposed chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper": {
+    "name": "waxed exposed copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper_bars": {
+    "name": "waxed exposed copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper_bulb": {
+    "name": "waxed exposed copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_exposed_copper_chain": {
+    "name": "waxed exposed copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper_chest": {
+    "name": "waxed exposed copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_exposed_copper_door": {
+    "name": "waxed exposed copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_exposed_copper_golem_statue": {
+    "name": "waxed exposed copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper_grate": {
+    "name": "waxed exposed copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_copper_lantern": {
+    "name": "waxed exposed copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_exposed_copper_trapdoor": {
+    "name": "waxed exposed copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_exposed_cut_copper": {
+    "name": "waxed exposed cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_cut_copper_slab": {
+    "name": "waxed exposed cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_cut_copper_stairs": {
+    "name": "waxed exposed cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_exposed_lightning_rod": {
+    "name": "waxed exposed lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_lightning_rod": {
+    "name": "waxed lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_oxidized_chiseled_copper": {
+    "name": "waxed oxidized chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper": {
+    "name": "waxed oxidized copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_bars": {
+    "name": "waxed oxidized copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_bulb": {
+    "name": "waxed oxidized copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_chain": {
+    "name": "waxed oxidized copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_chest": {
+    "name": "waxed oxidized copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_door": {
+    "name": "waxed oxidized copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_golem_statue": {
+    "name": "waxed oxidized copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_grate": {
+    "name": "waxed oxidized copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_lantern": {
+    "name": "waxed oxidized copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_oxidized_copper_trapdoor": {
+    "name": "waxed oxidized copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_oxidized_cut_copper": {
+    "name": "waxed oxidized cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_cut_copper_slab": {
+    "name": "waxed oxidized cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_cut_copper_stairs": {
+    "name": "waxed oxidized cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_oxidized_lightning_rod": {
+    "name": "waxed oxidized lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_weathered_chiseled_copper": {
+    "name": "waxed weathered chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper": {
+    "name": "waxed weathered copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper_bars": {
+    "name": "waxed weathered copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper_bulb": {
+    "name": "waxed weathered copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_weathered_copper_chain": {
+    "name": "waxed weathered copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper_chest": {
+    "name": "waxed weathered copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "waxed_weathered_copper_door": {
+    "name": "waxed weathered copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_weathered_copper_golem_statue": {
+    "name": "waxed weathered copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper_grate": {
+    "name": "waxed weathered copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_copper_lantern": {
+    "name": "waxed weathered copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "waxed_weathered_copper_trapdoor": {
+    "name": "waxed weathered copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "waxed_weathered_cut_copper": {
+    "name": "waxed weathered cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_cut_copper_slab": {
+    "name": "waxed weathered cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_cut_copper_stairs": {
+    "name": "waxed weathered cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "waxed_weathered_lightning_rod": {
+    "name": "waxed weathered lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "wayfinder_armor_trim_smithing_template": {
+    "name": "wayfinder armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "weathered_chiseled_copper": {
+    "name": "weathered chiseled copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper": {
+    "name": "weathered copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper_bars": {
+    "name": "weathered copper bars",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper_bulb": {
+    "name": "weathered copper bulb",
+    "category": "light",
+    "stack": 64
+  },
+  "weathered_copper_chain": {
+    "name": "weathered copper chain",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper_chest": {
+    "name": "weathered copper chest",
+    "category": "utility",
+    "stack": 64
+  },
+  "weathered_copper_door": {
+    "name": "weathered copper door",
+    "category": "redstone",
+    "stack": 64
+  },
+  "weathered_copper_golem_statue": {
+    "name": "weathered copper golem statue",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper_grate": {
+    "name": "weathered copper grate",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_copper_lantern": {
+    "name": "weathered copper lantern",
+    "category": "light",
+    "stack": 64
+  },
+  "weathered_copper_trapdoor": {
+    "name": "weathered copper trapdoor",
+    "category": "redstone",
+    "stack": 64
+  },
+  "weathered_cut_copper": {
+    "name": "weathered cut copper",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_cut_copper_slab": {
+    "name": "weathered cut copper slab",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_cut_copper_stairs": {
+    "name": "weathered cut copper stairs",
+    "category": "copper",
+    "stack": 64
+  },
+  "weathered_lightning_rod": {
+    "name": "weathered lightning rod",
+    "category": "utility",
+    "stack": 64
+  },
+  "weeping_vines": {
+    "name": "weeping vines",
+    "category": "plants",
+    "stack": 64
+  },
+  "wet_sponge": {
+    "name": "wet sponge",
+    "category": "ocean",
+    "stack": 64
+  },
+  "wheat": {
+    "name": "wheat",
+    "category": "food",
+    "stack": 64
+  },
+  "wheat_seeds": {
+    "name": "wheat seeds",
+    "category": "plants",
+    "stack": 64
+  },
+  "white_banner": {
+    "name": "white banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "white_bed": {
+    "name": "white bed",
+    "category": "utility",
+    "stack": 1
+  },
+  "white_bundle": {
+    "name": "white bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "white_candle": {
+    "name": "white candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_carpet": {
+    "name": "white carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_concrete": {
+    "name": "white concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_concrete_powder": {
+    "name": "white concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_dye": {
+    "name": "white dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_glazed_terracotta": {
+    "name": "white glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_harness": {
+    "name": "white harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "white_shulker_box": {
+    "name": "white shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "white_stained_glass": {
+    "name": "white stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_stained_glass_pane": {
+    "name": "white stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_terracotta": {
+    "name": "white terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "white_tulip": {
+    "name": "white tulip",
+    "category": "plants",
+    "stack": 64
+  },
+  "white_wool": {
+    "name": "white wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "wild_armor_trim_smithing_template": {
+    "name": "wild armor trim smithing template",
+    "category": "armor",
+    "stack": 64
+  },
+  "wildflowers": {
+    "name": "wildflowers",
+    "category": "plants",
+    "stack": 64
+  },
+  "wind_charge": {
+    "name": "wind charge",
+    "category": "drops",
+    "stack": 64
+  },
+  "wither_rose": {
+    "name": "wither rose",
+    "category": "drops",
+    "stack": "64"
+  },
+  "wither_skeleton_skull": {
+    "name": "wither skeleton skull",
+    "category": "drops",
+    "stack": "64"
+  },
+  "wolf_armor": {
+    "name": "wolf armor",
+    "category": "armor",
+    "stack": 1
+  },
+  "wooden_axe": {
+    "name": "wooden axe",
+    "category": "tools",
+    "stack": 1
+  },
+  "wooden_hoe": {
+    "name": "wooden hoe",
+    "category": "tools",
+    "stack": 1
+  },
+  "wooden_pickaxe": {
+    "name": "wooden pickaxe",
+    "category": "tools",
+    "stack": 1
+  },
+  "wooden_shovel": {
+    "name": "wooden shovel",
+    "category": "tools",
+    "stack": 1
+  },
+  "wooden_spear": {
+    "name": "wooden spear",
+    "category": "weapons",
+    "stack": 1
+  },
+  "wooden_sword": {
+    "name": "wooden sword",
+    "category": "weapons",
+    "stack": 1
+  },
+  "yellow_banner": {
+    "name": "yellow banner",
+    "category": "dyed",
+    "stack": 16
+  },
+  "yellow_bed": {
+    "name": "yellow bed",
+    "category": "dyed",
+    "stack": 1
+  },
+  "yellow_bundle": {
+    "name": "yellow bundle",
+    "category": "dyed",
+    "stack": 1
+  },
+  "yellow_candle": {
+    "name": "yellow candle",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_carpet": {
+    "name": "yellow carpet",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_concrete": {
+    "name": "yellow concrete",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_concrete_powder": {
+    "name": "yellow concrete powder",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_dye": {
+    "name": "yellow dye",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_glazed_terracotta": {
+    "name": "yellow glazed terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_harness": {
+    "name": "yellow harness",
+    "category": "transport",
+    "stack": 1
+  },
+  "yellow_shulker_box": {
+    "name": "yellow shulker box",
+    "category": "dyed",
+    "stack": 1
+  },
+  "yellow_stained_glass": {
+    "name": "yellow stained glass",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_stained_glass_pane": {
+    "name": "yellow stained glass pane",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_terracotta": {
+    "name": "yellow terracotta",
+    "category": "dyed",
+    "stack": 64
+  },
+  "yellow_wool": {
+    "name": "yellow wool",
+    "category": "dyed",
+    "stack": 64
+  },
+  "zombie_head": {
+    "name": "zombie head",
+    "category": "drops",
+    "stack": 64
+  },
+  "_export_metadata": {
+    "source": "Verzion's Economy Price Guide",
+    "url": "https://minecraft-economy-price-guide.net",
+    "version": "1.21",
+    "export_date": "2026-02-16T20:44:04.051Z",
+    "item_count": 1663,
+    "currency_type": "money",
+    "price_multiplier": 1,
+    "sell_margin": 0.3,
+    "round_to_whole": false,
+    "sort_field": "name",
+    "sort_direction": "asc"
+  }
+}
