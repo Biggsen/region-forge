@@ -5,6 +5,12 @@ import { saveMapState, loadMapState } from '../utils/persistenceUtils'
 export function useMapState() {
   const [mapState, setMapState] = useState<MapState>({
     image: null,
+    terrainImage: null,
+    biomeImage: null,
+    terrainVisible: true,
+    terrainOpacity: 1,
+    biomeVisible: true,
+    biomeOpacity: 0.8,
     scale: 1,
     offsetX: 0,
     offsetY: 0,
@@ -37,7 +43,36 @@ export function useMapState() {
   }, [mapState])
 
   const setImage = useCallback((image: HTMLImageElement) => {
-    setMapState(prev => ({ ...prev, image }))
+    setMapState(prev => ({
+      ...prev,
+      image,
+      terrainImage: image,
+      biomeImage: null
+    }))
+  }, [])
+
+  const setTerrainImage = useCallback((image: HTMLImageElement | null) => {
+    setMapState(prev => ({ ...prev, terrainImage: image }))
+  }, [])
+
+  const setBiomeImage = useCallback((image: HTMLImageElement | null) => {
+    setMapState(prev => ({ ...prev, biomeImage: image }))
+  }, [])
+
+  const setTerrainOpacity = useCallback((opacity: number) => {
+    setMapState(prev => ({ ...prev, terrainOpacity: Math.max(0, Math.min(1, opacity)) }))
+  }, [])
+
+  const setBiomeOpacity = useCallback((opacity: number) => {
+    setMapState(prev => ({ ...prev, biomeOpacity: Math.max(0, Math.min(1, opacity)) }))
+  }, [])
+
+  const setTerrainVisible = useCallback((visible: boolean) => {
+    setMapState(prev => ({ ...prev, terrainVisible: visible }))
+  }, [])
+
+  const setBiomeVisible = useCallback((visible: boolean) => {
+    setMapState(prev => ({ ...prev, biomeVisible: visible }))
   }, [])
 
   const setScale = useCallback((scale: number) => {
@@ -125,6 +160,8 @@ export function useMapState() {
   return {
     mapState,
     setImage,
+    setTerrainImage,
+    setBiomeImage,
     setScale,
     setOffset,
     setOrigin,
@@ -134,6 +171,10 @@ export function useMapState() {
     stopDragging,
     handleMouseMove,
     handleWheel,
-    setImageOpacity
+    setImageOpacity,
+    setTerrainOpacity,
+    setBiomeOpacity,
+    setTerrainVisible,
+    setBiomeVisible
   }
 }

@@ -11,17 +11,103 @@ export function ImageImportHandler() {
   const hasProcessedRef = useRef(false)
 
   useEffect(() => {
-    if (location.state?.importImage && !hasProcessedRef.current) {
-      hasProcessedRef.current = true // Prevent multiple executions
-      const imageUrl = location.state.importImage  // Already full URL from service
-      
-      // Load the image
+    const dualUrls = location.state?.importTerrainImage && location.state?.importBiomeImage
+    const singleUrl = location.state?.importImage
+    const hasImport = dualUrls || singleUrl
+
+    if (hasImport && !hasProcessedRef.current) {
+      hasProcessedRef.current = true
+
+      if (dualUrls) {
+        loadDualImages()
+      } else {
+        loadSingleImage(location.state.importImage)
+      }
+    }
+
+    function clearAndApplyDual(terrainImg: HTMLImageElement, biomeImg: HTMLImageElement) {
+      regions.replaceRegions([])
+      regions.setSelectedRegionId(null)
+      mapState.setScale(1)
+      mapState.setOffset(0, 0)
+      mapState.setOriginSelected(false)
+      mapState.setOriginOffset(null)
+      mapState.setTerrainImage(terrainImg)
+      mapState.setBiomeImage(biomeImg)
+      if (terrainImg.width === terrainImg.height) {
+        const centerX = Math.floor(terrainImg.width / 2)
+        const centerY = Math.floor(terrainImg.height / 2)
+        mapState.setOrigin(centerX, centerY)
+      }
+      const calculatedWorldSize = terrainImg.width === terrainImg.height
+        ? Math.round(terrainImg.width / 125)
+        : Math.round(Math.max(terrainImg.width, terrainImg.height) / 125)
+      saveImageDetails({
+        imageSize: { width: terrainImg.width, height: terrainImg.height },
+        worldSize: calculatedWorldSize
+      })
+      if (location.state?.seed !== undefined || location.state?.dimension !== undefined) {
+        seedInfo.updateSeedInfo({
+          seed: location.state.seed,
+          dimension: location.state.dimension
+        })
+      }
+      worldName.updateWorldName('World')
+      spawn.setSpawnCoordinates(null)
+      window.history.replaceState({}, document.title)
+    }
+
+    function loadDualImages() {
+      const terrainUrl = location.state.importTerrainImage
+      const biomeUrl = location.state.importBiomeImage
+      const proxiedTerrain = getImageProxyUrl(terrainUrl)
+      const proxiedBiome = getImageProxyUrl(biomeUrl)
+
+      const terrainImg = new Image()
+      const biomeImg = new Image()
+      terrainImg.crossOrigin = 'anonymous'
+      biomeImg.crossOrigin = 'anonymous'
+
+      let terrainLoaded = false
+      let biomeLoaded = false
+
+      function maybeApply() {
+        if (!terrainLoaded || !biomeLoaded) return
+        if (terrainImg.width !== biomeImg.width || terrainImg.height !== biomeImg.height) {
+          toast.showToast('Terrain and biome images must have the same dimensions.', 'error')
+          return
+        }
+        const validation = validateImageDimensions(terrainImg.width, terrainImg.height)
+        if (!validation.isValid) {
+          toast.showToast(validation.error || 'Image validation failed', 'error')
+          return
+        }
+        clearAndApplyDual(terrainImg, biomeImg)
+      }
+
+      terrainImg.onload = () => {
+        terrainLoaded = true
+        maybeApply()
+      }
+      biomeImg.onload = () => {
+        biomeLoaded = true
+        maybeApply()
+      }
+
+      terrainImg.onerror = () => {
+        toast.showToast('Failed to load terrain image.', 'error')
+      }
+      biomeImg.onerror = () => {
+        toast.showToast('Failed to load biome image.', 'error')
+      }
+
+      terrainImg.src = proxiedTerrain
+      biomeImg.src = proxiedBiome
+    }
+
+    function loadSingleImage(imageUrl: string) {
       const img = new Image()
-      
-      // Use proxy for external URLs to avoid CORS issues
       const proxiedImageUrl = getImageProxyUrl(imageUrl)
-      
-      // Set crossOrigin to anonymous for CORS
       img.crossOrigin = 'anonymous'
       
       img.onload = () => {
@@ -98,7 +184,7 @@ export function ImageImportHandler() {
       
       img.src = proxiedImageUrl
     }
-  }, [location.state, mapState])
+  }, [location.state, mapState, regions, worldName, spawn, seedInfo, toast])
 
   // Reset the processed flag when location changes
   useEffect(() => {

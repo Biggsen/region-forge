@@ -2,12 +2,13 @@ import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { canvasToImage, pixelToWorld, worldToPixel, imageToCanvas, isPointInPolygon } from '../utils/coordinateUtils'
 import { SIDEBAR_WIDTH } from '../utils/constants'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 import { GridOverlay } from './GridOverlay'
 import { RegionOverlay } from './RegionOverlay'
 import { CustomMarkerOverlay } from './CustomMarkerOverlay'
 import { CoordinateInputDialog } from './CoordinateInputDialog'
 import { MapDisplayControls } from './MapDisplayControls'
-import { Scan } from 'lucide-react'
+import { Scan, Eye, EyeOff } from 'lucide-react'
 
 interface MapCanvasProps {
   onNavigateToRegions?: () => void
@@ -16,7 +17,8 @@ interface MapCanvasProps {
 export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName, seedInfo } = useAppContext()
-  const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity } = mapStateHook
+  const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity, setTerrainOpacity, setBiomeOpacity, setTerrainVisible, setBiomeVisible } = mapStateHook
+  const effectiveImage = getEffectiveMapImage(mapState)
   const { 
     drawingRegion, 
     addPointToDrawing, 
@@ -104,7 +106,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     if (spawnState.isPlacing) {
       return 'cursor-crosshair'
     }
-    if (!mapState.originSelected && mapState.image) {
+    if (!mapState.originSelected && effectiveImage) {
       return 'cursor-crosshair'
     }
     if (drawingRegion) {
@@ -115,13 +117,33 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
 
   const drawMap = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas || !mapState.image) return
+    const img = getEffectiveMapImage(mapState)
+    if (!canvas || !img) return
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    const drawLayers = () => {
+      ctx.translate(mapState.offsetX, mapState.offsetY)
+      ctx.scale(mapState.scale, mapState.scale)
+
+      const hasDual = mapState.terrainImage && mapState.biomeImage
+      if (hasDual) {
+        if (mapState.terrainVisible && mapState.terrainImage) {
+          ctx.globalAlpha = mapState.terrainOpacity * mapState.imageOpacity
+          ctx.drawImage(mapState.terrainImage, 0, 0)
+        }
+        if (mapState.biomeVisible && mapState.biomeImage) {
+          ctx.globalAlpha = mapState.biomeOpacity * mapState.imageOpacity
+          ctx.drawImage(mapState.biomeImage, 0, 0)
+        }
+      } else {
+        ctx.globalAlpha = mapState.imageOpacity
+        ctx.drawImage(img, 0, 0)
+      }
+    }
 
     if (isolatedRegionId && mapState.originOffset) {
       const isolatedRegion = regions.regions.find(r => r.id === isolatedRegionId)
@@ -129,7 +151,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         ctx.save()
         ctx.beginPath()
         const canvasPoints = isolatedRegion.points.map(point => {
-          const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+          const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
           return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
         })
         ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
@@ -138,29 +160,22 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         }
         ctx.closePath()
         ctx.clip()
-        ctx.globalAlpha = mapState.imageOpacity
-        ctx.translate(mapState.offsetX, mapState.offsetY)
-        ctx.scale(mapState.scale, mapState.scale)
-        ctx.drawImage(mapState.image, 0, 0)
+        ctx.save()
+        drawLayers()
+        ctx.restore()
         ctx.restore()
         return
       }
     }
 
     ctx.save()
-    ctx.globalAlpha = mapState.imageOpacity
-    ctx.translate(mapState.offsetX, mapState.offsetY)
-    ctx.scale(mapState.scale, mapState.scale)
-    ctx.drawImage(mapState.image, 0, 0)
+    drawLayers()
     ctx.restore()
-  }, [mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.imageOpacity, mapState.originOffset, isolatedRegionId, regions.regions])
+  }, [mapState, isolatedRegionId, regions.regions])
 
-  // Draw map whenever state changes
   useEffect(() => {
-    if (mapState.image) {
-      drawMap()
-    }
-  }, [drawMap])
+    if (effectiveImage) drawMap()
+  }, [drawMap, effectiveImage])
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -179,19 +194,16 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
       } else if (editMode.isEditing) {
         // If in edit mode and space is not pressed, don't handle other interactions
         return
-      } else if (!mapState.originSelected && mapState.image) {
-        // Set origin
+      } else if (!mapState.originSelected && effectiveImage) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
         setOrigin(imagePos.x, imagePos.y)
-      } else if (spawnState.isPlacing && mapState.image && mapState.originSelected) {
-        // Place spawn point
+      } else if (spawnState.isPlacing && effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-        const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
         setSpawnCoordinates(worldPos)
-      } else if (drawingRegion) {
-        // Check if clicking near a previous point to close polygon
+      } else if (drawingRegion && effectiveImage) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-        const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
         
         if (regions.freehandEnabled) {
           // Start freehand stroke
@@ -216,19 +228,17 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             addPointToDrawing(worldPos.x, worldPos.z)
           }
         }
-      } else if (isSettingCenterPoint && mapState.image && mapState.originSelected) {
-        // Set custom center point for the selected region
+      } else if (isSettingCenterPoint && effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-        const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
         
         if (centerPointRegionId) {
           regions.setCustomCenterPoint(centerPointRegionId, worldPos)
           stopSettingCenterPoint()
         }
-      } else if (editMode.isMovingRegion && mapState.image && mapState.originSelected) {
-        // Start dragging the region to move it - only if clicking inside the region
+      } else if (editMode.isMovingRegion && effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-        const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
         
         if (editMode.movingRegionId) {
           const movingRegion = regions.regions.find(r => r.id === editMode.movingRegionId)
@@ -237,10 +247,9 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             setIsMovingRegion(true)
           }
         }
-      } else if (mapState.image && mapState.originSelected) {
-        // Check if clicking on a region
+      } else if (effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-        const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
         
         // Warp brush applies to selected region if enabled
         if (isWarping && regions.selectedRegionId) {
@@ -275,7 +284,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
       }
       // Note: Panning is only allowed when space key is pressed (handled in the first condition)
     }
-  }, [mapState.originSelected, mapState.image, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, isolatedRegionId, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
+  }, [mapState.originSelected, effectiveImage, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, isolatedRegionId, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (e.button === 0) {
@@ -293,9 +302,8 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
 
   const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
-    if (!canvas || !mapState.image || !mapState.originSelected) return
+    if (!canvas || !effectiveImage || !mapState.originSelected) return
 
-    // Don't handle double-click if in edit mode, moving region, or other special modes
     if (editMode.isEditing || editMode.isMovingRegion || editMode.isSplittingRegion || drawingRegion || isSpacePressed) {
       return
     }
@@ -304,9 +312,8 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    // Convert to world coordinates
     const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-    const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+    const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
 
     // Check each region to see if the double-click is inside (only isolated region when in isolate mode)
     const regionsToCheck = isolatedRegionId
@@ -322,7 +329,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         return
       }
     }
-  }, [mapState.image, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, editMode.isEditing, editMode.isMovingRegion, editMode.isSplittingRegion, drawingRegion, isSpacePressed, regions, isolatedRegionId, onNavigateToRegions])
+  }, [effectiveImage, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, editMode.isEditing, editMode.isMovingRegion, editMode.isSplittingRegion, drawingRegion, isSpacePressed, regions, isolatedRegionId, onNavigateToRegions])
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -332,10 +339,9 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    // Update mouse coordinates for display
-    if (mapState.image && mapState.originSelected) {
+    if (effectiveImage && mapState.originSelected) {
       const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-      const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image.width, mapState.image.height, mapState.originOffset)
+      const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
       setMouseCoordinates(worldPos)
       
       // Real-time region movement preview while dragging
@@ -364,7 +370,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     }
 
     handleMouseMove(x, y)
-  }, [mapState.image, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, handleMouseMove, isMovingRegion, isMouseDown, updateMoveRegion, isWarping, regions.selectedRegionId, isSpacePressed, editMode.isEditing, warpRegion, warpRadius, warpStrength, regions.freehandEnabled, drawingRegion, addPointToDrawing])
+  }, [effectiveImage, mapState.originSelected, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, handleMouseMove, isMovingRegion, isMouseDown, updateMoveRegion, isWarping, regions.selectedRegionId, isSpacePressed, editMode.isEditing, warpRegion, warpRadius, warpStrength, regions.freehandEnabled, drawingRegion, addPointToDrawing])
 
   // Add wheel event listener with passive: false to allow preventDefault
   useEffect(() => {
@@ -441,7 +447,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         </div>
       )}
       
-      {!mapState.image && regions.regions.length > 0 && (
+      {!effectiveImage && regions.regions.length > 0 && (
         <div className="absolute top-32 left-4 z-10 bg-yellow-600 text-white px-4 py-2 rounded text-sm shadow-lg max-w-md">
           <div className="font-semibold mb-1">Image Required</div>
           <div className="text-xs">
@@ -451,7 +457,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         </div>
       )}
       
-      {mapState.image && !mapState.originSelected && (
+      {effectiveImage && !mapState.originSelected && (
         <div className="absolute top-16 left-4 z-10 bg-blue-600 text-white px-4 py-2 rounded text-sm shadow-lg">
           Choose the world center (0,0) - Click on the compass or known reference point
         </div>
@@ -535,11 +541,11 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         <button
           onClick={() => {
             setScale(1)
-            if (mapState.image) {
-              const canvasWidth = window.innerWidth - SIDEBAR_WIDTH // Account for sidebar
-              const canvasHeight = window.innerHeight - 64 // Account for nav bar
-              const centerX = (canvasWidth - mapState.image.width) / 2
-              const centerY = (canvasHeight - mapState.image.height) / 2
+            if (effectiveImage) {
+              const canvasWidth = window.innerWidth - SIDEBAR_WIDTH
+              const canvasHeight = window.innerHeight - 64
+              const centerX = (canvasWidth - effectiveImage.width) / 2
+              const centerY = (canvasHeight - effectiveImage.height) / 2
               setOffset(centerX, centerY)
             }
           }}
@@ -562,7 +568,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
         onDoubleClick={handleDoubleClick}
       />
       
-      {mapState.image && (
+      {effectiveImage && (
         <>
           <GridOverlay
             canvas={canvasRef.current}
@@ -624,28 +630,67 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             toggleShowNames={regions.toggleShowNames}
           />
             
-            <div className="bg-gray-900/90 backdrop-blur-sm border border-gunmetal rounded-lg px-3 py-2 shadow-lg">
-              <div className="flex items-center gap-2 min-w-[140px]">
-                <label className="text-white text-xs font-medium whitespace-nowrap">
-                  Opacity:
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={mapState.imageOpacity}
-                  onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
-                  className="w-16 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                  style={{
-                    background: `linear-gradient(to right, #4a5568 0%, #4a5568 ${mapState.imageOpacity * 100}%, #2d3748 ${mapState.imageOpacity * 100}%, #2d3748 100%)`
-                  }}
-                />
-                <span className="text-white text-xs font-mono w-8 text-right">
-                  {Math.round(mapState.imageOpacity * 100)}%
-                </span>
+            {mapState.terrainImage && mapState.biomeImage ? (
+              <div className="bg-gray-900/90 backdrop-blur-sm border border-gunmetal rounded-lg px-3 py-2 shadow-lg space-y-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setTerrainVisible(!mapState.terrainVisible)}
+                    className={`flex items-center gap-1.5 text-xs ${mapState.terrainVisible ? 'text-white' : 'text-gray-500'}`}
+                  >
+                    {mapState.terrainVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    Terrain
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={mapState.terrainOpacity}
+                    onChange={(e) => setTerrainOpacity(parseFloat(e.target.value))}
+                    className="w-14 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setBiomeVisible(!mapState.biomeVisible)}
+                    className={`flex items-center gap-1.5 text-xs ${mapState.biomeVisible ? 'text-white' : 'text-gray-500'}`}
+                  >
+                    {mapState.biomeVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    Biome
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={mapState.biomeOpacity}
+                    onChange={(e) => setBiomeOpacity(parseFloat(e.target.value))}
+                    className="w-14 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-gray-900/90 backdrop-blur-sm border border-gunmetal rounded-lg px-3 py-2 shadow-lg">
+                <div className="flex items-center gap-2 min-w-[140px]">
+                  <label className="text-white text-xs font-medium whitespace-nowrap">Opacity:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={mapState.imageOpacity}
+                    onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
+                    className="w-16 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #4a5568 0%, #4a5568 ${mapState.imageOpacity * 100}%, #2d3748 ${mapState.imageOpacity * 100}%, #2d3748 100%)`
+                    }}
+                  />
+                  <span className="text-white text-xs font-mono w-8 text-right">
+                    {Math.round(mapState.imageOpacity * 100)}%
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

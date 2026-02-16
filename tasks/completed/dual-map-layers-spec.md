@@ -262,27 +262,39 @@ Placement: Expand existing "Display" panel or add a "Layers" section in Map tab 
 ## Implementation Phases
 
 ### Phase 1: Data Model & Rendering
-- [ ] Extend `MapState` in types
-- [ ] Update `useMapState` with new fields and setters
-- [ ] Update `MapCanvas` draw logic for dual layers
-- [ ] Add layer visibility/opacity controls
-- [ ] Update persistence (save/load) for dual layers
+- [x] Extend `MapState` in types
+- [x] Update `useMapState` with new fields and setters
+- [x] Update `MapCanvas` draw logic for dual layers
+- [x] Add layer visibility/opacity controls
+- [x] Update persistence (save/load) for dual layers
 
 ### Phase 2: Biome Scanner & Display
-- [ ] Update biome scanner to use biome layer
-- [ ] Update RegionDetailsView to pass correct image
-- [ ] Handle "biome map not loaded" state in Scan biomes UI
+- [x] Update biome scanner to use biome layer
+- [x] Update RegionDetailsView to pass correct image
+- [x] Handle "biome map not loaded" state in Scan biomes UI
 
 ### Phase 3: Import Paths
-- [ ] Extend project file import/export
-- [ ] Add dual-URL input for Load from URL (or extend UI)
-- [ ] Update ImageImportHandler for router state
-- [ ] Integrate MC Map Generator dual-URL response (`terrainUrl`, `biomeUrl` from status)
+- [x] Extend project file import/export
+- [x] Add dual-URL input for Load from URL (or extend UI)
+- [x] Update ImageImportHandler for router state
+- [x] Integrate MC Map Generator dual-URL response (`terrainUrl`, `biomeUrl` from status)
 
 ### Phase 4: Polish
-- [ ] Migration for legacy localStorage state
-- [ ] Update documentation
-- [ ] Manual testing of all import/export paths
+- [x] Migration for legacy localStorage state
+- [x] Update documentation
+- [x] Manual testing of all import/export paths
+
+### Manual Testing Checklist
+
+| Path | Single layer | Dual layer |
+|------|--------------|------------|
+| **MC Map Generator** | Nether/End → terrain only | Overworld → terrain + biome |
+| **Load from URL** | Terrain URL only | Terrain + biome URLs |
+| **Project import** | Legacy `imageData` | `terrainImageData` + `biomeImageData` |
+| **Router state** | `importImage` | `importTerrainImage` + `importBiomeImage` |
+| **localStorage** | Old `image` migrates to terrain | `terrainImageSrc` + `biomeImageSrc` |
+
+**Verify:** Layer toggles, opacity sliders, biome scan uses biome layer, project save/load round-trip with dual layers.
 
 ---
 
@@ -322,14 +334,14 @@ No API changes required. Region Forge needs to:
 
 ## Success Criteria
 
-- [ ] Both terrain and biome layers can be loaded and displayed
-- [ ] Layer visibility and opacity are user-configurable
-- [ ] Biome scanner uses the biome layer when available
-- [ ] Legacy single-image projects load correctly
-- [ ] Project export/import round-trips both layers
-- [ ] Load from URL supports loading terrain and biome independently
-- [ ] Clear errors when dimensions mismatch
-- [ ] No regressions in single-image workflows
+- [x] Both terrain and biome layers can be loaded and displayed
+- [x] Layer visibility and opacity are user-configurable
+- [x] Biome scanner uses the biome layer when available
+- [x] Legacy single-image projects load correctly
+- [x] Project export/import round-trips both layers
+- [x] Load from URL supports loading terrain and biome independently
+- [x] Clear errors when dimensions mismatch
+- [x] No regressions in single-image workflows (manual verification)
 
 ---
 

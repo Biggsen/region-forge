@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { copyToClipboard, calculatePolygonArea, formatArea } from '../utils/polygonUtils'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 import { calculateZoomToFitRegion } from '../utils/zoomUtils'
 import { RegionCreationForm } from './RegionCreationForm'
 import { RegionDetailsView } from './RegionDetailsView'
@@ -66,8 +67,10 @@ export function RegionPanel() {
   }
 
 
+  const effectiveImage = getEffectiveMapImage(mapState)
+
   const handleZoomToRegion = (region: { id: string; name: string; points: { x: number; z: number }[] }) => {
-    if (!mapState.image) {
+    if (!effectiveImage) {
       console.warn('Cannot zoom: No image loaded')
       toast.showToast('Cannot zoom to region: No map image is loaded. Please load a map image first from the Map tab.', 'error')
       return
@@ -76,8 +79,8 @@ export function RegionPanel() {
     try {
       const zoomResult = calculateZoomToFitRegion(
         region.points,
-        mapState.image.width,
-        mapState.image.height,
+        effectiveImage.width,
+        effectiveImage.height,
         mapState.originOffset
       )
 
@@ -159,7 +162,7 @@ export function RegionPanel() {
                 }}
                 onCancelDrawing={() => regions.cancelDrawingRegion()}
                 isDrawing={!!drawingRegion}
-                hasMap={!!mapState.image}
+                hasMap={!!effectiveImage}
               />
             </div>
           )}

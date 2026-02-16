@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MapState, Region, EditMode, HighlightMode, Subregion, WorldCoordinate, ChallengeLevel } from '../types'
 import { worldToPixel, imageToCanvas, canvasToImage, pixelToWorld } from '../utils/coordinateUtils'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
   easy: { fill: 'rgba(34, 139, 34, 0.7)', stroke: 'rgba(34, 139, 34, 0.9)' }, // Forest Green
@@ -56,10 +57,11 @@ export function RegionOverlay({
   isolatedMode = false
 }: RegionOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
+  const img = getEffectiveMapImage(mapState)
 
   useEffect(() => {
     const overlay = overlayRef.current
-    if (!overlay || !canvas || !mapState.image) return
+    if (!overlay || !canvas || !img) return
 
     overlay.width = canvas.width
     overlay.height = canvas.height
@@ -75,7 +77,7 @@ export function RegionOverlay({
       regions.forEach(region => {
         if (region.subregions) {
           region.subregions.forEach(subregion => {
-            drawVillage(ctx, subregion, mapState, region.id === selectedRegionId, highlightMode.showNames)
+            drawVillage(ctx, subregion, mapState, img, region.id === selectedRegionId, highlightMode.showNames)
           })
         }
       })
@@ -92,23 +94,21 @@ export function RegionOverlay({
         const isHighlighted = highlightMode.highlightAll
         const showChallengeLevels = highlightMode.showChallengeLevels
         const isDisabled = region.disabled === true
-        drawRegion(ctx, region, mapState, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames)
+        drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames)
         
-        // Draw center point for each region
         if (highlightMode.showCenterPoints) {
-          drawCenterPoint(ctx, region, mapState, isSelected)
+          drawCenterPoint(ctx, region, mapState, img, isSelected)
         }
 
-        // Draw split points and line if splitting this region
         if (isSplitting) {
-          drawSplitPoints(ctx, mapState, editMode.splitPoints)
+          drawSplitPoints(ctx, mapState, img, editMode.splitPoints)
         }
       })
     } else if (highlightMode.showNames && regions.length > 0) {
       regions.forEach(region => {
         if (region.points.length < 2) return
         const canvasPoints = region.points.map(point => {
-          const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+          const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
           return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
         })
         const centerX = canvasPoints.reduce((sum, p) => sum + p.x, 0) / canvasPoints.length
@@ -130,30 +130,27 @@ export function RegionOverlay({
 
     // Draw drawing region
     if (drawingRegion && drawingRegion.points.length > 0) {
-      drawRegion(ctx, drawingRegion, mapState, false, true, false, false, false, false, false, false, highlightMode.showNames)
-      
-      // Draw center point for drawing region
+      drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames)
       if (highlightMode.showCenterPoints) {
-        drawCenterPoint(ctx, drawingRegion, mapState, false)
+        drawCenterPoint(ctx, drawingRegion, mapState, img, false)
       }
     }
 
-    // Draw spawn point
     if (spawnCoordinates) {
-      drawSpawnPoint(ctx, spawnCoordinates, mapState)
+      drawSpawnPoint(ctx, spawnCoordinates, mapState, img)
     }
 
-    // Draw warp brush radius indicator (only when mouse is over canvas)
     if (isWarping && mouseCoordinates && isMouseOverCanvas) {
-      drawWarpBrush(ctx, mouseCoordinates, mapState, warpRadius)
+      drawWarpBrush(ctx, mouseCoordinates, mapState, img, warpRadius)
     }
 
-  }, [canvas, mapState, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas, isolatedMode])
+  }, [canvas, mapState, img, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas, isolatedMode])
 
   const drawRegion = (
     ctx: CanvasRenderingContext2D, 
     region: Region, 
-    mapState: MapState, 
+    mapState: MapState,
+    img: HTMLImageElement,
     isSelected: boolean = false,
     isDrawing: boolean = false,
     isEditing: boolean = false,
@@ -168,7 +165,7 @@ export function RegionOverlay({
 
     // Convert world coordinates to canvas coordinates
     const canvasPoints = region.points.map(point => {
-      const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+      const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
       return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
     })
 
@@ -327,15 +324,12 @@ export function RegionOverlay({
     ctx: CanvasRenderingContext2D,
     region: Region,
     mapState: MapState,
+    img: HTMLImageElement,
     isSelected: boolean = false
   ) => {
-    // Only draw center points for regions with custom center points.
-    // Auto-calculated hearts are deliberately not shown because they would overlap
-    // with the region name display (which is positioned at the calculated center).
     if (!region.centerPoint) return
 
-    // Convert world coordinates to canvas coordinates
-    const pixelPos = worldToPixel(region.centerPoint.x, region.centerPoint.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(region.centerPoint.x, region.centerPoint.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
     // Draw center point marker (smaller size)
@@ -380,11 +374,11 @@ export function RegionOverlay({
     ctx: CanvasRenderingContext2D,
     subregion: Subregion,
     mapState: MapState,
+    img: HTMLImageElement,
     isParentSelected: boolean = false,
     showNames: boolean = true
   ) => {
-    // Convert village world coordinates to canvas coordinates
-    const pixelPos = worldToPixel(subregion.x, subregion.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(subregion.x, subregion.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
     
     // Draw village center point
@@ -426,9 +420,10 @@ export function RegionOverlay({
   const drawSpawnPoint = (
     ctx: CanvasRenderingContext2D,
     spawnCoordinates: WorldCoordinate,
-    mapState: MapState
+    mapState: MapState,
+    img: HTMLImageElement
   ) => {
-    const pixelPos = worldToPixel(spawnCoordinates.x, spawnCoordinates.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(spawnCoordinates.x, spawnCoordinates.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
     ctx.fillStyle = 'rgba(255, 0, 0, 1)' // Red spawn point
@@ -451,9 +446,10 @@ export function RegionOverlay({
     ctx: CanvasRenderingContext2D,
     mouseCoordinates: { x: number; z: number },
     mapState: MapState,
+    img: HTMLImageElement,
     radius: number
   ) => {
-    const pixelPos = worldToPixel(mouseCoordinates.x, mouseCoordinates.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(mouseCoordinates.x, mouseCoordinates.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
     // Convert radius from world coordinates to canvas pixels
@@ -473,13 +469,13 @@ export function RegionOverlay({
   const drawSplitPoints = (
     ctx: CanvasRenderingContext2D,
     mapState: MapState,
+    img: HTMLImageElement,
     splitPoints: { x: number; z: number }[]
   ) => {
     if (splitPoints.length === 0) return
 
-    // Draw split points
     splitPoints.forEach((point, index) => {
-      const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+      const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
       const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
       
       // Draw split point
@@ -500,8 +496,8 @@ export function RegionOverlay({
 
     // Draw split line if we have 2 points
     if (splitPoints.length === 2) {
-      const pixelPos1 = worldToPixel(splitPoints[0].x, splitPoints[0].z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
-      const pixelPos2 = worldToPixel(splitPoints[1].x, splitPoints[1].z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+      const pixelPos1 = worldToPixel(splitPoints[0].x, splitPoints[0].z, img.width, img.height, mapState.originOffset)
+      const pixelPos2 = worldToPixel(splitPoints[1].x, splitPoints[1].z, img.width, img.height, mapState.originOffset)
       const canvasPos1 = imageToCanvas(pixelPos1.x, pixelPos1.y, mapState.scale, mapState.offsetX, mapState.offsetY)
       const canvasPos2 = imageToCanvas(pixelPos2.x, pixelPos2.y, mapState.scale, mapState.offsetX, mapState.offsetY)
       
@@ -532,7 +528,7 @@ export function RegionOverlay({
     if (!editingRegion) return
 
     const canvasPoints = editingRegion.points.map(point => {
-      const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+      const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
       return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
     })
 
@@ -564,7 +560,7 @@ export function RegionOverlay({
         if (distance <= clickRadius) {
           // Convert canvas coordinates to world coordinates
           const imagePos = canvasToImage(midX, midY, mapState.scale, mapState.offsetX, mapState.offsetY)
-          const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+          const worldPos = pixelToWorld(imagePos.x, imagePos.y, img.width, img.height, mapState.originOffset)
           
           // Insert point after the current point
           const insertIndex = (i + 1) % canvasPoints.length
@@ -587,7 +583,7 @@ export function RegionOverlay({
 
     // Convert canvas coordinates to world coordinates
     const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
-    const worldPos = pixelToWorld(imagePos.x, imagePos.y, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const worldPos = pixelToWorld(imagePos.x, imagePos.y, img.width, img.height, mapState.originOffset)
 
     onPointMouseMove(editMode.editingRegionId, editMode.draggingPointIndex, worldPos.x, worldPos.z)
   }
@@ -613,11 +609,10 @@ export function RegionOverlay({
     if (!editingRegion) return
 
     const canvasPoints = editingRegion.points.map(point => {
-      const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+      const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
       return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
     })
 
-    // Check each point for double-click
     for (let i = 0; i < canvasPoints.length; i++) {
       const point = canvasPoints[i]
       const distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2))
@@ -630,7 +625,7 @@ export function RegionOverlay({
     }
   }
 
-  if (!canvas || !mapState.image) return null
+  if (!canvas || !img) return null
 
   return (
     <canvas

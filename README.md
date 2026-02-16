@@ -5,7 +5,7 @@ A professional browser-based tool for defining and managing polygonal exploratio
 ## Features
 
 ### Core Functionality
-- 🗺️ **Map Loading**: Generate maps from seeds or load from URLs via integrated microservice
+- 🗺️ **Map Loading**: Generate maps from seeds or load from URLs via integrated microservice (Overworld: terrain + biome layers)
 - 🎯 **Region Drawing**: Draw polygonal regions by clicking points on the map
 - 🧭 **Coordinate System**: Automatic conversion between image pixels and Minecraft world coordinates
 - 📐 **Grid Overlay**: Optional chunk grid (16×16 blocks) for precise alignment
@@ -64,11 +64,13 @@ npm run proxy
 - Select dimension (Overworld, Nether, or End)
 - Adjust world size if generating Overworld (2k-16k)
 - Click "Generate Map Image" and wait for processing (30-60 seconds)
+- For Overworld, both terrain and biome maps are imported; Nether/End load terrain only
 - Click "Import Map" to load it into the editor
 
 **Option B: Load from URL**
 - Navigate to the **Map** tab
-- Enter the URL of your biome map image
+- Enter the terrain map URL (required) and optionally the biome map URL
+- Both images must have matching dimensions
 - Click "Load"
 
 ### 2. Set Origin
@@ -186,7 +188,7 @@ Standard WorldGuard region format compatible with WorldGuard plugins for Minecra
 ### Complete Project Export
 JSON format containing:
 - All regions with full configuration
-- Map image (embedded as base64)
+- Map image(s): terrain and biome layers (embedded as base64) when both are loaded
 - Map state (zoom, position, origin)
 - World name and settings
 - Spawn coordinates

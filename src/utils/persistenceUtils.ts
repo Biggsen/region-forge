@@ -52,23 +52,25 @@ export function loadImageFromSource(src: string): Promise<HTMLImageElement> {
   })
 }
 
+function serializeImageForStorage(image: HTMLImageElement | null): string | null {
+  if (!image) return null
+  const src = getImageSource(image)
+  return src.startsWith('file://') ? null : src
+}
+
 // Save map state to localStorage
 export async function saveMapState(mapState: MapState): Promise<void> {
   try {
-    const stateToSave = { ...mapState }
-    
-    // Store image source URL instead of base64
-    if (mapState.image) {
-      const imageSrc = getImageSource(mapState.image)
-      // Only save if it's not a file:// URL (which won't work after refresh)
-      if (!imageSrc.startsWith('file://')) {
-        (stateToSave as any).image = imageSrc
-      } else {
-        // Remove image from saved state if it's a local file
-        stateToSave.image = null
-      }
-    }
-    
+    const stateToSave: Record<string, unknown> = { ...mapState }
+
+    const imageSrc = mapState.image ? serializeImageForStorage(mapState.image) : null
+    const terrainImageSrc = mapState.terrainImage ? serializeImageForStorage(mapState.terrainImage) : null
+    const biomeImageSrc = mapState.biomeImage ? serializeImageForStorage(mapState.biomeImage) : null
+
+    stateToSave.image = imageSrc ?? null
+    stateToSave.terrainImage = terrainImageSrc ?? null
+    stateToSave.biomeImage = biomeImageSrc ?? null
+
     localStorage.setItem(STORAGE_KEYS.MAP_STATE, JSON.stringify(stateToSave))
   } catch (error) {
     console.error('Failed to save map state:', error)
@@ -80,20 +82,39 @@ export async function loadMapState(): Promise<MapState | null> {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.MAP_STATE)
     if (!saved) return null
-    
+
     const parsed = JSON.parse(saved)
-    
-    // Set default opacity for backward compatibility
-    if (parsed.imageOpacity === undefined) {
-      parsed.imageOpacity = 1
+
+    if (parsed.imageOpacity === undefined) parsed.imageOpacity = 1
+    if (parsed.terrainVisible === undefined) parsed.terrainVisible = true
+    if (parsed.terrainOpacity === undefined) parsed.terrainOpacity = 1
+    if (parsed.biomeVisible === undefined) parsed.biomeVisible = true
+    if (parsed.biomeOpacity === undefined) parsed.biomeOpacity = 0.8
+
+    const terrainSrc = typeof parsed.terrainImage === 'string' ? parsed.terrainImage : parsed.terrainImageSrc
+    const biomeSrc = typeof parsed.biomeImage === 'string' ? parsed.biomeImage : parsed.biomeImageSrc
+    const imageSrc = typeof parsed.image === 'string' ? parsed.image : null
+
+    if (terrainSrc) {
+      parsed.terrainImage = await loadImageFromSource(terrainSrc)
+    } else {
+      parsed.terrainImage = null
     }
-    
-    // Load image from source URL if it exists
-    if (parsed.image && typeof parsed.image === 'string') {
-      parsed.image = await loadImageFromSource(parsed.image)
+
+    if (biomeSrc) {
+      parsed.biomeImage = await loadImageFromSource(biomeSrc)
+    } else {
+      parsed.biomeImage = null
     }
-    
-    return parsed
+
+    if (imageSrc && !terrainSrc) {
+      parsed.image = await loadImageFromSource(imageSrc)
+      if (!parsed.terrainImage) parsed.terrainImage = parsed.image
+    } else {
+      if (!parsed.image && parsed.terrainImage) parsed.image = parsed.terrainImage
+    }
+
+    return parsed as MapState
   } catch (error) {
     console.error('Failed to load map state:', error)
     return null

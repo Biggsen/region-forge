@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MapState, CustomMarker } from '../types'
 import { worldToPixel, imageToCanvas } from '../utils/coordinateUtils'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 
 interface CustomMarkerOverlayProps {
   canvas: HTMLCanvasElement | null
@@ -12,10 +13,11 @@ interface CustomMarkerOverlayProps {
 
 export function CustomMarkerOverlay({ canvas, mapState, customMarker, orphanedVillageMarkers, showOrphanedVillages }: CustomMarkerOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
+  const img = getEffectiveMapImage(mapState)
 
   useEffect(() => {
     const overlay = overlayRef.current
-    if (!overlay || !canvas || !mapState.image) return
+    if (!overlay || !canvas || !img) return
 
     overlay.width = canvas.width
     overlay.height = canvas.height
@@ -26,26 +28,24 @@ export function CustomMarkerOverlay({ canvas, mapState, customMarker, orphanedVi
     // Clear overlay
     ctx.clearRect(0, 0, overlay.width, overlay.height)
 
-    // Draw custom marker if it exists
     if (customMarker) {
-      drawCustomMarker(ctx, customMarker, mapState)
+      drawCustomMarker(ctx, customMarker, mapState, img)
     }
 
-    // Draw orphaned village markers if they should be shown
     if (showOrphanedVillages && orphanedVillageMarkers.length > 0) {
       orphanedVillageMarkers.forEach(marker => {
-        drawOrphanedVillageMarker(ctx, marker, mapState)
+        drawOrphanedVillageMarker(ctx, marker, mapState, img)
       })
     }
-  }, [canvas, mapState, customMarker, orphanedVillageMarkers, showOrphanedVillages])
+  }, [canvas, mapState, img, customMarker, orphanedVillageMarkers, showOrphanedVillages])
 
   const drawCustomMarker = (
     ctx: CanvasRenderingContext2D,
     marker: CustomMarker,
-    mapState: MapState
+    mapState: MapState,
+    img: HTMLImageElement
   ) => {
-    // Convert world coordinates to canvas coordinates
-    const pixelPos = worldToPixel(marker.coordinates.x, marker.coordinates.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(marker.coordinates.x, marker.coordinates.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
     // Draw red dot marker
@@ -87,10 +87,10 @@ export function CustomMarkerOverlay({ canvas, mapState, customMarker, orphanedVi
   const drawOrphanedVillageMarker = (
     ctx: CanvasRenderingContext2D,
     marker: CustomMarker,
-    mapState: MapState
+    mapState: MapState,
+    img: HTMLImageElement
   ) => {
-    // Convert world coordinates to canvas coordinates
-    const pixelPos = worldToPixel(marker.coordinates.x, marker.coordinates.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+    const pixelPos = worldToPixel(marker.coordinates.x, marker.coordinates.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
     // Draw orange dot marker for orphaned villages

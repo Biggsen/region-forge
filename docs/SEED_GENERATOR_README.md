@@ -27,6 +27,7 @@ The application uses an external microservice for map generation. For local deve
 ### 3. Features of Generated Maps
 
 - **High Quality**: 1000x1000 pixel PNG images
+- **Dual Layers (Overworld)**: Terrain heightmap + biome color map imported together
 - **Fast Processing**: Async job-based generation with status polling
 - **Multiple Dimensions**: Supports Overworld, Nether, and End
 - **Configurable Sizes**: World sizes from 2k to 16k blocks
@@ -49,7 +50,7 @@ The map generation service provides the following endpoints:
   - Response: `{ jobId, status, estimatedTime }`
   
 - `GET /api/status/{jobId}` - Check job status
-  - Response: `{ status, imageUrl }` (when ready)
+  - Response: `{ status, terrainUrl, biomeUrl?, imageUrl }` (when ready; Overworld returns both terrain and biome)
   
 - `GET /api/health` - Service health check
 

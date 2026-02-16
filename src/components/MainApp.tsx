@@ -75,7 +75,7 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
   const hasExistingData = () => {
     return (
       regions.regions.length > 0 ||
-      mapState.mapState.image !== null ||
+      (mapState.mapState.terrainImage ?? mapState.mapState.biomeImage ?? mapState.mapState.image) !== null ||
       worldName.worldName !== 'world' ||
       spawn.spawnState.coordinates !== null
     )
@@ -109,9 +109,39 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
     try {
       const importData = await importMapData(file)
       
-      // Load the image if it exists
-      if ('imageData' in importData && importData.imageData) {
-        // New format with embedded image data
+      if (importData.terrainImageData && importData.biomeImageData) {
+        try {
+          const [terrainImg, biomeImg] = await Promise.all([
+            loadImageFromBase64(importData.terrainImageData),
+            loadImageFromBase64(importData.biomeImageData)
+          ])
+          const tVal = validateImageDimensions(terrainImg.width, terrainImg.height)
+          const bVal = validateImageDimensions(biomeImg.width, biomeImg.height)
+          if (!tVal.isValid || !bVal.isValid) {
+            toast.showToast(tVal.error || bVal.error || 'Image validation failed', 'error')
+          } else if (terrainImg.width !== biomeImg.width || terrainImg.height !== biomeImg.height) {
+            toast.showToast('Terrain and biome layers have mismatched dimensions', 'error')
+          } else {
+            mapState.setTerrainImage(terrainImg)
+            mapState.setBiomeImage(biomeImg)
+          }
+        } catch (error) {
+          console.warn('Failed to load dual layers, continuing without images')
+        }
+      } else if (importData.terrainImageData) {
+        try {
+          const image = await loadImageFromBase64(importData.terrainImageData)
+          const validation = validateImageDimensions(image.width, image.height)
+          if (!validation.isValid) {
+            toast.showToast(validation.error || 'Image validation failed', 'error')
+          } else {
+            mapState.setTerrainImage(image)
+            mapState.setBiomeImage(null)
+          }
+        } catch (error) {
+          console.warn('Failed to load terrain image, continuing without image')
+        }
+      } else if ('imageData' in importData && importData.imageData) {
         try {
           const image = await loadImageFromBase64(importData.imageData)
           const validation = validateImageDimensions(image.width, image.height)

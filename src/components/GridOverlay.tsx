@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MapState, Region } from '../types'
 import { worldToPixel, imageToCanvas } from '../utils/coordinateUtils'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 
 interface GridOverlayProps {
   canvas: HTMLCanvasElement | null
@@ -11,10 +12,11 @@ interface GridOverlayProps {
 
 export function GridOverlay({ canvas, mapState, isVisible, clipRegion }: GridOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
+  const img = getEffectiveMapImage(mapState)
 
   useEffect(() => {
     const overlay = overlayRef.current
-    if (!overlay || !canvas || !mapState.image || !mapState.originSelected || !isVisible) return
+    if (!overlay || !canvas || !img || !mapState.originSelected || !isVisible) return
 
     overlay.width = canvas.width
     overlay.height = canvas.height
@@ -28,7 +30,7 @@ export function GridOverlay({ canvas, mapState, isVisible, clipRegion }: GridOve
       ctx.save()
       ctx.beginPath()
       const canvasPoints = clipRegion.points.map(point => {
-        const pixelPos = worldToPixel(point.x, point.z, mapState.image!.width, mapState.image!.height, mapState.originOffset)
+        const pixelPos = worldToPixel(point.x, point.z, img.width, img.height, mapState.originOffset)
         return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
       })
       ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
@@ -43,8 +45,8 @@ export function GridOverlay({ canvas, mapState, isVisible, clipRegion }: GridOve
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
     ctx.lineWidth = 1
 
-    const imageWidth = mapState.image.width
-    const imageHeight = mapState.image.height
+    const imageWidth = img.width
+    const imageHeight = img.height
 
     // Calculate pixels per block based on image size
     // mcseedmap shows 8x8 chunks, each chunk is 16 blocks, so 128 blocks total
@@ -118,11 +120,11 @@ export function GridOverlay({ canvas, mapState, isVisible, clipRegion }: GridOve
     if (clipRegion) {
       ctx.restore()
     }
-  }, [canvas, mapState, isVisible, clipRegion])
+  }, [canvas, mapState, img, isVisible, clipRegion])
 
   if (!isVisible) return null
 
-  if (!canvas || !mapState.image || !mapState.originSelected) return null
+  if (!canvas || !img || !mapState.originSelected) return null
 
   return (
     <canvas

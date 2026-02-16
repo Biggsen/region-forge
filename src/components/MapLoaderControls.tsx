@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useAppContext } from '../context/AppContext'
+import { hasMapLoaded } from '../utils/mapStateUtils'
 import { saveImageDetails, loadImageDetails, ImageDetails } from '../utils/persistenceUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
 import { validateImageDimensions } from '../utils/imageValidation'
@@ -18,11 +19,15 @@ interface MapLoaderControlsProps {
 export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControlsProps) {
   const { mapState, regions, seedInfo, worldName, toast } = useAppContext()
   const [imageUrl, setImageUrl] = useState('')
+  const [terrainUrl, setTerrainUrl] = useState('')
+  const [biomeUrl, setBiomeUrl] = useState('')
   const [worldSize, setWorldSize] = useState(8)
   const [isLoading, setIsLoading] = useState(false)
   const [isPolling, setIsPolling] = useState(false)
   const [isLoadingUrl, setIsLoadingUrl] = useState(false)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [previewTerrainUrl, setPreviewTerrainUrl] = useState<string | null>(null)
+  const [previewBiomeUrl, setPreviewBiomeUrl] = useState<string | null>(null)
   const [previewImageDimensions, setPreviewImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [urlError, setUrlError] = useState<string | null>(null)
@@ -36,9 +41,9 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
   const [importSeed, setImportSeed] = useState(seedInfo.seedInfo.seed || '')
   const [importDimension, setImportDimension] = useState(seedInfo.seedInfo.dimension || 'overworld')
   
-  const { setImage, setOffset } = mapState
+  const { setImage, setTerrainImage, setBiomeImage, setOffset } = mapState
   
-  const hasMapLoaded = !!mapState.mapState.image
+  const hasMapLoadedState = hasMapLoaded(mapState.mapState)
 
   // Helper function to calculate world size from image dimensions
   const calculateWorldSize = (width: number, height: number): number => {
@@ -64,7 +69,7 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
     if (savedDetails) {
       setLoadedMapDetails(savedDetails)
     }
-  }, [mapState.mapState.image])
+  }, [mapState.mapState.terrainImage, mapState.mapState.biomeImage, mapState.mapState.image])
 
   // Save image details whenever they change
   useEffect(() => {
@@ -105,6 +110,58 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
       window.removeEventListener('imageDetailsUpdated', handleImageDetailsUpdate)
     }
   }, [])
+
+  const loadDualImagesToCanvas = useCallback(async (terrainUrl: string, biomeUrl: string) => {
+    const [terrainImg, biomeImg] = await Promise.all([
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => resolve(img)
+        img.onerror = () => reject(new Error('Failed to load terrain image'))
+        img.src = getImageProxyUrl(terrainUrl)
+      }),
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => resolve(img)
+        img.onerror = () => reject(new Error('Failed to load biome image'))
+        img.src = getImageProxyUrl(biomeUrl)
+      })
+    ])
+    const tVal = validateImageDimensions(terrainImg.width, terrainImg.height)
+    const bVal = validateImageDimensions(biomeImg.width, biomeImg.height)
+    if (!tVal.isValid || !bVal.isValid) {
+      toast.showToast(tVal.error || bVal.error || 'Image validation failed', 'error')
+      return
+    }
+    if (terrainImg.width !== biomeImg.width || terrainImg.height !== biomeImg.height) {
+      toast.showToast('Terrain and biome maps must have matching dimensions', 'error')
+      return
+    }
+    isUpdatingDetailsRef.current = true
+    setTerrainImage(terrainImg)
+    setBiomeImage(biomeImg)
+    const canvasWidth = window.innerWidth - SIDEBAR_WIDTH
+    const canvasHeight = window.innerHeight - 64
+    const centerX = (canvasWidth - terrainImg.width) / 2
+    const centerY = (canvasHeight - terrainImg.height) / 2
+    setOffset(centerX, centerY)
+    if (terrainImg.width === terrainImg.height) {
+      mapState.setOrigin(Math.floor(terrainImg.width / 2), Math.floor(terrainImg.height / 2))
+    }
+    const calculatedWorldSize = terrainImg.width === terrainImg.height
+      ? Math.round(terrainImg.width / 125)
+      : Math.round(Math.max(terrainImg.width, terrainImg.height) / 125)
+    const newImageDetails: ImageDetails = {
+      seed: importSeed.trim() || seedInfo.seedInfo.seed,
+      dimension: importDimension || seedInfo.seedInfo.dimension,
+      imageSize: { width: terrainImg.width, height: terrainImg.height },
+      worldSize: calculatedWorldSize
+    }
+    saveImageDetails(newImageDetails)
+    setLoadedMapDetails(newImageDetails)
+    setTimeout(() => { isUpdatingDetailsRef.current = false }, 100)
+  }, [setTerrainImage, setBiomeImage, setOffset, mapState, importSeed, importDimension, seedInfo])
 
   const loadImageToCanvas = useCallback((url: string) => {
     const img = new Image()
@@ -186,6 +243,8 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
     setUrlError(null)
     setSeedError(null)
     setPreviewImageUrl(null)
+    setPreviewTerrainUrl(null)
+    setPreviewBiomeUrl(null)
     setPreviewImageDimensions(null)
     
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -221,63 +280,58 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
       const maxAttempts = 20  // 100 seconds max (20 polls * 5 seconds)
       let attempts = 0
       
-      const pollStatus = async (): Promise<string> => {
+      type StatusResult = { status: string; terrainUrl?: string; biomeUrl?: string; imageUrl?: string; message?: string; retryable?: boolean }
+      const pollStatus = async (): Promise<StatusResult> => {
         const statusResponse = await fetch(`${API_URL}/api/status/${jobId}`)
-        
-        if (!statusResponse.ok) {
-          throw new Error('Failed to check job status')
-        }
-        
-        const statusResult = await statusResponse.json()
-        
-        if (statusResult.status === 'ready') {
-          return statusResult.imageUrl
-        }
-        
+        if (!statusResponse.ok) throw new Error('Failed to check job status')
+        const statusResult: StatusResult = await statusResponse.json()
+
+        if (statusResult.status === 'ready') return statusResult
         if (statusResult.status === 'failed') {
           const errorMsg = statusResult.message || 'Map generation failed'
           const retryable = statusResult.retryable
           throw new Error(`${errorMsg}${retryable ? ' (You can retry)' : ''}`)
         }
-        
-        // Still processing
         attempts++
-        if (attempts >= maxAttempts) {
-          throw new Error('Map generation timed out. Please try again.')
-        }
-        
-        // Wait 5 seconds before next poll
+        if (attempts >= maxAttempts) throw new Error('Map generation timed out. Please try again.')
         await new Promise(resolve => setTimeout(resolve, 5000))
         return pollStatus()
       }
-      
-      let generatedImageUrl = await pollStatus()
-      
-      // Normalize image URL - handle relative URLs or localhost URLs
-      if (generatedImageUrl.startsWith('/')) {
-        // Relative URL - prepend API_URL
-        generatedImageUrl = `${API_URL}${generatedImageUrl}`
-      } else if (generatedImageUrl.includes('localhost:3000') || generatedImageUrl.includes('localhost:3001')) {
-        // Replace localhost with API_URL - extract path from URL
-        try {
-          const urlPath = new URL(generatedImageUrl).pathname
-          generatedImageUrl = `${API_URL}${urlPath}`
-        } catch {
-          // If URL parsing fails, try simple string replacement
-          const match = generatedImageUrl.match(/\/generated-maps\/.+$/)
-          if (match) {
-            generatedImageUrl = `${API_URL}${match[0]}`
+
+      const statusResult = await pollStatus()
+      const terrainUrlRaw = statusResult.terrainUrl || statusResult.imageUrl
+      const biomeUrlRaw = statusResult.biomeUrl
+
+      const normalizeUrl = (url: string): string => {
+        if (!url) return url
+        if (url.startsWith('/')) return `${API_URL}${url}`
+        if (url.includes('localhost:3000') || url.includes('localhost:3001')) {
+          try {
+            const urlPath = new URL(url).pathname
+            return `${API_URL}${urlPath}`
+          } catch {
+            const match = url.match(/\/generated-maps\/.+$/)
+            return match ? `${API_URL}${match[0]}` : url
           }
         }
+        return url
       }
-      
-      // Use proxy for external URLs to avoid CORS issues
-      const proxiedImageUrl = getImageProxyUrl(generatedImageUrl)
-      
-      setPreviewImageUrl(proxiedImageUrl)
-      // Calculate dimensions from world size (formula: worldSize * 125 = image size)
+
+      const terrainUrl = terrainUrlRaw ? normalizeUrl(terrainUrlRaw) : null
+      const biomeUrl = biomeUrlRaw ? normalizeUrl(biomeUrlRaw) : null
+
       const imageSize = worldSize * 125
       setPreviewImageDimensions({ width: imageSize, height: imageSize })
+
+      if (terrainUrl && biomeUrl) {
+        setPreviewTerrainUrl(getImageProxyUrl(terrainUrl))
+        setPreviewBiomeUrl(getImageProxyUrl(biomeUrl))
+        setPreviewImageUrl(null)
+      } else if (terrainUrl) {
+        setPreviewImageUrl(getImageProxyUrl(terrainUrl))
+        setPreviewTerrainUrl(null)
+        setPreviewBiomeUrl(null)
+      }
       
     } catch (error) {
       console.error('Error generating map:', error)
@@ -294,53 +348,76 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
 
   const handleLoadFromUrl = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!imageUrl.trim()) return
-    
+    const tUrl = terrainUrl.trim()
+    const bUrl = biomeUrl.trim()
+    if (!tUrl) return
+
     setIsLoadingUrl(true)
     setUrlError(null)
-    
+
     try {
-      // Just load to preview, not to canvas yet
-      // Use proxy for external URLs to avoid CORS issues
-      const proxiedUrl = getImageProxyUrl(imageUrl.trim())
-      
-      // Test if image loads
-      const testImg = new Image()
-      testImg.crossOrigin = 'anonymous'
-      
-      await new Promise((resolve, reject) => {
-        testImg.onload = () => {
-          const validation = validateImageDimensions(testImg.width, testImg.height)
-          if (!validation.isValid) {
-            reject(new Error(validation.error || 'Image validation failed'))
-            return
+      if (tUrl && bUrl) {
+        const [terrainImg, biomeImg] = await Promise.all([
+          new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.onload = () => resolve(img)
+            img.onerror = () => reject(new Error('Failed to load terrain image'))
+            img.src = getImageProxyUrl(tUrl)
+          }),
+          new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.onload = () => resolve(img)
+            img.onerror = () => reject(new Error('Failed to load biome image'))
+            img.src = getImageProxyUrl(bUrl)
+          })
+        ])
+        const tVal = validateImageDimensions(terrainImg.width, terrainImg.height)
+        const bVal = validateImageDimensions(biomeImg.width, biomeImg.height)
+        if (!tVal.isValid || !bVal.isValid) throw new Error(tVal.error || bVal.error || 'Image validation failed')
+        if (terrainImg.width !== biomeImg.width || terrainImg.height !== biomeImg.height) {
+          throw new Error('Terrain and biome maps must have matching dimensions')
+        }
+        setPreviewTerrainUrl(getImageProxyUrl(tUrl))
+        setPreviewBiomeUrl(getImageProxyUrl(bUrl))
+        setPreviewImageUrl(null)
+        setPreviewImageDimensions({ width: terrainImg.width, height: terrainImg.height })
+      } else {
+        const testImg = new Image()
+        testImg.crossOrigin = 'anonymous'
+        await new Promise((resolve, reject) => {
+          testImg.onload = () => {
+            const validation = validateImageDimensions(testImg.width, testImg.height)
+            if (!validation.isValid) reject(new Error(validation.error || 'Image validation failed'))
+            else {
+              setPreviewImageUrl(getImageProxyUrl(tUrl))
+              setPreviewTerrainUrl(null)
+              setPreviewBiomeUrl(null)
+              setPreviewImageDimensions({ width: testImg.width, height: testImg.height })
+              resolve(null)
+            }
           }
-          setPreviewImageUrl(proxiedUrl)
-          setPreviewImageDimensions({ width: testImg.width, height: testImg.height })
-          resolve(null)
-        }
-        testImg.onerror = () => {
-          reject(new Error('Failed to load image from URL'))
-        }
-        testImg.src = proxiedUrl
-      })
+          testImg.onerror = () => reject(new Error('Failed to load image from URL'))
+          testImg.src = getImageProxyUrl(tUrl)
+        })
+      }
     } catch (error) {
-      console.error('Error loading image from URL:', error)
-      setUrlError(error instanceof Error ? error.message : 'Failed to load image from URL. Please check the URL and try again.')
+      setUrlError(error instanceof Error ? error.message : 'Failed to load image from URL.')
     } finally {
       setIsLoadingUrl(false)
     }
   }
 
+  const hasDualPreview = previewTerrainUrl && previewBiomeUrl
+  const hasSinglePreview = !!previewImageUrl
+
   const handleImportMap = () => {
-    if (!previewImageUrl) return
-    
-    // Save seed/dimension to localStorage via useSeedInfo (already saved, but ensure it's current)
-    // The seedInfo hook already auto-saves, so this is just ensuring consistency
+    if (!hasDualPreview && !hasSinglePreview) return
     
     // Check if there's existing data that would be lost
     const hasExistingData = regions.regions.length > 0 || 
-                           mapState.mapState.image || 
+                           (mapState.mapState.terrainImage ?? mapState.mapState.biomeImage ?? mapState.mapState.image) || 
                            mapState.mapState.originSelected
     
     if (hasExistingData) {
@@ -351,27 +428,30 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
     }
   }
 
-  const performImport = (deleteRegions: boolean) => {
-    if (!previewImageUrl) return
-    
-    // Clear regions if user chose to delete them
+  const performImport = async (deleteRegions: boolean) => {
+    if (!hasDualPreview && !hasSinglePreview) return
+
     if (deleteRegions) {
       regions.replaceRegions([])
       regions.setSelectedRegionId(null)
     }
-    
-    // Save world details to localStorage only when importing
+
     worldName.updateWorldName(importWorldName.trim() || 'world')
-    seedInfo.updateSeedInfo({ 
-      seed: importSeed.trim() || undefined,
-      dimension: importDimension || undefined 
-    })
-    
-    loadImageToCanvas(previewImageUrl)
-    setPreviewImageUrl(null)
+    seedInfo.updateSeedInfo({ seed: importSeed.trim() || undefined, dimension: importDimension || undefined })
+
+    if (hasDualPreview && previewTerrainUrl && previewBiomeUrl) {
+      await loadDualImagesToCanvas(previewTerrainUrl, previewBiomeUrl)
+      setPreviewTerrainUrl(null)
+      setPreviewBiomeUrl(null)
+    } else if (hasSinglePreview && previewImageUrl) {
+      loadImageToCanvas(previewImageUrl)
+      setPreviewImageUrl(null)
+    }
     setPreviewImageDimensions(null)
-    setImageUrl('') // Clear URL input
-    setShowLoadSection(false) // Hide load section after import
+    setImageUrl('')
+    setTerrainUrl('')
+    setBiomeUrl('')
+    setShowLoadSection(false)
   }
 
   const handleClearData = () => {
@@ -510,12 +590,23 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
           <form onSubmit={handleLoadFromUrl} className="space-y-2">
             <input
               type="url"
-              value={imageUrl}
+              value={terrainUrl}
               onChange={(e) => {
-                setImageUrl(e.target.value)
+                setTerrainUrl(e.target.value)
                 if (urlError) setUrlError(null)
               }}
-              placeholder="https://example.com/image.png"
+              placeholder="Terrain map URL"
+              className="w-full bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:border-lapis-lighter focus:outline-none text-sm placeholder:text-gray-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading || isLoadingUrl}
+            />
+            <input
+              type="url"
+              value={biomeUrl}
+              onChange={(e) => {
+                setBiomeUrl(e.target.value)
+                if (urlError) setUrlError(null)
+              }}
+              placeholder="Biome map URL (optional)"
               className="w-full bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:border-lapis-lighter focus:outline-none text-sm placeholder:text-gray-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading || isLoadingUrl}
             />
@@ -547,7 +638,7 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
       </div>
 
       {/* Unified Preview - only show when no map is loaded or when previewing */}
-      {previewImageUrl && !hasMapLoaded && (
+      {(hasDualPreview || hasSinglePreview) && !hasMapLoadedState && (
         <div className="border-b border-gunmetal pb-4">
           <h3 className="text-lg font-semibold text-white mb-2">Map Image Preview</h3>
           {previewImageDimensions && (
@@ -557,18 +648,13 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
           )}
           <div className="bg-gray-700 rounded p-2 mb-2">
             <img 
-              src={previewImageUrl} 
-              alt="Map preview"
+              src={(hasDualPreview ? previewTerrainUrl : previewImageUrl) || ''} 
+              alt={hasDualPreview ? 'Terrain map preview (biome also loaded)' : 'Map preview'}
               className="w-full h-auto border border-gunmetal rounded"
             />
+            {hasDualPreview && <p className="text-xs text-gray-400 mt-1">Terrain + biome layers ready</p>}
           </div>
-          <Button
-            variant="primary"
-            onClick={handleImportMap}
-            className="w-full"
-          >
-            Import Map
-          </Button>
+          <Button variant="primary" onClick={handleImportMap} className="w-full">Import Map</Button>
         </div>
       )}
     </>
@@ -576,7 +662,7 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
 
   return (
     <div className="space-y-4">
-      {hasMapLoaded ? (
+      {hasMapLoadedState ? (
         // When map is loaded, show either World Details or Import Map Image section
         showLoadSection ? (
           // Import Map Image Section
@@ -587,8 +673,12 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
               onClick={() => {
                 setShowLoadSection(false)
                 setPreviewImageUrl(null)
+                setPreviewTerrainUrl(null)
+                setPreviewBiomeUrl(null)
                 setPreviewImageDimensions(null)
                 setImageUrl('')
+                setTerrainUrl('')
+                setBiomeUrl('')
                 setError(null)
                 setUrlError(null)
                 setSeedError(null)
@@ -607,8 +697,7 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
             
             {renderLoadSection()}
             
-            {/* Preview when changing map */}
-            {previewImageUrl && (
+            {(hasDualPreview || hasSinglePreview) && (
               <div className="border-b border-gunmetal pb-4 mt-4">
                 <h3 className="text-lg font-semibold text-white mb-2">Map Image Preview</h3>
                 {previewImageDimensions && (
@@ -618,18 +707,13 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
                 )}
                 <div className="bg-gray-700 rounded p-2 mb-2">
                   <img 
-                    src={previewImageUrl} 
-                    alt="Map preview"
+                    src={(hasDualPreview ? previewTerrainUrl : previewImageUrl) || ''} 
+                    alt={hasDualPreview ? 'Terrain map preview' : 'Map preview'}
                     className="w-full h-auto border border-gunmetal rounded"
                   />
+                  {hasDualPreview && <p className="text-xs text-gray-400 mt-1">Terrain + biome layers ready</p>}
                 </div>
-                <Button
-                  variant="primary"
-                  onClick={handleImportMap}
-                  className="w-full"
-                >
-                  Import Map
-                </Button>
+                <Button variant="primary" onClick={handleImportMap} className="w-full">Import Map</Button>
               </div>
             )}
           </>

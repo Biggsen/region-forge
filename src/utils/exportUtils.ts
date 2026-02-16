@@ -1,4 +1,5 @@
 import { Region, MapState } from '../types'
+import { getEffectiveMapImage } from './mapStateUtils'
 import { generateRegionYAML } from './polygonUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
 import yaml from 'js-yaml'
@@ -15,8 +16,12 @@ export interface MapExportData {
   mapState: Omit<MapState, 'image'> & { imageSrc?: string }
   spawnCoordinates?: { x: number; z: number; radius?: number } | null
   exportDate: string
-  imageData?: string // Base64 encoded image data
+  imageData?: string
+  terrainImageData?: string
+  biomeImageData?: string
   imageFilename?: string
+  terrainImageFilename?: string
+  biomeImageFilename?: string
   exportSettings?: ExportSettings
 }
 
@@ -35,46 +40,49 @@ export async function exportCompleteMap(
   imageSize?: { width: number; height: number },
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): Promise<void> {
-  if (!mapState.image) {
+  const effectiveImage = getEffectiveMapImage(mapState)
+  if (!effectiveImage) {
     onShowToast('No map image loaded. Please load an image first.', 'error')
     return
   }
 
   try {
     let imageData: string | null = null
-    
-    // Try to convert image to base64, but handle CORS issues gracefully
-    try {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        throw new Error('Could not get canvas context')
-      }
+    let terrainImageData: string | null = null
+    let biomeImageData: string | null = null
+    const hasDual = mapState.terrainImage && mapState.biomeImage
 
-      canvas.width = mapState.image.width
-      canvas.height = mapState.image.height
-      ctx.drawImage(mapState.image, 0, 0)
-      
-      imageData = canvas.toDataURL('image/png')
-    } catch (corsError) {
-      console.warn('Cannot export image data due to CORS restrictions:', corsError)
-      
-      // For cross-origin images, we'll include the image source URL instead
-      // The user will need to manually save the image if they want a complete export
-      const userConfirmed = confirm(
-        'The map image is from a different origin and cannot be embedded in the export file.\n\n' +
-        'The export will include the image URL instead. You can manually save the image separately if needed.\n\n' +
-        'Continue with export?'
-      )
-      
-      if (!userConfirmed) {
-        return
+    const toBase64 = (img: HTMLImageElement): string | null => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return null
+        ctx.drawImage(img, 0, 0)
+        return canvas.toDataURL('image/png')
+      } catch {
+        return null
       }
     }
-    
-    // Load current export settings to include in project export
+
+    if (hasDual) {
+      terrainImageData = toBase64(mapState.terrainImage!)
+      biomeImageData = toBase64(mapState.biomeImage!)
+    } else {
+      imageData = toBase64(effectiveImage)
+    }
+
+    if (!hasDual && !imageData) {
+      const userConfirmed = confirm(
+        'The map image is from a different origin and cannot be embedded.\n\nContinue with export (image will be omitted)?'
+      )
+      if (!userConfirmed) return
+    }
+
     const exportSettings = loadExportSettings()
-    
+    const dateStr = new Date().toISOString().split('T')[0]
+
     const exportData: MapExportData = {
       version: CURRENT_VERSION,
       worldName,
@@ -91,12 +99,16 @@ export async function exportCompleteMap(
         lastMousePos: mapState.lastMousePos,
         originSelected: mapState.originSelected,
         originOffset: mapState.originOffset,
-        imageSrc: (mapState.image as any)?.imageSrc || undefined
+        imageSrc: (effectiveImage as any)?.src || undefined
       },
       spawnCoordinates,
       exportDate: new Date().toISOString(),
       imageData: imageData || undefined,
-      imageFilename: imageData ? `map-image-${new Date().toISOString().split('T')[0]}.png` : undefined,
+      terrainImageData: terrainImageData || undefined,
+      biomeImageData: biomeImageData || undefined,
+      imageFilename: imageData ? `map-image-${dateStr}.png` : undefined,
+      terrainImageFilename: terrainImageData ? `terrain-${dateStr}.png` : undefined,
+      biomeImageFilename: biomeImageData ? `biome-${dateStr}.png` : undefined,
       exportSettings: exportSettings || undefined
     }
 

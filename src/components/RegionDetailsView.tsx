@@ -7,6 +7,7 @@ import { VillageManager } from './VillageManager'
 import { Button } from './Button'
 import { DeleteRegionModal } from './DeleteRegionModal'
 import { scanBiomes, type BiomeBreakdownEntry } from '../utils/biomeScanner'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 import { ArrowLeft, VectorSquare, Plus, Minus, BrushCleaning, Move, Scissors, CircleDotDashed, Trash2, Eye, EyeOff, Scan, Focus, Layers, Wrench } from 'lucide-react'
 
 interface RegionDetailsViewProps {
@@ -505,14 +506,15 @@ export function RegionDetailsView({
           <Button
             variant="secondary"
             onClick={() => {
-              if (!mapState?.image) return
+              const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image
+              if (!biomeImage) return
               setIsScanningBiomes(true)
               setShowBiomeBreakdown(true)
               setTimeout(() => {
                 const result = scanBiomes(
                   selectedRegion,
-                  mapState.image!,
-                  mapState.originOffset
+                  biomeImage,
+                  mapState!.originOffset
                 )
                 setBiomeBreakdown(result)
                 setIsScanningBiomes(false)
@@ -520,8 +522,8 @@ export function RegionDetailsView({
             }}
             leftIcon={<Scan className="w-4 h-4" />}
             className="w-full"
-            disabled={!mapState?.image || isScanningBiomes}
-            title={!mapState?.image ? 'Load a map image first' : undefined}
+            disabled={!mapState || !(mapState.biomeImage ?? mapState.terrainImage ?? mapState.image) || isScanningBiomes}
+            title={!mapState?.biomeImage && !mapState?.terrainImage && !mapState?.image ? 'Load a biome or terrain map first' : undefined}
           >
             {isScanningBiomes ? 'Scanning…' : 'Scan biomes'}
           </Button>

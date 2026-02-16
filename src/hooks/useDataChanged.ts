@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Region, MapState } from '../types'
+import { getEffectiveMapImage } from '../utils/mapStateUtils'
 
 interface LastSavedState {
   regions: Region[]
@@ -20,18 +21,19 @@ export function useDataChanged(
   const lastSavedRef = useRef<LastSavedState | null>(null)
 
   // Get a stable representation of the map image
+  const effectiveImage = getEffectiveMapImage(mapState)
   const getMapImageKey = useCallback((): string | null => {
-    if (!mapState.image) return null
-    const image = mapState.image as any
+    if (!effectiveImage) return null
+    const image = effectiveImage as any
     return image.src || `${image.width}x${image.height}`
-  }, [mapState.image])
+  }, [effectiveImage])
 
   // Check if current state differs from last saved
   const checkForChanges = useCallback(() => {
     if (!lastSavedRef.current) {
       const hasData = 
         regions.length > 0 ||
-        mapState.image !== null ||
+        effectiveImage !== null ||
         worldName !== 'world' ||
         spawnCoordinates !== null
       setHasChanged(hasData)
@@ -54,7 +56,7 @@ export function useDataChanged(
       dimensionChanged ||
       mapImageChanged
     )
-  }, [regions, mapState.image, worldName, spawnCoordinates, dimension, getMapImageKey])
+  }, [regions, effectiveImage, worldName, spawnCoordinates, dimension, getMapImageKey])
 
   // Check for changes whenever monitored data changes
   useEffect(() => {

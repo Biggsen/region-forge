@@ -43,6 +43,12 @@ export type SpawnState = {
 
 export type MapState = {
   image: HTMLImageElement | null
+  terrainImage: HTMLImageElement | null
+  biomeImage: HTMLImageElement | null
+  terrainVisible: boolean
+  terrainOpacity: number
+  biomeVisible: boolean
+  biomeOpacity: number
   scale: number
   offsetX: number
   offsetY: number
