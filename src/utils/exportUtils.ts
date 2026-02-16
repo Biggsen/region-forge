@@ -292,7 +292,7 @@ export function exportRegionsMetaYAML(
   const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image ?? null
   const originOffset = mapState?.originOffset ?? null
 
-  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[] }[] = []
+  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[] }[] = []
 
   if (hasSpawnRegion) {
     metaRegions.push({
@@ -305,7 +305,7 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[] } = {
+    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[] } = {
       id: mainId,
       world: dim,
       kind: 'region',
@@ -314,6 +314,8 @@ export function exportRegionsMetaYAML(
         recipeId: getRecipeId('region', dim)
       }
     }
+    if (region.minecraftCategory) regionEntry.category = region.minecraftCategory
+    if (region.minecraftItems && region.minecraftItems.length > 0) regionEntry.items = region.minecraftItems
     if (biomeImage && region.points.length >= 3) {
       const breakdown = scanBiomes(region, biomeImage, originOffset)
       if (breakdown && breakdown.length > 0) {

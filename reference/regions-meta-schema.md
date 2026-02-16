@@ -41,6 +41,8 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `kind`   | string | **Yes**  | One of: `system`, `region`, `village`, `heart`. See §3.2. |
 | `discover` | object | **Yes**  | Discovery behaviour. See §3.3. |
 | `biomes` | array  | No       | Biome breakdown for this region (from map scan). See §3.6. Only present for `kind: region` when a biome map is available. |
+| `category` | string | No     | Minecraft item category (e.g. `ores`, `stone`, `wood`, `food`). Used for economy plugins or discovery rewards. VZ price guide categories. |
+| `items`  | array  | No       | Up to 3 Minecraft items for this region. See §3.7. Used for economy plugins or discovery rewards. VZ price guide item IDs. |
 
 Unknown keys on a region object are ignored.
 
@@ -93,6 +95,15 @@ Biome breakdown for a region, derived from sampling the biome map within the reg
 | `percentage` | number | **Yes**  | Approximate percentage of the region covered by this biome (0–100). Percentages sum to 100 across all entries. |
 
 Entries are sorted by percentage descending. Mc-plugin-manager may use this for filtering, display, or plugin configuration. Unknown keys in a biome entry are ignored.
+
+### 3.7 `items` (array, optional)
+
+Up to 3 Minecraft items associated with this region. Region Forge populates these from the VZ price guide (random or manual assignment). Mc-plugin-manager may use them for economy plugins, discovery rewards, or CE crate configuration.
+
+| Field  | Type   | Required | Description |
+|--------|--------|----------|-------------|
+| `id`   | string | **Yes**  | Minecraft item ID (e.g. `diamond`, `acacia_planks`). |
+| `name` | string | **Yes**  | Display name (e.g. `diamond`, `acacia planks`). |
 
 ---
 
@@ -222,6 +233,14 @@ regions:
     discover:
       method: on_enter
       recipeId: region
+    category: ores
+    items:
+      - id: diamond
+        name: diamond
+      - id: gold_ingot
+        name: gold ingot
+      - id: coal
+        name: coal
     biomes:
       - biome: plains
         percentage: 45
@@ -299,6 +318,7 @@ regions:
 |--------|-------|
 | 1      | Initial schema: regions, onboarding, spawnCenter, levelledMobs. |
 | 1.1    | Added optional `biomes` array on region objects (§3.6): biome breakdown from map scan for `kind: region`. |
+| 1.2    | Added optional `category` and `items` on region objects (§3.7): Minecraft category and up to 3 items from VZ price guide. |
 
 ---
 
