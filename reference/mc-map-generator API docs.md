@@ -102,13 +102,34 @@ Poll this endpoint to check the status of a map generation job.
 }
 ```
 
-**Ready Response (200):**
+**Ready Response (200) - Nether/End:**
+```json
+{
+  "success": true,
+  "jobId": "seed-12345-nether-1703123456789",
+  "status": "ready",
+  "terrainUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-nether-8k-1703123456789.png",
+  "imageUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-nether-8k-1703123456789.png",
+  "metadata": {
+    "seed": "12345",
+    "dimension": "nether",
+    "size": "8k",
+    "generatedAt": "2023-12-21T10:30:45Z",
+    "fileSize": "245KB",
+    "dimensions": "1000x1000"
+  }
+}
+```
+
+**Ready Response (200) - Overworld (terrain + biome):**
 ```json
 {
   "success": true,
   "jobId": "seed-12345-overworld-1703123456789",
   "status": "ready",
-  "imageUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-overworld-1703123456789.png",
+  "terrainUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-overworld-8k-1703123456789.png",
+  "biomeUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-overworld-8k-biome-1703123456789.png",
+  "imageUrl": "https://mc-map-generator-production.up.railway.app/generated-maps/seed-12345-overworld-8k-1703123456789.png",
   "metadata": {
     "seed": "12345",
     "dimension": "overworld",
@@ -119,6 +140,7 @@ Poll this endpoint to check the status of a map generation job.
   }
 }
 ```
+Note: `imageUrl` is an alias for `terrainUrl` (backward compatibility).
 
 **Failed Response (200):**
 ```json
@@ -204,17 +226,27 @@ Manually trigger cleanup of old completed jobs (optional maintenance).
 
 ## Image Generation Process
 
-### Workflow
+### Workflow (All Dimensions)
 1. Launch Puppeteer browser
 2. Navigate to `https://mcseedmap.net/1.21.5-Java/{seed}/{dimension}`
 3. Handle cookie banner
 4. Toggle sidebar for clean view
-5. Wait for map to load
-6. Take full-page screenshot (3840x2160)
-7. Crop to map area (2000x2000)
-8. Resize to final size (1000x1000)
-9. Save to storage
-10. Return image URL
+5. Configure markers (Markers tab → Village)
+6. Wait for map to load (~10s)
+7. Take full-page screenshot (3840x2160)
+8. Crop and resize per size parameter
+9. Save → **terrainUrl**
+10. **Overworld only:** continue to biome capture (see below)
+11. Return URL(s)
+
+### Overworld Dual View (Terrain + Biome)
+When dimension is `overworld`, a second screenshot is captured:
+1. Click Map Settings tab (`button[title="Map settings"]`)
+2. Toggle Terrain estimation off (label containing "Terrain estimation")
+3. Wait for map refresh (~10s)
+4. Take second screenshot, process identically
+5. Save → **biomeUrl**
+6. Response includes both `terrainUrl` and `biomeUrl`
 
 ### Supported Dimensions
 - `overworld` (default)
@@ -273,8 +305,9 @@ const pollStatus = async () => {
   const status = await statusResponse.json();
   
   if (status.status === 'ready') {
-    console.log('Map ready:', status.imageUrl);
-    return status.imageUrl;
+    console.log('Terrain:', status.terrainUrl);
+    if (status.biomeUrl) console.log('Biome:', status.biomeUrl);
+    return status;
   } else if (status.status === 'failed') {
     console.error('Generation failed:', status.message);
     return null;
@@ -307,7 +340,9 @@ while True:
     status = status_response.json()
     
     if status['status'] == 'ready':
-        print(f"Map ready: {status['imageUrl']}")
+        print(f"Terrain: {status['terrainUrl']}")
+        if status.get('biomeUrl'):
+            print(f"Biome: {status['biomeUrl']}")
         break
     elif status['status'] == 'failed':
         print(f"Generation failed: {status['message']}")

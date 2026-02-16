@@ -23,7 +23,7 @@ This specification defines the technical requirements for supporting **two map l
 - **Biome Scanner:** `biomeScanner.ts` samples the single map image for pixel colors
 
 ### Import Paths
-1. **MC Map Generator** – Generate from seed → single `imageUrl` from `/api/status/{jobId}`
+1. **MC Map Generator** – Generate from seed → `imageUrl`/`terrainUrl` from `/api/status/{jobId}`; overworld also returns `biomeUrl` but Region Forge currently imports only one
 2. **Load from URL** – Single URL input
 3. **Project file import** – `MapExportData` with `imageData` (base64) or `imageSrc`
 4. **Router state** – `ImageImportHandler` receives `importImage` URL
@@ -102,26 +102,27 @@ Update `drawMap` to composite layers:
 
 ### 4. MC Map Generator Integration
 
-** prerequisite:** MC Map Generator must be updated to return both terrain and biome image URLs. This spec assumes the following API extension.
+**Note:** The MC Map Generator API already supports dual outputs for `overworld` dimension. See `reference/mc-map-generator API docs.md`.
 
-**Extended status response (when ready):**
+**Status response (overworld, ready):** Returns `terrainUrl`, `biomeUrl`, and `imageUrl` (alias for `terrainUrl`). Nether/End return only `terrainUrl` and `imageUrl`.
+
 ```json
 {
   "success": true,
   "jobId": "...",
   "status": "ready",
-  "imageUrl": "...",
-  "terrainImageUrl": "https://.../terrain.png",
-  "biomeImageUrl": "https://.../biome.png",
+  "terrainUrl": "https://.../seed-overworld-8k-xxx.png",
+  "biomeUrl": "https://.../seed-overworld-8k-biome-xxx.png",
+  "imageUrl": "https://.../seed-overworld-8k-xxx.png",
   "metadata": { ... }
 }
 ```
 
-**Fallback:** If only `imageUrl` is present (legacy service), use it for terrain layer; biome layer remains null.
+**Fallback:** For nether/end (or if `biomeUrl` absent), use `terrainUrl` or `imageUrl` for terrain layer; biome layer remains null.
 
 **File:** `src/components/MapLoaderControls.tsx`
 
-- Parse `terrainImageUrl` and `biomeImageUrl` from status response
+- Parse `terrainUrl` and `biomeUrl` from status response
 - Load both images in parallel when available
 - Validate dimensions match between layers
 - Call `setTerrainImage` and `setBiomeImage` (or equivalent)
@@ -276,7 +277,7 @@ Placement: Expand existing "Display" panel or add a "Layers" section in Map tab 
 - [ ] Extend project file import/export
 - [ ] Add dual-URL input for Load from URL (or extend UI)
 - [ ] Update ImageImportHandler for router state
-- [ ] Integrate MC Map Generator dual-URL response (when service supports it)
+- [ ] Integrate MC Map Generator dual-URL response (`terrainUrl`, `biomeUrl` from status)
 
 ### Phase 4: Polish
 - [ ] Migration for legacy localStorage state
@@ -306,16 +307,16 @@ Placement: Expand existing "Display" panel or add a "Layers" section in Map tab 
 
 ## MC Map Generator (External Dependency)
 
-This spec assumes the MC Map Generator service will eventually support dual outputs. Until then:
+The MC Map Generator **already returns** dual outputs for overworld dimension:
 
-- Region Forge can implement Phases 1–2 and 3 (excluding MC Map Generator dual-URL)
-- "Generate Map Image" continues to return a single image; it populates terrain layer only
-- Users can add a biome layer via "Load from URL" if they have a separate biome map source
+- **Overworld:** `terrainUrl` + `biomeUrl` (both 1000×1000 PNG, same dimensions)
+- **Nether/End:** `terrainUrl` / `imageUrl` only (single image)
 
-**Suggested MC Map Generator API extension** (for reference, not in scope for this repo):
+No API changes required. Region Forge needs to:
 
-- `POST /api/generate` – add optional `includeTerrain: boolean`, `includeBiome: boolean` (or similar)
-- `GET /api/status/{jobId}` – when ready, return `terrainImageUrl`, `biomeImageUrl` in addition to `imageUrl`
+- Poll `GET /api/status/{jobId}` and parse `terrainUrl` and `biomeUrl` when `status === "ready"`
+- Load both images in parallel for overworld; populate terrain and biome layers
+- For nether/end, use `terrainUrl` or `imageUrl` for terrain layer only
 
 ---
 
