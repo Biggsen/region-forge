@@ -7,15 +7,16 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen, ScrollText } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
+import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
 export function AdvancedPanel() {
-  const { regions, seedInfo, mapCanvas, toast, mapState } = useAppContext()
+  const { regions, seedInfo, mapCanvas, toast, mapState, worldName } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -31,6 +32,7 @@ export function AdvancedPanel() {
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
   const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
   const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(false)
+  const [isLoreInstructionsExpanded, setIsLoreInstructionsExpanded] = useState(false)
   const [showAllBiomes, setShowAllBiomes] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
@@ -222,6 +224,29 @@ export function AdvancedPanel() {
       pairs[2] ?? { a: '', b: '' }
     ])
     toast.showToast(`Assigned: ${pairs.map(p => `${p.a} + ${p.b}`).join('; ')}`, 'success')
+  }
+
+  const handleCopyLoreToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    toast.showToast('Lore copied to clipboard', 'success')
+  }
+
+  const loreForSelectedRegion = useMemo(() => {
+    if (!selectedRegion || !worldName?.worldName) return null
+    return formatRegionLore(selectedRegion, worldName.worldName, biomeBreakdown)
+  }, [selectedRegion, worldName?.worldName, biomeBreakdown])
+
+  const handleCopyAllLore = () => {
+    const w = worldName?.worldName ?? 'world'
+    const targets = regions.regions.filter(r => !r.disabled && r.points.length >= 3)
+    const blocks: string[] = []
+    for (const region of targets) {
+      const breakdown = biomeImage && region.points.length >= 3
+        ? scanBiomes(region, biomeImage, originOffset)
+        : null
+      blocks.push(formatRegionLore(region, w, breakdown))
+    }
+    handleCopyLoreToClipboard(blocks.join('\n\n'))
   }
 
   const handleAssignThemeToAll = () => {
@@ -862,6 +887,63 @@ export function AdvancedPanel() {
                   leftIcon={<BookOpen size={16} />}
                 >
                   Assign random to all regions
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Lore Instructions */}
+        <div>
+          <button
+            onClick={() => setIsLoreInstructionsExpanded(!isLoreInstructionsExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <ScrollText className="w-4 h-4" />
+              Lore Instructions
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isLoreInstructionsExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isLoreInstructionsExpanded && (
+            <div className="ml-4 space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm text-gray-300">
+                  Generate lore instructions for AI or documentation. Includes world, region, difficulty, biomes, category, items, theme hints, and villages.
+                </p>
+                {selectedRegion && loreForSelectedRegion ? (
+                  <div className="space-y-2">
+                    <pre className="p-3 bg-eerie-back rounded border border-gunmetal text-sm text-gray-300 whitespace-pre-wrap font-sans">
+                      {loreForSelectedRegion}
+                    </pre>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleCopyLoreToClipboard(loreForSelectedRegion!)}
+                      leftIcon={<ClipboardCopy size={16} />}
+                    >
+                      Copy selected region
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                    Select a region to view its lore instructions.
+                  </div>
+                )}
+                <Button
+                  variant="secondary"
+                  onClick={handleCopyAllLore}
+                  disabled={availableRegions.length === 0}
+                  className="w-full"
+                  leftIcon={<ClipboardCopy size={16} />}
+                >
+                  Copy all regions
                 </Button>
               </div>
             </div>
