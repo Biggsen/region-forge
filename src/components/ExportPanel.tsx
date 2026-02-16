@@ -6,7 +6,7 @@ import { BaseModal } from './BaseModal'
 import { Button } from './Button'
 
 export function ExportPanel() {
-  const { regions, spawn, seedInfo, worldName, toast } = useAppContext()
+  const { regions, spawn, seedInfo, worldName, toast, mapState } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
@@ -120,7 +120,8 @@ export function ExportPanel() {
       includeVillages,
       includeHeartRegions,
       finalIncludeSpawnRegion,
-      toast.showToast
+      toast.showToast,
+      mapState.mapState
     )
   }
 

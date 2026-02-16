@@ -1,5 +1,6 @@
 import { Region, MapState } from '../types'
 import { getEffectiveMapImage } from './mapStateUtils'
+import { scanBiomes } from './biomeScanner'
 import { generateRegionYAML } from './polygonUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
 import yaml from 'js-yaml'
@@ -277,7 +278,8 @@ export function exportRegionsMetaYAML(
   includeVillages: boolean,
   includeHeartRegions: boolean,
   includeSpawnRegion: boolean,
-  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
+  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
+  mapState?: MapState | null
 ): void {
   const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
   const dim = effectiveDimension
@@ -287,7 +289,10 @@ export function exportRegionsMetaYAML(
   // Filter out disabled regions
   const enabledRegions = regions.filter(region => !region.disabled)
 
-  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string } }[] = []
+  const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image ?? null
+  const originOffset = mapState?.originOffset ?? null
+
+  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[] }[] = []
 
   if (hasSpawnRegion) {
     metaRegions.push({
@@ -300,7 +305,7 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    metaRegions.push({
+    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[] } = {
       id: mainId,
       world: dim,
       kind: 'region',
@@ -308,7 +313,14 @@ export function exportRegionsMetaYAML(
         method: region.hasSpawn === true ? 'first_join' : 'on_enter',
         recipeId: getRecipeId('region', dim)
       }
-    })
+    }
+    if (biomeImage && region.points.length >= 3) {
+      const breakdown = scanBiomes(region, biomeImage, originOffset)
+      if (breakdown && breakdown.length > 0) {
+        regionEntry.biomes = breakdown.map(({ biome, percentage }) => ({ biome, percentage }))
+      }
+    }
+    metaRegions.push(regionEntry)
     if (includeHeartRegions && region.centerPoint != null) {
       metaRegions.push({
         id: `heart_of_${mainId}`,

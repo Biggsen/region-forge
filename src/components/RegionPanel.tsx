@@ -408,7 +408,6 @@ export function RegionPanel() {
           isolatedRegionId={isolatedRegionId}
           onIsolateRegion={setIsolatedRegionId}
           onClearIsolate={() => setIsolatedRegionId(null)}
-          mapState={mapState}
         />
       )}
     </div>

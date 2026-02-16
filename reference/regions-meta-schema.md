@@ -40,6 +40,7 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `world`  | string | **Yes**  | World name. Should match the root-level `world` field. Typically `overworld`, `nether`, or `end`; mc-plugin-manager accepts any string. |
 | `kind`   | string | **Yes**  | One of: `system`, `region`, `village`, `heart`. See §3.2. |
 | `discover` | object | **Yes**  | Discovery behaviour. See §3.3. |
+| `biomes` | array  | No       | Biome breakdown for this region (from map scan). See §3.6. Only present for `kind: region` when a biome map is available. |
 
 Unknown keys on a region object are ignored.
 
@@ -81,6 +82,17 @@ Unknown keys on a region object are ignored.
 | `village`      | Overworld village. (Note: Villages are overworld-only; there is no `nether_village`.) |
 
 `recipeId` should match `kind` and `world`. Mc-plugin-manager uses `kind` and `world` for CE reward logic; `recipeId` can be used for consistency checks or future features.
+
+### 3.6 `biomes` (array, optional)
+
+Biome breakdown for a region, derived from sampling the biome map within the region polygon. Region Forge populates this when a biome map is loaded and the map origin is set. Only present for `kind: region` (main regions). Omitted for spawn, hearts, and villages.
+
+| Field        | Type   | Required | Description |
+|-------------|--------|----------|-------------|
+| `biome`     | string | **Yes**  | Biome identifier (e.g. `plains`, `forest`, `oak_forest`). |
+| `percentage` | number | **Yes**  | Approximate percentage of the region covered by this biome (0–100). Percentages sum to 100 across all entries. |
+
+Entries are sorted by percentage descending. Mc-plugin-manager may use this for filtering, display, or plugin configuration. Unknown keys in a biome entry are ignored.
 
 ---
 
@@ -210,6 +222,13 @@ regions:
     discover:
       method: on_enter
       recipeId: region
+    biomes:
+      - biome: plains
+        percentage: 45
+      - biome: forest
+        percentage: 30
+      - biome: oak_forest
+        percentage: 25
 
   - id: elfdonia
     world: overworld
@@ -279,6 +298,7 @@ regions:
 | Version | Notes |
 |--------|-------|
 | 1      | Initial schema: regions, onboarding, spawnCenter, levelledMobs. |
+| 1.1    | Added optional `biomes` array on region objects (§3.6): biome breakdown from map scan for `kind: region`. |
 
 ---
 

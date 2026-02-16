@@ -1,17 +1,18 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
+import { scanBiomes } from '../utils/biomeScanner'
 import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine } from 'lucide-react'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
 export function AdvancedPanel() {
-  const { regions, seedInfo, mapCanvas, toast, worldName, spawn } = useAppContext()
+  const { regions, seedInfo, mapCanvas, toast, mapState } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -24,6 +25,8 @@ export function AdvancedPanel() {
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
+  const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
+  const [showAllBiomes, setShowAllBiomes] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
@@ -132,6 +135,17 @@ export function AdvancedPanel() {
   }
 
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
+
+  const selectedRegion = regions.selectedRegionId
+    ? regions.regions.find(r => r.id === regions.selectedRegionId) ?? null
+    : null
+  const biomeImage = mapState?.mapState?.biomeImage ?? mapState?.mapState?.terrainImage ?? mapState?.mapState?.image ?? null
+  const originOffset = mapState?.mapState?.originOffset ?? null
+
+  const biomeBreakdown = useMemo(() => {
+    if (!selectedRegion || !biomeImage || selectedRegion.points.length < 3) return null
+    return scanBiomes(selectedRegion, biomeImage, originOffset)
+  }, [selectedRegion, biomeImage, originOffset])
 
   const handleClearData = () => {
     setShowClearDataModal(true)
@@ -286,6 +300,70 @@ export function AdvancedPanel() {
                   onRandomizeChallengeLevels={handleRandomizeChallengeLevels}
                 />
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Biome Data */}
+        <div>
+          <button
+            onClick={() => setIsBiomeDataExpanded(!isBiomeDataExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <TreePine className="w-4 h-4" />
+              Biome Data
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isBiomeDataExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isBiomeDataExpanded && (
+            <div className="ml-4 space-y-4">
+              {!selectedRegion ? (
+                <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                  Select a region to view its biome data
+                </div>
+              ) : !biomeImage ? (
+                <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                  Load a biome map to view biome data
+                </div>
+              ) : biomeBreakdown === null ? (
+                <p className="text-gray-400 text-sm">No pixels sampled. Set map origin and ensure the region overlaps the map.</p>
+              ) : biomeBreakdown.length === 0 ? (
+                <p className="text-gray-400 text-sm">No biomes detected.</p>
+              ) : (
+                (() => {
+                  const threshold = 5
+                  const visible = showAllBiomes ? biomeBreakdown : biomeBreakdown.filter(b => b.percentage >= threshold)
+                  const hasHidden = biomeBreakdown.some(b => b.percentage < threshold)
+                  return (
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-400 text-xs mb-2">Biome breakdown for {selectedRegion.name}</p>
+                      {visible.map(({ biome, percentage }) => (
+                        <div key={biome} className="flex justify-between">
+                          <span className="text-gray-300">{biome}</span>
+                          <span className="text-gray-400 font-medium">{percentage}%</span>
+                        </div>
+                      ))}
+                      {hasHidden && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllBiomes(!showAllBiomes)}
+                          className="text-lapis-lazuli hover:text-lapis-lighter text-xs mt-2 underline"
+                        >
+                          {showAllBiomes ? 'See less' : 'See more'}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })()
+              )}
             </div>
           )}
         </div>
