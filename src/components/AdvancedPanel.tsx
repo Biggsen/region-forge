@@ -7,7 +7,7 @@ import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen, ScrollText } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen, ScrollText, Eye, EyeOff } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
@@ -16,7 +16,7 @@ import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
 export function AdvancedPanel() {
-  const { regions, seedInfo, mapCanvas, toast, mapState, worldName } = useAppContext()
+  const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -464,13 +464,24 @@ export function AdvancedPanel() {
                   const hasHidden = biomeBreakdown.some(b => b.percentage < threshold)
                   return (
                     <div className="space-y-1 text-sm">
-                      <p className="text-gray-400 text-xs mb-2">Biome breakdown for {selectedRegion.name}</p>
-                      {visible.map(({ biome, percentage }) => (
-                        <div key={biome} className="flex justify-between">
-                          <span className="text-gray-300">{biome}</span>
-                          <span className="text-gray-400 font-medium">{percentage}%</span>
-                        </div>
-                      ))}
+                      <p className="text-gray-400 text-xs mb-2">Biome breakdown for {selectedRegion.name}. Toggle to hide/show labels on map.</p>
+                      {visible.map(({ biome, percentage }) => {
+                        const isHidden = biomeLabelVisibility.isBiomeLabelHidden(biome)
+                        return (
+                          <div key={biome} className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => biomeLabelVisibility.toggleBiomeLabel(biome)}
+                              className="p-0.5 rounded hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"
+                              title={isHidden ? 'Show label on map' : 'Hide label on map'}
+                            >
+                              {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                            <span className={`flex-1 ${isHidden ? 'text-gray-500' : 'text-gray-300'}`}>{biome}</span>
+                            <span className="text-gray-400 font-medium">{percentage}%</span>
+                          </div>
+                        )
+                      })}
                       {hasHidden && (
                         <button
                           type="button"

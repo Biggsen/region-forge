@@ -2,6 +2,31 @@ import { useEffect, useRef } from 'react'
 import { MapState, Region, EditMode, HighlightMode, Subregion, WorldCoordinate, ChallengeLevel } from '../types'
 import { worldToPixel, imageToCanvas, canvasToImage, pixelToWorld } from '../utils/coordinateUtils'
 import { getEffectiveMapImage } from '../utils/mapStateUtils'
+import { scanBiomesWithCentroids } from '../utils/biomeScanner'
+
+/** Max chars per line for biome labels (e.g. "Old Growth" / "Birch Forest"). */
+const BIOME_LABEL_MAX_CHARS = 11
+
+/** Wraps a long biome name into multiple lines of ~10-12 chars. */
+function wrapBiomeLabel(text: string): string[] {
+  const words = text.split(' ')
+  if (words.length <= 1) return [text]
+
+  const lines: string[] = []
+  let current = ''
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word
+    if (candidate.length <= BIOME_LABEL_MAX_CHARS) {
+      current = candidate
+    } else {
+      if (current) lines.push(current)
+      current = word
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
 
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
   easy: { fill: 'rgba(34, 139, 34, 0.7)', stroke: 'rgba(34, 139, 34, 0.9)' }, // Forest Green
@@ -32,6 +57,8 @@ interface RegionOverlayProps {
   mouseCoordinates?: { x: number; z: number } | null
   isMouseOverCanvas?: boolean
   isolatedMode?: boolean
+  hiddenBiomeLabels?: Set<string>
+  showBiomeLabels?: boolean
 }
 
 export function RegionOverlay({ 
@@ -54,7 +81,9 @@ export function RegionOverlay({
   warpRadius = 40,
   mouseCoordinates = null,
   isMouseOverCanvas = false,
-  isolatedMode = false
+  isolatedMode = false,
+  hiddenBiomeLabels,
+  showBiomeLabels = false
 }: RegionOverlayProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
   const img = getEffectiveMapImage(mapState)
@@ -126,6 +155,37 @@ export function RegionOverlay({
         ctx.fillStyle = 'white'
         ctx.fillText(region.name, centerX, centerY)
       })
+
+    }
+
+    if (isolatedMode && showBiomeLabels && regions.length > 0) {
+      const biomeImage = mapState.biomeImage ?? mapState.terrainImage
+      const region = regions[0]
+      if (biomeImage && mapState.originOffset && region.points.length >= 3) {
+        const biomeBreakdown = scanBiomesWithCentroids(region, biomeImage, mapState.originOffset)
+        if (biomeBreakdown) {
+          biomeBreakdown.forEach(({ biome, centroid }) => {
+              if (hiddenBiomeLabels?.has(biome)) return
+              const pixelPos = worldToPixel(centroid.x, centroid.z, img.width, img.height, mapState.originOffset)
+              const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+              ctx.font = '11px sans-serif'
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'middle'
+              ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)'
+              ctx.lineWidth = 2
+              const lines = wrapBiomeLabel(biome)
+              const lineHeight = 13
+              const totalHeight = (lines.length - 1) * lineHeight
+              let y = canvasPos.y - totalHeight / 2
+              for (const line of lines) {
+                ctx.strokeText(line, canvasPos.x, y)
+                ctx.fillStyle = 'white'
+                ctx.fillText(line, canvasPos.x, y)
+                y += lineHeight
+              }
+            })
+        }
+      }
     }
 
     // Draw drawing region
@@ -144,7 +204,7 @@ export function RegionOverlay({
       drawWarpBrush(ctx, mouseCoordinates, mapState, img, warpRadius)
     }
 
-  }, [canvas, mapState, img, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas, isolatedMode])
+  }, [canvas, mapState, img, drawingRegion, selectedRegionId, hoveredRegionId, editMode, highlightMode, regions, spawnCoordinates, isWarping, warpRadius, mouseCoordinates, isMouseOverCanvas, isolatedMode, hiddenBiomeLabels, showBiomeLabels])
 
   const drawRegion = (
     ctx: CanvasRenderingContext2D, 

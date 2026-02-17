@@ -16,7 +16,8 @@ interface MapCanvasProps {
 
 export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName, seedInfo } = useAppContext()
+  const showAdvanced = new URLSearchParams(window.location.search).get('advanced') === 'true'
+  const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName, seedInfo, biomeLabelVisibility } = useAppContext()
   const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity, setTerrainOpacity, setBiomeOpacity, setTerrainVisible, setBiomeVisible } = mapStateHook
   const effectiveImage = getEffectiveMapImage(mapState)
   const { 
@@ -598,6 +599,8 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
               warpRadius={warpRadius}
               mouseCoordinates={mouseCoordinates}
               isMouseOverCanvas={isMouseOverCanvas}
+              hiddenBiomeLabels={biomeLabelVisibility.hiddenBiomes}
+              showBiomeLabels={showAdvanced}
             />
           )}
           <CustomMarkerOverlay
