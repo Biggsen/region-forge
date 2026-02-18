@@ -258,6 +258,21 @@ function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'ov
   return kind
 }
 
+function convertDescriptionToLiteralBlock(yamlStr: string): string {
+  const regex = /^(\s*description:)\s*"((?:[^"\\]|\\.)*)"\s*$/gm
+  return yamlStr.replace(regex, (_, prefix, quoted) => {
+    const unescaped = quoted
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\')
+    const lines = unescaped.split('\n')
+    const baseIndent = prefix.match(/^(\s*)/)![1]
+    const blockIndent = baseIndent + '  '
+    const blockContent = lines.map((l) => blockIndent + l).join('\n')
+    return `${prefix} |\n${blockContent}`
+  })
+}
+
 function getStandardWorldName(dimension: 'overworld' | 'nether' | 'end'): string {
   const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
   switch (effectiveDimension) {
@@ -400,7 +415,8 @@ export function exportRegionsMetaYAML(
   const prefix = exportFilenamePrefix(worldName, dim)
   const filename = `${prefix}-regions-meta.yml`
   try {
-    const yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
+    let yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
+    yamlStr = convertDescriptionToLiteralBlock(yamlStr)
     const blob = new Blob([yamlStr], { type: 'text/yaml' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
