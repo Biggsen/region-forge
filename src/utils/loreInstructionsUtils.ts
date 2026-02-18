@@ -1,5 +1,6 @@
 import { Region } from '../types'
 import { BiomeBreakdownEntry } from './biomeScanner'
+import { calculatePolygonArea, formatArea } from './polygonUtils'
 
 const DIFFICULTY_ORDER: Record<string, number> = {
   easy: 1,
@@ -19,7 +20,8 @@ function formatBiomeName(id: string): string {
 export function formatRegionLore(
   region: Region,
   worldName: string,
-  biomeBreakdown: BiomeBreakdownEntry[] | null
+  biomeBreakdown: BiomeBreakdownEntry[] | null,
+  simpler = false
 ): string {
   const level = region.challengeLevel ?? 'easy'
   const levelNum = DIFFICULTY_ORDER[level] ?? 1
@@ -54,14 +56,21 @@ export function formatRegionLore(
     ? region.subregions!.filter(s => s.type === 'village').map(s => s.name).join(', ')
     : '—'
 
-  return [
+  const areaInBlocks = region.points.length >= 3 ? calculatePolygonArea(region.points) : 0
+  const sizeStr = formatArea(areaInBlocks)
+
+  const lines = [
     `World: ${worldName}`,
     `Region name: ${region.name}`,
-    `Difficulty (Mob Strength): ${levelLabel} (${levelNum} out of 5 (Easy, Normal, Hard, Severe, Deadly))`,
-    `Biomes: ${biomesLine}`,
-    `Special Category: ${category}`,
-    `3 special items: ${items}`,
-    `Minor theme/historical hints: ${themes}`,
-    `Villages: ${villages}`
-  ].join('\n')
+    `Region size: ${sizeStr}`,
+    `Difficulty (Mob Strength): ${levelLabel} (${levelNum} out of 5 (Easy, Normal, Hard, Severe, Deadly))`
+  ]
+  if (!simpler) {
+    lines.push(`Biomes: ${biomesLine}`)
+    lines.push(`Special Category: ${category}`)
+    lines.push(`3 special items: ${items}`)
+  }
+  lines.push(`Minor theme/historical hints: ${themes}`)
+  lines.push(`Villages: ${villages}`)
+  return lines.join('\n')
 }

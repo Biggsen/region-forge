@@ -33,6 +33,7 @@ export function AdvancedPanel() {
   const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
   const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(false)
   const [isLoreInstructionsExpanded, setIsLoreInstructionsExpanded] = useState(false)
+  const [loreSimplerMode, setLoreSimplerMode] = useState(false)
   const [showAllBiomes, setShowAllBiomes] = useState(false)
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
@@ -233,18 +234,20 @@ export function AdvancedPanel() {
 
   const loreForSelectedRegion = useMemo(() => {
     if (!selectedRegion || !worldName?.worldName) return null
-    return formatRegionLore(selectedRegion, worldName.worldName, biomeBreakdown)
-  }, [selectedRegion, worldName?.worldName, biomeBreakdown])
+    return formatRegionLore(selectedRegion, worldName.worldName, biomeBreakdown, loreSimplerMode)
+  }, [selectedRegion, worldName?.worldName, biomeBreakdown, loreSimplerMode])
 
   const handleCopyAllLore = () => {
     const w = worldName?.worldName ?? 'world'
-    const targets = regions.regions.filter(r => !r.disabled && r.points.length >= 3)
+    const targets = regions.regions
+      .filter(r => !r.disabled && r.points.length >= 3)
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
     const blocks: string[] = []
     for (const region of targets) {
       const breakdown = biomeImage && region.points.length >= 3
         ? scanBiomes(region, biomeImage, originOffset)
         : null
-      blocks.push(formatRegionLore(region, w, breakdown))
+      blocks.push(formatRegionLore(region, w, breakdown, loreSimplerMode))
     }
     handleCopyLoreToClipboard(blocks.join('\n\n'))
   }
@@ -929,6 +932,15 @@ export function AdvancedPanel() {
                 <p className="text-sm text-gray-300">
                   Generate lore instructions for AI or documentation. Includes world, region, difficulty, biomes, category, items, theme hints, and villages.
                 </p>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={loreSimplerMode}
+                    onChange={(e) => setLoreSimplerMode(e.target.checked)}
+                    className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
+                  />
+                  <span className="text-sm text-gray-300">Simpler</span>
+                </label>
                 {selectedRegion && loreForSelectedRegion ? (
                   <div className="space-y-2">
                     <pre className="p-3 bg-eerie-back rounded border border-gunmetal text-sm text-gray-300 whitespace-pre-wrap font-sans">
