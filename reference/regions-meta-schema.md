@@ -44,6 +44,7 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `category` | string | No     | Minecraft item category (e.g. `ores`, `stone`, `wood`, `food`). Used for economy plugins or discovery rewards. VZ price guide categories. |
 | `items`  | array  | No       | Up to 3 Minecraft items for this region. See §3.7. Used for economy plugins or discovery rewards. VZ price guide item IDs. |
 | `theme`  | array  | No       | Up to 3 theme pairs (A + B) for narrative flavor. See §3.8. Storyteller's Automaton table. |
+| `description` | string | No   | Free-form description of the region. Used for display, quest hooks, or discovery text. mc-plugin-manager may use this for region lore or UI. |
 
 Unknown keys on a region object are ignored.
 
@@ -243,6 +244,7 @@ regions:
     discover:
       method: on_enter
       recipeId: region
+    description: A rugged highland region rich in mineral deposits.
     category: ores
     items:
       - id: diamond
@@ -335,6 +337,7 @@ regions:
 | 1.1    | Added optional `biomes` array on region objects (§3.6): biome breakdown from map scan for `kind: region`. |
 | 1.2    | Added optional `category` and `items` on region objects (§3.7): Minecraft category and up to 3 items from VZ price guide. |
 | 1.3    | Added optional `theme` on region objects (§3.8): up to 3 theme pairs (A + B) from Storyteller's Automaton table. |
+| 1.4    | Added optional `description` on region objects: free-form text for display, quest hooks, or discovery. |
 
 ---
 

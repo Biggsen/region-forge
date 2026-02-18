@@ -292,7 +292,7 @@ export function exportRegionsMetaYAML(
   const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image ?? null
   const originOffset = mapState?.originOffset ?? null
 
-  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[] }[] = []
+  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[]; description?: string }[] = []
 
   if (hasSpawnRegion) {
     metaRegions.push({
@@ -305,7 +305,7 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[] } = {
+    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[]; description?: string } = {
       id: mainId,
       world: dim,
       kind: 'region',
@@ -314,6 +314,7 @@ export function exportRegionsMetaYAML(
         recipeId: getRecipeId('region', dim)
       }
     }
+    if (region.description) regionEntry.description = region.description
     if (region.minecraftCategory) regionEntry.category = region.minecraftCategory
     if (region.minecraftItems && region.minecraftItems.length > 0) regionEntry.items = region.minecraftItems
     if (region.regionTheme && region.regionTheme.length > 0) regionEntry.theme = region.regionTheme
