@@ -27,7 +27,8 @@ const STORAGE_KEYS = {
   WORLD_NAME: 'mc-region-maker-world-name',
   WORLD_TYPE: 'mc-region-maker-world-type',
   WORLD_SEED: 'mc-region-maker-world-seed',
-  EXPORT_SETTINGS: 'mc-region-maker-export-settings'
+  EXPORT_SETTINGS: 'mc-region-maker-export-settings',
+  REGION_SORT: 'mc-region-maker-region-sort'
 }
 
 // Get image source URL for storage
@@ -159,6 +160,31 @@ export function loadSelectedRegion(): string | null {
   } catch (error) {
     console.error('Failed to load selected region:', error)
     return null
+  }
+}
+
+export type RegionSortBy = 'name' | 'size' | 'newest'
+export type RegionSortOrder = 'asc' | 'desc'
+
+export function saveRegionSort(sortBy: RegionSortBy, sortOrder: RegionSortOrder): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.REGION_SORT, JSON.stringify({ sortBy, sortOrder }))
+  } catch (error) {
+    console.error('Failed to save region sort:', error)
+  }
+}
+
+export function loadRegionSort(): { sortBy: RegionSortBy; sortOrder: RegionSortOrder } {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.REGION_SORT)
+    if (!saved) return { sortBy: 'newest', sortOrder: 'desc' }
+    const parsed = JSON.parse(saved)
+    const sortBy = ['name', 'size', 'newest'].includes(parsed?.sortBy) ? parsed.sortBy : 'newest'
+    const sortOrder = parsed?.sortOrder === 'asc' || parsed?.sortOrder === 'desc' ? parsed.sortOrder : 'desc'
+    return { sortBy, sortOrder }
+  } catch (error) {
+    console.error('Failed to load region sort:', error)
+    return { sortBy: 'newest', sortOrder: 'desc' }
   }
 }
 

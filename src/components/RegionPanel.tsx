@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { copyToClipboard, calculatePolygonArea, formatArea } from '../utils/polygonUtils'
 import { getEffectiveMapImage } from '../utils/mapStateUtils'
@@ -10,6 +10,7 @@ import { DeleteAllRegionsModal } from './DeleteAllRegionsModal'
 import { DeleteRegionModal } from './DeleteRegionModal'
 import { SortButton } from './SortButton'
 import { Trash2, Search, LineSquiggle, ZoomIn } from 'lucide-react'
+import { loadRegionSort, saveRegionSort } from '../utils/persistenceUtils'
 
 export function RegionPanel() {
   const { regions, seedInfo, mapState: mapStateHook, toast } = useAppContext()
@@ -51,8 +52,12 @@ export function RegionPanel() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [regionToDelete, setRegionToDelete] = useState<{ id: string; name: string } | null>(null)
-  const [sortBy, setSortBy] = useState<'name' | 'size' | 'newest'>('newest')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [sortBy, setSortBy] = useState<'name' | 'size' | 'newest'>(() => loadRegionSort().sortBy)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => loadRegionSort().sortOrder)
+
+  useEffect(() => {
+    saveRegionSort(sortBy, sortOrder)
+  }, [sortBy, sortOrder])
 
 
   const handleCopyYAML = async (regionId: string) => {
