@@ -221,6 +221,9 @@ function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; radiu
   yaml += `      creeper-explosion: deny\n`
   yaml += `      other-explosion: deny\n`
   yaml += `      tnt: deny\n`
+  yaml += `      greeting: "§2You are in Spawn. This area is safe and protected."\n`
+  yaml += `      farewell: "§6You have left Spawn. Your journey begins."\n`
+  yaml += `      invincible: allow\n`
   yaml += `    owners: {}\n`
   yaml += `    type: cuboid\n`
   yaml += `    priority: 10\n`
