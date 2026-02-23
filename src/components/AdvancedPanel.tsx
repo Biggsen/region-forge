@@ -252,6 +252,17 @@ export function AdvancedPanel() {
     handleCopyLoreToClipboard(blocks.join('\n\n'))
   }
 
+  const handleCopyAllDescriptions = () => {
+    const targets = regions.regions
+      .filter(r => r.description?.trim())
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+    const blocks = targets.map(r => `=== ${r.name} ===\n${r.description!.trim()}`)
+    navigator.clipboard.writeText(blocks.join('\n\n'))
+    toast.showToast('Descriptions copied to clipboard', 'success')
+  }
+
+  const regionsWithDescriptions = regions.regions.filter(r => r.description?.trim())
+
   const handleAssignThemeToAll = () => {
     const targets = regions.regions.filter(r => !r.disabled && r.points.length >= 3)
     targets.forEach(region => {
@@ -691,6 +702,15 @@ export function AdvancedPanel() {
                   No region selected
                 </div>
               )}
+                <Button
+                  variant="secondary"
+                  onClick={handleCopyAllDescriptions}
+                  disabled={regionsWithDescriptions.length === 0}
+                  className="w-full"
+                  leftIcon={<ClipboardCopy size={16} />}
+                >
+                  Copy all descriptions
+                </Button>
             </div>
           )}
         </div>
