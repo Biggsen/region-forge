@@ -112,8 +112,39 @@ function flattenBiomes(): BiomeEntry[] {
 
 const BIOME_LOOKUP = flattenBiomes()
 
+function buildBiomeToCategoryMap(): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const [categoryKey, biomes] of Object.entries(BIOME_COLORS)) {
+    const displayName = formatCategoryName(categoryKey)
+    for (const biomeName of Object.keys(biomes)) {
+      map.set(biomeName, displayName)
+    }
+  }
+  return map
+}
+
+function formatCategoryName(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+const BIOME_TO_CATEGORY = buildBiomeToCategoryMap()
+
+export function getBiomeCategory(biomeName: string): string {
+  return BIOME_TO_CATEGORY.get(biomeName) ?? 'Other'
+}
+
 function colorDistance(r1: number, g1: number, b1: number, r2: number, g2: number, b2: number): number {
   return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2)
+}
+
+/** Biomes that count as water/sea for land vs sea breakdown. Rivers excluded (narrow, treated as land). */
+const SEA_BIOMES = new Set([
+  'Cold Ocean', 'Deep Cold Ocean', 'Deep Frozen Ocean', 'Deep Lukewarm Ocean', 'Deep Ocean',
+  'Frozen Ocean', 'Lukewarm Ocean', 'Ocean', 'Warm Ocean'
+])
+
+export function isSeaBiome(biomeName: string): boolean {
+  return SEA_BIOMES.has(biomeName)
 }
 
 export function findNearestBiome(r: number, g: number, b: number): string {

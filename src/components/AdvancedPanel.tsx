@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
-import { scanBiomes } from '../utils/biomeScanner'
+import { scanBiomes, scanBiomesFullImage, getGroupedLandVsSea } from '../utils/biomeScanner'
 import { ChallengeLevel } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Sparkles, BookOpen, ScrollText, Eye, EyeOff } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
@@ -30,11 +30,31 @@ export function AdvancedPanel() {
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
+  const [isWorldBiomeDataExpanded, setIsWorldBiomeDataExpanded] = useState(false)
   const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
   const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(false)
   const [isLoreInstructionsExpanded, setIsLoreInstructionsExpanded] = useState(false)
   const [loreSimplerMode, setLoreSimplerMode] = useState(false)
-  const [showAllBiomes, setShowAllBiomes] = useState(false)
+  const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
+  const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
+
+  const toggleRegionCategory = (key: string) => {
+    setExpandedRegionCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+  const toggleWorldCategory = (key: string) => {
+    setExpandedWorldCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const [customCenterX, setCustomCenterX] = useState('')
   const [customCenterZ, setCustomCenterZ] = useState('')
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
@@ -157,6 +177,11 @@ export function AdvancedPanel() {
     if (!selectedRegion || !biomeImage || selectedRegion.points.length < 3) return null
     return scanBiomes(selectedRegion, biomeImage, originOffset)
   }, [selectedRegion, biomeImage, originOffset])
+
+  const worldBiomeBreakdown = useMemo(() => {
+    if (!biomeImage) return null
+    return scanBiomesFullImage(biomeImage)
+  }, [biomeImage])
 
   const allItems = useMemo(() => getAllItems(), [])
   const themeAValues = useMemo(() => getAValues(), [])
@@ -438,7 +463,7 @@ export function AdvancedPanel() {
           )}
         </div>
 
-        {/* Biome Data */}
+        {/* Region Biome Data */}
         <div>
           <button
             onClick={() => setIsBiomeDataExpanded(!isBiomeDataExpanded)}
@@ -446,7 +471,7 @@ export function AdvancedPanel() {
           >
             <span className="flex items-center gap-2">
               <TreePine className="w-4 h-4" />
-              Biome Data
+              Region Biome Data
             </span>
             <svg
               className={`w-4 h-4 transition-transform duration-200 ${isBiomeDataExpanded ? 'rotate-90' : ''}`}
@@ -461,11 +486,11 @@ export function AdvancedPanel() {
             <div className="ml-4 space-y-4">
               {!selectedRegion ? (
                 <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
-                  Select a region to view its biome data
+                  Select a region to view its region biome data
                 </div>
               ) : !biomeImage ? (
                 <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
-                  Load a biome map to view biome data
+                  Load a biome map to view region biome data
                 </div>
               ) : biomeBreakdown === null ? (
                 <p className="text-gray-400 text-sm">No pixels sampled. Set map origin and ensure the region overlaps the map.</p>
@@ -473,37 +498,206 @@ export function AdvancedPanel() {
                 <p className="text-gray-400 text-sm">No biomes detected.</p>
               ) : (
                 (() => {
-                  const threshold = 5
-                  const visible = showAllBiomes ? biomeBreakdown : biomeBreakdown.filter(b => b.percentage >= threshold)
-                  const hasHidden = biomeBreakdown.some(b => b.percentage < threshold)
+                  const grouped = getGroupedLandVsSea(biomeBreakdown)
                   return (
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-400 text-xs mb-2">Biome breakdown for {selectedRegion.name}. Toggle to hide/show labels on map.</p>
-                      {visible.map(({ biome, percentage }) => {
-                        const isHidden = biomeLabelVisibility.isBiomeLabelHidden(biome)
-                        return (
-                          <div key={biome} className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => biomeLabelVisibility.toggleBiomeLabel(biome)}
-                              className="p-0.5 rounded hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"
-                              title={isHidden ? 'Show label on map' : 'Hide label on map'}
-                            >
-                              {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                            <span className={`flex-1 ${isHidden ? 'text-gray-500' : 'text-gray-300'}`}>{biome}</span>
-                            <span className="text-gray-400 font-medium">{percentage}%</span>
+                    <div className="space-y-3 text-sm">
+                      <p className="text-gray-400 text-xs">Biome breakdown for {selectedRegion.name}. Toggle to hide/show labels on map.</p>
+                      {grouped.land.total > 0 && (
+                        <div>
+                          <div className="font-medium text-gray-300 mb-1.5">Land {grouped.land.total}%</div>
+                          <div className="ml-3 space-y-1">
+                            {grouped.land.groups.map(({ category, percentage, biomes }) => {
+                              const key = `land-${category}`
+                              const isExpanded = expandedRegionCategories.has(key)
+                              return (
+                                <div key={key}>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleRegionCategory(key)}
+                                    className="flex items-center gap-1.5 w-full text-left text-gray-400 font-medium hover:text-gray-300 py-0.5 rounded"
+                                  >
+                                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                                    {category} {percentage}%
+                                  </button>
+                                  {isExpanded && (
+                                    <div className="ml-5 mt-1 space-y-0.5">
+                                      {biomes.map(({ biome, percentage: pct }) => {
+                                        const isHidden = biomeLabelVisibility.isBiomeLabelHidden(biome)
+                                        return (
+                                          <div key={biome} className="flex items-center gap-2">
+                                            <button
+                                              type="button"
+                                              onClick={() => biomeLabelVisibility.toggleBiomeLabel(biome)}
+                                              className="p-0.5 rounded hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"
+                                              title={isHidden ? 'Show label on map' : 'Hide label on map'}
+                                            >
+                                              {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                            <span className={`flex-1 ${isHidden ? 'text-gray-500' : 'text-gray-300'}`}>{biome}</span>
+                                            <span className="text-gray-400 font-medium">{pct}%</span>
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
                           </div>
-                        )
-                      })}
-                      {hasHidden && (
-                        <button
-                          type="button"
-                          onClick={() => setShowAllBiomes(!showAllBiomes)}
-                          className="text-lapis-lazuli hover:text-lapis-lighter text-xs mt-2 underline"
-                        >
-                          {showAllBiomes ? 'See less' : 'See more'}
-                        </button>
+                        </div>
+                      )}
+                      {grouped.sea.total > 0 && (
+                        <div>
+                          <div className="font-medium text-gray-300 mb-1.5">Sea {grouped.sea.total}%</div>
+                          <div className="ml-3 space-y-1">
+                            {grouped.sea.groups.map(({ category, percentage, biomes }) => {
+                              const key = `sea-${category}`
+                              const isExpanded = expandedRegionCategories.has(key)
+                              return (
+                                <div key={key}>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleRegionCategory(key)}
+                                    className="flex items-center gap-1.5 w-full text-left text-gray-400 font-medium hover:text-gray-300 py-0.5 rounded"
+                                  >
+                                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                                    {category} {percentage}%
+                                  </button>
+                                  {isExpanded && (
+                                    <div className="ml-5 mt-1 space-y-0.5">
+                                      {biomes.map(({ biome, percentage: pct }) => {
+                                        const isHidden = biomeLabelVisibility.isBiomeLabelHidden(biome)
+                                        return (
+                                          <div key={biome} className="flex items-center gap-2">
+                                            <button
+                                              type="button"
+                                              onClick={() => biomeLabelVisibility.toggleBiomeLabel(biome)}
+                                              className="p-0.5 rounded hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"
+                                              title={isHidden ? 'Show label on map' : 'Hide label on map'}
+                                            >
+                                              {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                            <span className={`flex-1 ${isHidden ? 'text-gray-500' : 'text-gray-300'}`}>{biome}</span>
+                                            <span className="text-gray-400 font-medium">{pct}%</span>
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* World Biome Data */}
+        <div>
+          <button
+            onClick={() => setIsWorldBiomeDataExpanded(!isWorldBiomeDataExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              World Biome Data
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isWorldBiomeDataExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isWorldBiomeDataExpanded && (
+            <div className="ml-4 space-y-4">
+              {!biomeImage ? (
+                <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">
+                  Load a biome map to view world biome data
+                </div>
+              ) : worldBiomeBreakdown === null ? (
+                <p className="text-gray-400 text-sm">No pixels sampled.</p>
+              ) : worldBiomeBreakdown.length === 0 ? (
+                <p className="text-gray-400 text-sm">No biomes detected.</p>
+              ) : (
+                (() => {
+                  const grouped = getGroupedLandVsSea(worldBiomeBreakdown)
+                  return (
+                    <div className="space-y-3 text-sm">
+                      <p className="text-gray-400 text-xs">Biome breakdown for the entire loaded map.</p>
+                      {grouped.land.total > 0 && (
+                        <div>
+                          <div className="font-medium text-gray-300 mb-1.5">Land {grouped.land.total}%</div>
+                          <div className="ml-3 space-y-1">
+                            {grouped.land.groups.map(({ category, percentage, biomes }) => {
+                              const key = `land-${category}`
+                              const isExpanded = expandedWorldCategories.has(key)
+                              return (
+                                <div key={key}>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleWorldCategory(key)}
+                                    className="flex items-center gap-1.5 w-full text-left text-gray-400 font-medium hover:text-gray-300 py-0.5 rounded"
+                                  >
+                                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                                    {category} {percentage}%
+                                  </button>
+                                  {isExpanded && (
+                                    <div className="ml-5 mt-1 space-y-0.5">
+                                      {biomes.map(({ biome, percentage: pct }) => (
+                                        <div key={biome} className="flex items-center gap-2">
+                                          <span className="flex-1 text-gray-300">{biome}</span>
+                                          <span className="text-gray-400 font-medium">{pct}%</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {grouped.sea.total > 0 && (
+                        <div>
+                          <div className="font-medium text-gray-300 mb-1.5">Sea {grouped.sea.total}%</div>
+                          <div className="ml-3 space-y-1">
+                            {grouped.sea.groups.map(({ category, percentage, biomes }) => {
+                              const key = `sea-${category}`
+                              const isExpanded = expandedWorldCategories.has(key)
+                              return (
+                                <div key={key}>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleWorldCategory(key)}
+                                    className="flex items-center gap-1.5 w-full text-left text-gray-400 font-medium hover:text-gray-300 py-0.5 rounded"
+                                  >
+                                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                                    {category} {percentage}%
+                                  </button>
+                                  {isExpanded && (
+                                    <div className="ml-5 mt-1 space-y-0.5">
+                                      {biomes.map(({ biome, percentage: pct }) => (
+                                        <div key={biome} className="flex items-center gap-2">
+                                          <span className="flex-1 text-gray-300">{biome}</span>
+                                          <span className="text-gray-400 font-medium">{pct}%</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
                       )}
                     </div>
                   )
