@@ -85,6 +85,7 @@ export async function loadMapState(): Promise<MapState | null> {
     if (!saved) return null
 
     const parsed = JSON.parse(saved)
+    const terrainSrc = typeof parsed.terrainImage === 'string' ? parsed.terrainImage : parsed.terrainImageSrc
 
     if (parsed.imageOpacity === undefined) parsed.imageOpacity = 1
     if (parsed.terrainVisible === undefined) parsed.terrainVisible = true
@@ -92,7 +93,6 @@ export async function loadMapState(): Promise<MapState | null> {
     if (parsed.biomeVisible === undefined) parsed.biomeVisible = true
     if (parsed.biomeOpacity === undefined) parsed.biomeOpacity = 0.8
 
-    const terrainSrc = typeof parsed.terrainImage === 'string' ? parsed.terrainImage : parsed.terrainImageSrc
     const biomeSrc = typeof parsed.biomeImage === 'string' ? parsed.biomeImage : parsed.biomeImageSrc
     const imageSrc = typeof parsed.image === 'string' ? parsed.image : null
 

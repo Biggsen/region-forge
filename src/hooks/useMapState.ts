@@ -1,8 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { MapState } from '../types'
 import { saveMapState, loadMapState } from '../utils/persistenceUtils'
 
 export function useMapState() {
+  const isHydratedRef = useRef(false)
+  const latestMapStateRef = useRef<MapState | null>(null)
   const [mapState, setMapState] = useState<MapState>({
     image: null,
     terrainImage: null,
@@ -29,17 +31,29 @@ export function useMapState() {
         setMapState(savedState)
       }
     }
-    loadSavedState()
+    loadSavedState().finally(() => {
+      isHydratedRef.current = true
+    })
+  }, [])
+
+  latestMapStateRef.current = mapState
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const state = latestMapStateRef.current
+      if (state?.terrainImage || state?.image) {
+        saveMapState(state)
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
   // Save state whenever it changes (but not during initial load)
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      // Always save map state, even without image (to preserve zoom/position)
-      saveMapState(mapState)
-    }, 100) // Small delay to avoid saving during initial load
-    
-    return () => clearTimeout(timeoutId)
+    if (!isHydratedRef.current) return
+    if (!mapState.terrainImage && !mapState.image) return
+    saveMapState(mapState)
   }, [mapState])
 
   const setImage = useCallback((image: HTMLImageElement) => {
