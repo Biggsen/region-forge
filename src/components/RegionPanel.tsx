@@ -158,7 +158,7 @@ export function RegionPanel() {
             <div className="flex-shrink-0 mb-2">
               <RegionCreationForm
                 existingRegions={regionsList}
-                dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+                dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
                   ? seedInfo.seedInfo.dimension 
                   : 'overworld'}
                 onStartDrawing={(name, freehand) => {
@@ -376,8 +376,8 @@ export function RegionPanel() {
         <RegionDetailsView
           selectedRegion={selectedRegion}
           editMode={editMode}
-          dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
-            ? seedInfo.seedInfo.dimension 
+dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
+            ? seedInfo.seedInfo.dimension
             : 'overworld'}
           isWarping={isWarping}
           warpRadius={warpRadius}

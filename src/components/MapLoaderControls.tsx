@@ -509,7 +509,7 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
           >
             <option value="overworld">Overworld</option>
             <option value="nether">Nether</option>
-            <option value="end" disabled>End (Coming soon)</option>
+            <option value="end">End</option>
           </select>
         </div>
       </div>
@@ -522,10 +522,10 @@ export function MapLoaderControls({ onShowImportConfirmation }: MapLoaderControl
         <div className="mb-4">
           <h5 className="text-sm font-medium text-gray-400 mb-2">Generate from Seed</h5>
           
-          {(importDimension === 'overworld' || importDimension === 'nether') && (
+          {(importDimension === 'overworld' || importDimension === 'nether' || importDimension === 'end') && (
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                {importDimension === 'nether' ? 'Nether ' : ''}World Size: {worldSize}k ({worldSize * 125}x{worldSize * 125})
+                {importDimension === 'nether' ? 'Nether ' : importDimension === 'end' ? 'End ' : ''}World Size: {worldSize}k ({worldSize * 125}x{worldSize * 125})
               </label>
               <div className="relative">
                 <input

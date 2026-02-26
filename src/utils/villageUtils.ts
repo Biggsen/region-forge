@@ -59,14 +59,13 @@ export function findParentRegion(village: VillageData, regions: Region[]): Regio
 }
 
 export function createVillageSubregion(village: VillageData, index: number, parentRegionId?: string, existingNames: Set<string> = new Set(), dimension: 'overworld' | 'nether' | 'end' = 'overworld'): Subregion {
-  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-  let generatedName = generateVillageNameByWorldType(effectiveDimension)
+  let generatedName = generateVillageNameByWorldType(dimension)
   let attempts = 0
   const maxAttempts = 100 // Prevent infinite loops
   
   // Keep generating names until we find a unique one
   while (existingNames.has(generatedName) && attempts < maxAttempts) {
-    generatedName = generateVillageNameByWorldType(effectiveDimension)
+    generatedName = generateVillageNameByWorldType(dimension)
     attempts++
   }
   

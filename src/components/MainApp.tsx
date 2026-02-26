@@ -40,7 +40,7 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
     radius: spawn.spawnState.radius
   } : null
 
-  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
     ? seedInfo.seedInfo.dimension 
     : 'overworld'
   const { hasChanged, markAsSaved } = useDataChanged(
@@ -54,7 +54,7 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
   const handleSave = async () => {
     // Load image details for export
     const imageDetails = loadImageDetails()
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
       ? seedInfo.seedInfo.dimension 
       : 'overworld'
     
@@ -197,10 +197,9 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
       let dimensionToUse = importData.dimension
       if (!dimensionToUse && importData.worldType) {
         // Migrate from old worldType field
-        if (importData.worldType === 'overworld' || importData.worldType === 'nether') {
+        if (importData.worldType === 'overworld' || importData.worldType === 'nether' || importData.worldType === 'end') {
           dimensionToUse = importData.worldType
         } else {
-          // If worldType is 'end' or invalid, default to 'overworld'
           dimensionToUse = 'overworld'
         }
       }

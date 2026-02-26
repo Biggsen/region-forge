@@ -27,8 +27,7 @@ export function RegionCreationForm({
   // Generate a random name when the form is shown
   useEffect(() => {
     if (showNewRegionForm && !newRegionName) {
-      const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-      setNewRegionName(generateRegionName(effectiveDimension))
+      setNewRegionName(generateRegionName(dimension))
     }
   }, [showNewRegionForm, newRegionName, dimension])
 
@@ -40,8 +39,7 @@ export function RegionCreationForm({
   }, [newRegionName])
 
   const handleGenerateNewName = () => {
-    const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-    setNewRegionName(generateRegionName(effectiveDimension))
+    setNewRegionName(generateRegionName(dimension))
     setNameError(null)
   }
 

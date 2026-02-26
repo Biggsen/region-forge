@@ -320,7 +320,7 @@ export function AdvancedPanel() {
       <h3 className="text-lg font-semibold text-white mb-4">Advanced Tools</h3>
       
       <div className="space-y-4">
-        {seedInfo.seedInfo.dimension !== 'nether' && (
+        {seedInfo.seedInfo.dimension !== 'nether' && seedInfo.seedInfo.dimension !== 'end' && (
           <div>
             <button
               onClick={() => setIsOtherRegionTypesExpanded(!isOtherRegionTypesExpanded)}

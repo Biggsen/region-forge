@@ -157,12 +157,12 @@ export function exportRegionsYAML(
   includeChallengeLevelSubheading: boolean = false,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 ): void {
-  const effectiveDimension = dimension === 'end' ? 'overworld' : (dimension || 'overworld')
+  const effectiveDimension = dimension || 'overworld'
   
   // Filter out disabled regions
   const enabledRegions = regions.filter(region => !region.disabled)
   
-  if (enabledRegions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether')) {
+  if (enabledRegions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether' || effectiveDimension === 'end')) {
     onShowToast('No regions to export', 'error')
     return
   }
@@ -170,7 +170,7 @@ export function exportRegionsYAML(
   let yamlContent = 'regions:\n'
   
   // Add spawn region if requested and coordinates exist (only for overworld)
-  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension !== 'nether') {
+  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension === 'overworld') {
     const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; radius: number }, useModernWorldHeight)
     yamlContent += spawnRegion
     if (enabledRegions.length > 0) {
@@ -253,10 +253,13 @@ function toRegionId(name: string): string {
 
 function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether' | 'end'): string {
   if (kind === 'system') return 'none'
-  const effectiveWorld = world === 'end' ? 'overworld' : world
-  if (effectiveWorld === 'nether') {
+  if (world === 'nether') {
     if (kind === 'region') return 'nether_region'
     if (kind === 'heart') return 'nether_heart'
+  }
+  if (world === 'end') {
+    if (kind === 'region') return 'end_region'
+    if (kind === 'heart') return 'end_heart'
   }
   return kind
 }
@@ -277,12 +280,13 @@ function convertDescriptionToLiteralBlock(yamlStr: string): string {
 }
 
 function getStandardWorldName(dimension: 'overworld' | 'nether' | 'end'): string {
-  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-  switch (effectiveDimension) {
+  switch (dimension) {
     case 'overworld':
       return 'world'
     case 'nether':
       return 'world_nether'
+    case 'end':
+      return 'world_the_end'
     default:
       return 'world'
   }
@@ -299,8 +303,7 @@ export function exportRegionsMetaYAML(
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   mapState?: MapState | null
 ): void {
-  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-  const dim = effectiveDimension
+  const dim = dimension
   const hasSpawnCoords = !!spawnState.coordinates
   const hasSpawnRegion = dim === 'overworld' && includeSpawnRegion && hasSpawnCoords && !!spawnState.radius
 
@@ -336,7 +339,7 @@ export function exportRegionsMetaYAML(
     if (region.minecraftCategory) regionEntry.category = region.minecraftCategory
     if (region.minecraftItems && region.minecraftItems.length > 0) regionEntry.items = region.minecraftItems
     if (region.regionTheme && region.regionTheme.length > 0) regionEntry.theme = region.regionTheme
-    if (biomeImage && region.points.length >= 3) {
+    if (dim !== 'end' && biomeImage && region.points.length >= 3) {
       const breakdown = scanBiomes(region, biomeImage, originOffset)
       if (breakdown && breakdown.length > 0) {
         regionEntry.biomes = breakdown.map(({ biome, percentage }) => ({ biome, percentage }))

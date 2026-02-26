@@ -113,7 +113,7 @@ export function SeedInfoHeading() {
             >
               <option value="overworld">Overworld</option>
               <option value="nether">Nether</option>
-              <option value="end" disabled>End (Coming soon)</option>
+              <option value="end">End</option>
             </select>
           ) : (
             <>

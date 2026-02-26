@@ -27,9 +27,8 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
                       !region.name.toLowerCase().includes('heart') && 
                       !region.name.toLowerCase().includes('village')
   
-  // Determine greeting text based on dimension (filter 'end' to 'overworld' for now)
-  const effectiveDimension = dimension === 'end' ? 'overworld' : (dimension || 'overworld')
-  const greetingText = effectiveDimension === 'nether' ? 'You descend into' : 'Welcome to'
+  // Determine greeting text based on dimension
+  const greetingText = (dimension || 'overworld') === 'nether' ? 'You descend into' : 'Welcome to'
   
   // Generate flags based on region type
   let flags: string
@@ -155,7 +154,7 @@ ${points}`
   if (includeVillages && region.subregions && region.subregions.length > 0) {
     yaml += '\n\n'
     yaml += region.subregions.map(subregion => 
-      generateSubregionYAML(subregion, region.name, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
+      generateSubregionYAML(subregion, region.name, dimension || 'overworld', useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
     ).join('\n\n')
   }
   

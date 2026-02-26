@@ -6,8 +6,6 @@ import { parseVillageCSV, createVillageSubregion, findParentRegion } from '../ut
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworld') {
-  // Filter 'end' to 'overworld' for now (end names not implemented)
-  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
   const [regions, setRegions] = useState<Region[]>([])
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null)
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null)
@@ -503,7 +501,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         const parentRegion = findParentRegion(village, regions)
         
         if (parentRegion) {
-          const subregion = createVillageSubregion(village, index, parentRegion.id, existingVillageNames, effectiveDimension)
+          const subregion = createVillageSubregion(village, index, parentRegion.id, existingVillageNames, dimension)
           
           // Add the new village name to our tracking set
           existingVillageNames.add(subregion.name)
@@ -598,13 +596,13 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
             subregions: region.subregions.map(subregion => {
               if (subregion.type === 'village') {
                 // Generate a unique name for this village
-                let newName = generateVillageNameByWorldType(effectiveDimension)
+                let newName = generateVillageNameByWorldType(dimension)
                 let attempts = 0
                 const maxAttempts = 100
                 
                 // Keep generating names until we find a unique one
                 while (existingVillageNames.has(newName) && attempts < maxAttempts) {
-                  newName = generateVillageNameByWorldType(effectiveDimension)
+                  newName = generateVillageNameByWorldType(dimension)
                   attempts++
                 }
                 

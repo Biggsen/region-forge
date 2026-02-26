@@ -588,7 +588,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
               highlightMode={highlightMode}
               regions={isolatedRegionId ? (regions.regions.filter(r => r.id === isolatedRegionId)) : regions.regions}
               isolatedMode={!!isolatedRegionId}
-              spawnCoordinates={seedInfo.seedInfo.dimension === 'nether' ? null : spawnState.coordinates}
+              spawnCoordinates={(seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end') ? null : spawnState.coordinates}
               isSpacePressed={isSpacePressed}
               onPointMouseDown={handlePointMouseDown}
               onPointMouseMove={handlePointMouseMove}

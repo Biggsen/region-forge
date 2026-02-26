@@ -99,16 +99,16 @@ export function ExportPanel() {
       z: spawn.spawnState.coordinates.z,
       radius: spawn.spawnState.radius
     } : null
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
       ? seedInfo.seedInfo.dimension 
       : 'overworld'
-    // Force spawn region to false for nether since it doesn't exist
-    const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
+    // Force spawn region to false for nether and end since they don't have spawn
+    const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
     exportRegionsYAML(regions.regions, includeVillages, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
   const handleExportRegionsMeta = () => {
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
       ? seedInfo.seedInfo.dimension 
       : 'overworld'
     const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
@@ -127,7 +127,7 @@ export function ExportPanel() {
 
   const computedHasVillages = regions.regions.some(region => region.subregions && region.subregions.length > 0)
   const hasSpawn = !!spawn.spawnState.coordinates
-  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' 
+  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
     ? seedInfo.seedInfo.dimension 
     : 'overworld'
 
@@ -350,7 +350,7 @@ export function ExportPanel() {
                 </label>
               </div>
               
-              {dimension !== 'nether' && (
+              {dimension !== 'nether' && dimension !== 'end' && (
                 <div className="flex items-center">
                   <input
                     type="checkbox"

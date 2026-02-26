@@ -177,8 +177,7 @@ export function RegionDetailsView({
           <Button
             variant="ghost"
             onClick={() => {
-              const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-              const generatedName = generateRegionName(effectiveDimension)
+              const generatedName = generateRegionName(dimension)
               // Check for duplicates before applying
               const isDuplicate = existingRegions.some(r => 
                 r.id !== selectedRegion.id && r.name.trim().toLowerCase() === generatedName.toLowerCase()

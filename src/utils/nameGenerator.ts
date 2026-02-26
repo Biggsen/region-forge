@@ -413,11 +413,30 @@ export function generateNetherName(): string {
   }
 }
 
-// Main functions that choose between overworld and nether based on dimension
+// End dimension naming - ethereal, void/space themed (Prefix + Suffix)
+const endPrefixes = [
+  'Eshara', 'Vaelith', 'Korveth', 'Noxara', 'Zelphar', 'Cyrastra', 'Orenthyl', 'Velkor', 'Aelith', 'Vireth',
+  'Thalorim', 'Ilyra', 'Serathis', 'Nerovar', 'Vaelorin', 'Kelthara', 'Otheryn', 'Lunareth', 'Elaris', 'Myreth',
+  'Xylaris', 'Nytheron', 'Vespera', 'Aetheris', 'Zephyron', 'Caelith', 'Umbrath', 'Stellara', 'Nocthyr', 'Solareth',
+  'Ethereon', 'Voidara', 'Astralis', 'Chorion', 'Endrith', 'Nexaris', 'Orionth', 'Polaris', 'Quasara', 'Rigelth'
+]
+
+const endSuffixes = [
+  'Verge', 'Silence', 'Rift', 'Span', 'Meridian', 'Drift', 'Reach', 'Halo', 'Belt', 'Horizon',
+  'Expanse', 'Void', 'Threshold', 'Gate', 'Shard', 'Vestige', 'Echo', 'Gleam', 'Pulse', 'Veil'
+]
+
+export function generateEndName(): string {
+  const prefix = endPrefixes[Math.floor(Math.random() * endPrefixes.length)]
+  const suffix = endSuffixes[Math.floor(Math.random() * endSuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
+// Main functions that choose between overworld, nether, and end based on dimension
 export function generateRegionName(dimension: 'overworld' | 'nether' | 'end'): string {
-  // Filter 'end' to 'overworld' for now (end names not implemented)
-  const effectiveDimension = dimension === 'end' ? 'overworld' : dimension
-  return effectiveDimension === 'nether' ? generateNetherName() : generateMedievalName()
+  if (dimension === 'nether') return generateNetherName()
+  if (dimension === 'end') return generateEndName()
+  return generateMedievalName()
 }
 
 export function generateVillageNameByWorldType(dimension: 'overworld' | 'nether' | 'end'): string {
