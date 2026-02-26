@@ -284,4 +284,4 @@ The following decisions and changes were made during implementation and are now 
 ## Next Steps
 
 After completing this spec:
-1. Proceed to `end-dimension-addition-spec.md` to add End dimension support
+1. Proceed to `end-dimension-addition-spec.md` to add End dimension support — ✅ Done (see `tasks/completed/end-dimension-addition-spec.md`)

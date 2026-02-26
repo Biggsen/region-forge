@@ -295,4 +295,4 @@ Legacy export files may contain `worldType`:
 
 After completing this spec:
 1. Proceed to `nether-completion-spec.md` to complete nether support (will be much simpler now)
-2. Then proceed to `end-dimension-addition-spec.md` to add End dimension support
+2. Then proceed to `end-dimension-addition-spec.md` to add End dimension support — ✅ Done (see `tasks/completed/end-dimension-addition-spec.md`)

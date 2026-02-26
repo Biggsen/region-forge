@@ -57,7 +57,7 @@ The MVP is complete and deployed to production (Vercel). The application is full
 - **Region Drawing**: Draw polygonal regions by clicking points on the map with comprehensive editing tools
 - **YAML Export**: Generate WorldGuard-compatible region configurations
 - **Project Management**: Save and load complete projects with embedded map images
-- **Multi-Dimension Support**: Full support for Overworld and Nether dimensions (End dimension pending)
+- **Multi-Dimension Support**: Full support for Overworld, Nether, and End dimensions
 
 ---
 
@@ -86,7 +86,7 @@ The MVP is complete and deployed to production (Vercel). The application is full
   This helps track immediate priorities and current development state.
 -->
 
-Currently focused on bug fixes, security improvements, and End dimension support. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience. Dimension unification (removing redundant worldType setting) has been completed.
+Currently focused on bug fixes and security improvements. End dimension support completed. The MVP is complete and deployed, with ongoing work to address medium-priority issues and enhance the user experience. Dimension unification (removing redundant worldType setting) has been completed.
 
 ---
 
@@ -232,7 +232,7 @@ None - All known bugs have been resolved.
 - [ ] Complete Security Enhancements - File upload validation, security headers, frontend URL validation, logging utility
 - [ ] Enhanced Drawing Tools - Chunk snapping, rectangle/circle tools
 - [ ] UI Improvements - Zoom to fit, mini-map, keyboard shortcuts
-- [ ] End Dimension Support - Add End dimension support (see `tasks/end-dimension-addition-spec.md`)
+- [x] End Dimension Support - Add End dimension support (see `tasks/completed/end-dimension-addition-spec.md`)
 
 ### Low Priority / Future
 
@@ -286,7 +286,7 @@ None - All known bugs have been resolved.
 
 ### Long-term (3+ months)
 
-1. Complete End dimension support (see `tasks/end-dimension-addition-spec.md`)
+1. Complete End dimension support (see `tasks/completed/end-dimension-addition-spec.md`) — ✅ Done
 2. User accounts implementation
 3. Cloud storage and project sharing
 4. Onboarding system
@@ -321,7 +321,7 @@ None - All known bugs have been resolved.
 - **Security Spec**: `tasks/enhancements/security_enhancement_spec.md` - Security vulnerabilities and fixes
 - **Dimension Unification**: `tasks/completed/remove-worldtype-setting-spec.md` - Completed: Removed redundant worldType setting, unified on dimension
 - **Nether Completion**: `tasks/completed/nether-completion-spec.md` - Completed: Nether dimension fully enabled
-- **End Dimension**: `tasks/end-dimension-addition-spec.md` - End dimension support specification (outstanding)
+- **End Dimension**: `tasks/completed/end-dimension-addition-spec.md` - End dimension support specification (completed)
 - **Challenge Level Rename**: `tasks/challenge-level-rename-spec.md` - On hold pending LevelledMobs generator removal
 - **User Accounts Spec**: `tasks/user-accounts-spec.md` - Future user accounts feature
 - **Deployment Guide**: `docs/DEPLOYMENT.md` - Deployment instructions
