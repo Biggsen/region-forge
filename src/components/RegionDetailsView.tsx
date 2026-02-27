@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { calculatePolygonArea, formatArea, calculateRegionCenter } from '../utils/polygonUtils'
+import { calculatePolygonArea, formatArea, calculateRegionCenter, calculatePolygonCenter } from '../utils/polygonUtils'
 import { generateRegionName } from '../utils/nameGenerator'
 import { Region, EditMode } from '../types'
 import { YAMLDisplay } from './YAMLDisplay'
@@ -40,6 +40,9 @@ interface RegionDetailsViewProps {
   isolatedRegionId: string | null
   onIsolateRegion: (regionId: string) => void
   onClearIsolate: () => void
+  onStartPlacingLabel?: (regionId: string) => void
+  onStopPlacingLabel?: () => void
+  isPlacingLabel?: boolean
 }
 
 export function RegionDetailsView({
@@ -73,7 +76,10 @@ export function RegionDetailsView({
   existingRegions,
   isolatedRegionId,
   onIsolateRegion,
-  onClearIsolate
+  onClearIsolate,
+  onStartPlacingLabel,
+  onStopPlacingLabel,
+  isPlacingLabel = false
 }: RegionDetailsViewProps) {
   const [resizePercentage, setResizePercentage] = useState('100')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -214,6 +220,83 @@ export function RegionDetailsView({
           </p>
         </div>
       </div>
+
+      {showAdvanced && (
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">Label position</label>
+          <p className="text-gray-400 text-xs mb-2">
+            World coordinates where the region name appears on the map. Leave blank to use the centroid.
+          </p>
+          <div className="flex gap-2 items-center flex-wrap">
+            <input
+              type="number"
+              placeholder="X"
+              className="w-20 bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:outline-none focus:border-lapis-lighter placeholder:text-gray-500"
+              value={selectedRegion.labelPosition?.x ?? ''}
+              onChange={(e) => {
+                const centroid = calculatePolygonCenter(selectedRegion.points)
+                const xVal = e.target.value
+                const zVal = selectedRegion.labelPosition?.z ?? centroid.z
+                if (xVal === '') {
+                  onUpdateRegion(selectedRegion.id, { labelPosition: { x: centroid.x, z: zVal } })
+                } else {
+                  const x = parseFloat(xVal)
+                  if (!isNaN(x)) {
+                    onUpdateRegion(selectedRegion.id, { labelPosition: { x, z: zVal } })
+                  }
+                }
+              }}
+            />
+            <input
+              type="number"
+              placeholder="Z"
+              className="w-20 bg-input-bg text-input-text px-3 py-2 rounded border border-input-border focus:outline-none focus:border-lapis-lighter placeholder:text-gray-500"
+              value={selectedRegion.labelPosition?.z ?? ''}
+              onChange={(e) => {
+                const centroid = calculatePolygonCenter(selectedRegion.points)
+                const zVal = e.target.value
+                const xVal = selectedRegion.labelPosition?.x ?? centroid.x
+                if (zVal === '') {
+                  onUpdateRegion(selectedRegion.id, { labelPosition: { x: xVal, z: centroid.z } })
+                } else {
+                  const z = parseFloat(zVal)
+                  if (!isNaN(z)) {
+                    onUpdateRegion(selectedRegion.id, { labelPosition: { x: xVal, z } })
+                  }
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              onClick={() => onUpdateRegion(selectedRegion.id, { labelPosition: null })}
+              title="Use centroid (center of region)"
+              disabled={!selectedRegion.labelPosition}
+            >
+              Centroid
+            </Button>
+          </div>
+          {!isPlacingLabel && onStartPlacingLabel && (
+            <Button
+              variant="ghost"
+              className="mt-2 text-xs"
+              onClick={() => onStartPlacingLabel(selectedRegion.id)}
+              title="Click on the map to place the label"
+            >
+              {selectedRegion.labelPosition ? 'Move label' : 'Set custom position'}
+            </Button>
+          )}
+          {isPlacingLabel && onStopPlacingLabel && (
+            <Button
+              variant="ghost"
+              className="mt-2 text-xs"
+              onClick={onStopPlacingLabel}
+              title="Cancel label placement"
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
+      )}
 
             {!isEditing && (
               <div className="flex space-x-2">

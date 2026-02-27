@@ -28,7 +28,8 @@ const STORAGE_KEYS = {
   WORLD_TYPE: 'mc-region-maker-world-type',
   WORLD_SEED: 'mc-region-maker-world-seed',
   EXPORT_SETTINGS: 'mc-region-maker-export-settings',
-  REGION_SORT: 'mc-region-maker-region-sort'
+  REGION_SORT: 'mc-region-maker-region-sort',
+  REGION_FILL_OPACITY: 'mc-region-maker-region-fill-opacity'
 }
 
 // Get image source URL for storage
@@ -185,6 +186,26 @@ export function loadRegionSort(): { sortBy: RegionSortBy; sortOrder: RegionSortO
   } catch (error) {
     console.error('Failed to load region sort:', error)
     return { sortBy: 'newest', sortOrder: 'desc' }
+  }
+}
+
+export function saveRegionFillOpacity(value: number): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.REGION_FILL_OPACITY, JSON.stringify(value))
+  } catch (error) {
+    console.error('Failed to save region fill opacity:', error)
+  }
+}
+
+export function loadRegionFillOpacity(): number {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.REGION_FILL_OPACITY)
+    if (!saved) return 0.2
+    const parsed = parseFloat(saved)
+    return isNaN(parsed) || parsed < 0 ? 0 : parsed > 1 ? 1 : parsed
+  } catch (error) {
+    console.error('Failed to load region fill opacity:', error)
+    return 0.2
   }
 }
 

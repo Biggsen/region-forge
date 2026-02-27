@@ -454,10 +454,11 @@ export function importMapData(file: File): Promise<MapExportData> {
           data.worldName = 'world'
         }
         
-        // Migrate old challenge level names to new difficulty band names
+        // Migrate old challenge level names to new difficulty band names; ensure labelPosition is preserved
         data.regions = data.regions.map(region => ({
           ...region,
-          challengeLevel: migrateChallengLevel(region.challengeLevel) as Region['challengeLevel']
+          challengeLevel: migrateChallengLevel(region.challengeLevel) as Region['challengeLevel'],
+          labelPosition: region.labelPosition ?? null
         }))
         
         resolve(data)

@@ -13,7 +13,7 @@ import { Trash2, Search, LineSquiggle, ZoomIn } from 'lucide-react'
 import { loadRegionSort, saveRegionSort } from '../utils/persistenceUtils'
 
 export function RegionPanel() {
-  const { regions, seedInfo, mapState: mapStateHook, toast } = useAppContext()
+  const { regions, seedInfo, mapState: mapStateHook, toast, regionFillOpacity } = useAppContext()
   const {
     regions: regionsList,
     selectedRegionId,
@@ -45,7 +45,7 @@ export function RegionPanel() {
     setIsolatedRegionId
   } = regions
 
-  const { startSettingCenterPoint, stopSettingCenterPoint } = useAppContext().mapCanvas
+  const { startSettingCenterPoint, stopSettingCenterPoint, startPlacingLabel, stopPlacingLabel, isPlacingLabel, placingLabelRegionId } = useAppContext().mapCanvas
   const { isWarping, setIsWarping, warpRadius, setWarpRadius, warpStrength, setWarpStrength } = useAppContext().mapCanvas
   const { mapState, setScale, setOffset } = mapStateHook
 
@@ -243,6 +243,24 @@ export function RegionPanel() {
             />
           )}
 
+          {/* Region fill opacity */}
+          <div className="flex-shrink-0 mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Region fill opacity</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={Math.round(regionFillOpacity.regionFillOpacity * 100)}
+                onChange={(e) => regionFillOpacity.setRegionFillOpacity(parseInt(e.target.value, 10) / 100)}
+                className="flex-1 h-2 bg-gunmetal rounded-lg appearance-none cursor-pointer accent-lapis-lazuli"
+              />
+              <span className="text-gray-400 text-sm w-10 tabular-nums">
+                {Math.round(regionFillOpacity.regionFillOpacity * 100)}%
+              </span>
+            </div>
+          </div>
+
           {/* Search Input */}
           <div className="flex-shrink-0 mb-4 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -388,6 +406,7 @@ dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dime
             setIsolatedRegionId(null)
             setIsWarping(false)
             stopSettingCenterPoint()
+            stopPlacingLabel()
           }}
           onUpdateRegion={updateRegion}
           existingRegions={regionsList}
@@ -413,6 +432,9 @@ dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dime
           isolatedRegionId={isolatedRegionId}
           onIsolateRegion={setIsolatedRegionId}
           onClearIsolate={() => setIsolatedRegionId(null)}
+          onStartPlacingLabel={startPlacingLabel}
+          onStopPlacingLabel={stopPlacingLabel}
+          isPlacingLabel={isPlacingLabel && placingLabelRegionId === selectedRegionId}
         />
       )}
     </div>

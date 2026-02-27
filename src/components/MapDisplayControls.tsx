@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronRight, ChevronUp, Eye, EyeOff } from 'lucide-react'
 
 interface MapDisplayControlsProps {
@@ -40,6 +40,18 @@ export function MapDisplayControls({
 }: MapDisplayControlsProps) {
   const showVillagesOption = dimension !== 'nether'
   const [isExpanded, setIsExpanded] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isExpanded) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsExpanded(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isExpanded])
   
   // Check URL parameter for advanced features
   const urlParams = new URLSearchParams(window.location.search)
@@ -71,7 +83,7 @@ export function MapDisplayControls({
   )
 
   return (
-    <div>
+    <div ref={containerRef}>
       {isExpanded && (
         <div className="mb-2 bg-gray-900/90 backdrop-blur-sm border border-gunmetal rounded-lg px-1.5 py-1.5 space-y-1 w-[100px]">
           <ToggleButton

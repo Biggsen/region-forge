@@ -8,6 +8,7 @@ export type Region = {
   originalPoints?: { x: number; z: number }[]
   scaleFactor?: number
   centerPoint?: { x: number; z: number } | null
+  labelPosition?: { x: number; z: number } | null
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel
   hasSpawn?: boolean

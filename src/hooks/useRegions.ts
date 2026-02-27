@@ -53,14 +53,15 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       return oldToNew[level] || (level as ChallengeLevel)
     }
 
-    // Migrate existing regions to include centerPoint, challengeLevel, hasSpawn, originalPoints, and scaleFactor properties
+    // Migrate existing regions to include centerPoint, challengeLevel, hasSpawn, originalPoints, scaleFactor, and labelPosition
     const migratedRegions = savedRegions.map(region => ({
       ...region,
       centerPoint: region.centerPoint || null,
       challengeLevel: migrateChallengLevel(region.challengeLevel),
       hasSpawn: region.hasSpawn || false,
       originalPoints: region.originalPoints || region.points, // Use current points as original if not set
-      scaleFactor: region.scaleFactor || 1.0 // Default to 100% scale
+      scaleFactor: region.scaleFactor || 1.0, // Default to 100% scale
+      labelPosition: region.labelPosition ?? null
     }))
     
     setRegions(migratedRegions)

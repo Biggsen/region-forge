@@ -8,6 +8,7 @@ import { useCustomMarkers } from '../hooks/useCustomMarkers'
 import { useSeedInfo } from '../hooks/useSeedInfo'
 import { useToast } from '../hooks/useToast'
 import { useBiomeLabelVisibility } from '../hooks/useBiomeLabelVisibility'
+import { useRegionFillOpacity } from '../hooks/useRegionFillOpacity'
 
 interface AppContextType {
   regions: ReturnType<typeof useRegions>
@@ -19,6 +20,7 @@ interface AppContextType {
   seedInfo: ReturnType<typeof useSeedInfo>
   toast: ReturnType<typeof useToast>
   biomeLabelVisibility: ReturnType<typeof useBiomeLabelVisibility>
+  regionFillOpacity: ReturnType<typeof useRegionFillOpacity>
 }
 
 const AppContext = createContext<AppContextType | null>(null)
@@ -36,9 +38,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const customMarkers = useCustomMarkers()
   const toast = useToast()
   const biomeLabelVisibility = useBiomeLabelVisibility()
+  const regionFillOpacity = useRegionFillOpacity()
 
   return (
-    <AppContext.Provider value={{ regions, mapState, worldName, spawn, mapCanvas, customMarkers, seedInfo, toast, biomeLabelVisibility }}>
+    <AppContext.Provider value={{ regions, mapState, worldName, spawn, mapCanvas, customMarkers, seedInfo, toast, biomeLabelVisibility, regionFillOpacity }}>
       {children}
     </AppContext.Provider>
   )
