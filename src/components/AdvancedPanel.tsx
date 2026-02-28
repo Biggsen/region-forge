@@ -10,6 +10,7 @@ import { Button } from './Button'
 import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
+import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -1357,6 +1358,25 @@ export function AdvancedPanel() {
                   <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
                     Select a region to set its heart
                   </div>
+                )}
+                {regions.regions.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      const lines = [...regions.regions]
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(region => {
+                        const center = calculateRegionCenter(region)
+                        return `${region.name}:\n/tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
+                      })
+                      const text = lines.join('\n\n')
+                      await copyToClipboard(text)
+                      toast.showToast('All teleport commands copied', 'success')
+                    }}
+                    className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
+                  >
+                    <ClipboardCopy className="w-4 h-4" />
+                    Copy all TPs
+                  </button>
                 )}
                 <div className="text-sm text-white mt-2">
                   {(() => {
