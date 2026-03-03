@@ -93,7 +93,7 @@ export function CustomMarkerOverlay({ canvas, mapState, customMarker, orphanedVi
     const pixelPos = worldToPixel(marker.coordinates.x, marker.coordinates.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
 
-    // Draw orange dot marker for orphaned villages
+    // Draw red dot marker for orphaned villages (not in any region)
     const markerSize = 8
     
     // Draw outer ring (white background for visibility)
@@ -102,8 +102,8 @@ export function CustomMarkerOverlay({ canvas, mapState, customMarker, orphanedVi
     ctx.arc(canvasPos.x, canvasPos.y, markerSize + 2, 0, 2 * Math.PI)
     ctx.fill()
     
-    // Draw orange dot for orphaned villages
-    ctx.fillStyle = 'rgba(255, 165, 0, 1)'
+    // Draw red dot for orphaned villages
+    ctx.fillStyle = 'rgba(255, 0, 0, 1)'
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'
     ctx.lineWidth = 2
     

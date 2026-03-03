@@ -17,7 +17,7 @@ import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
 export function AdvancedPanel() {
-  const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility } = useAppContext()
+  const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility, customMarkers } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -83,9 +83,14 @@ export function AdvancedPanel() {
         throw new Error('File is empty or contains no valid data')
       }
 
-      // Use the existing CSV parser which handles the semicolon-separated format
-      regions.importVillagesFromCSV(text)
-      
+      const results = regions.importVillagesFromCSV(text)
+      customMarkers.addOrphanedVillageMarkers(results.orphanedVillages)
+
+      const msg = results.orphaned > 0
+        ? `${results.added} villages added to regions. ${results.orphaned} orphaned (not in any region) - shown as red dots on the map.`
+        : `${results.added} villages added to regions.`
+      alert(msg)
+
       // Clear the file input
       if (villageFileInputRef.current) {
         villageFileInputRef.current.value = ''
