@@ -34,13 +34,20 @@ export type WorldCoordinate = {
   z: number
 }
 
+/** Spawn position: x/z from map or manual, y manual only (default 0). */
+export type SpawnCoordinate = {
+  x: number
+  z: number
+  y: number
+}
+
 export type PixelCoordinate = {
   x: number
   y: number
 }
 
 export type SpawnState = {
-  coordinates: WorldCoordinate | null
+  coordinates: SpawnCoordinate | null
   isPlacing: boolean
   radius: number
 }

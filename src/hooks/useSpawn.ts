@@ -1,7 +1,17 @@
 import { useState, useCallback, useEffect } from 'react'
-import { SpawnState, WorldCoordinate } from '../types'
+import { SpawnState, SpawnCoordinate } from '../types'
 
 const SPAWN_STORAGE_KEY = 'mc-region-maker-spawn'
+
+const DEFAULT_Y = 0
+
+function toSpawnCoordinate(
+  coords: { x: number; z: number; y?: number },
+  existingY?: number
+): SpawnCoordinate {
+  const y = typeof coords.y === 'number' ? coords.y : (existingY ?? DEFAULT_Y)
+  return { x: coords.x, z: coords.z, y }
+}
 
 export function useSpawn() {
   const [spawnState, setSpawnState] = useState<SpawnState>({
@@ -17,9 +27,10 @@ export function useSpawn() {
       if (savedSpawn) {
         const parsedSpawn = JSON.parse(savedSpawn)
         if (parsedSpawn && typeof parsedSpawn.x === 'number' && typeof parsedSpawn.z === 'number') {
+          const y = typeof parsedSpawn.y === 'number' ? parsedSpawn.y : DEFAULT_Y
           setSpawnState(prev => ({
             ...prev,
-            coordinates: parsedSpawn,
+            coordinates: { x: parsedSpawn.x, z: parsedSpawn.z, y },
             radius: parsedSpawn.radius || 50
           }))
         }
@@ -29,23 +40,28 @@ export function useSpawn() {
     }
   }, [])
 
-  const setSpawnCoordinates = useCallback((coordinates: WorldCoordinate | null) => {
-    setSpawnState(prev => ({
-      ...prev,
-      coordinates,
-      isPlacing: false
-    }))
+  const setSpawnCoordinates = useCallback((coordinates: SpawnCoordinate | { x: number; z: number; y?: number } | null) => {
+    setSpawnState(prev => {
+      const nextCoords = coordinates
+        ? toSpawnCoordinate(coordinates, prev.coordinates?.y)
+        : null
+      return {
+        ...prev,
+        coordinates: nextCoords,
+        isPlacing: false
+      }
+    })
 
     // Save to localStorage
     if (coordinates) {
       try {
-        const spawnData = { ...coordinates, radius: spawnState.radius }
+        const normalized = toSpawnCoordinate(coordinates, spawnState.coordinates?.y)
+        const spawnData = { ...normalized, radius: spawnState.radius }
         localStorage.setItem(SPAWN_STORAGE_KEY, JSON.stringify(spawnData))
       } catch (error) {
         console.warn('Failed to save spawn data to localStorage:', error)
       }
     } else {
-      // Remove from localStorage if coordinates are null
       try {
         localStorage.removeItem(SPAWN_STORAGE_KEY)
       } catch (error) {

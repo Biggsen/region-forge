@@ -15,7 +15,7 @@ export interface MapExportData {
   imageSize?: { width: number; height: number }
   regions: Region[]
   mapState: Omit<MapState, 'image'> & { imageSrc?: string }
-  spawnCoordinates?: { x: number; z: number; radius?: number } | null
+  spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null
   exportDate: string
   imageData?: string
   terrainImageData?: string
@@ -34,7 +34,7 @@ export async function exportCompleteMap(
   regions: Region[], 
   mapState: MapState, 
   worldName: string, 
-  spawnCoordinates?: { x: number; z: number; radius?: number } | null, 
+  spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null, 
   dimension?: 'overworld' | 'nether' | 'end', 
   seed?: string, 
   worldSize?: number, 
@@ -148,7 +148,7 @@ export function exportRegionsYAML(
   includeVillages: boolean = true, 
   includeHeartRegions: boolean = true,
   includeSpawnRegion: boolean = false,
-  spawnCoordinates?: { x: number; z: number; radius?: number } | null,
+  spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null,
   dimension?: 'overworld' | 'nether' | 'end',
   worldName: string = 'world',
   useModernWorldHeight: boolean = true,
@@ -171,7 +171,7 @@ export function exportRegionsYAML(
   
   // Add spawn region if requested and coordinates exist (only for overworld)
   if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension === 'overworld') {
-    const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; radius: number }, useModernWorldHeight)
+    const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; y: number; radius: number }, useModernWorldHeight)
     yamlContent += spawnRegion
     if (enabledRegions.length > 0) {
       yamlContent += '\n'
@@ -197,18 +197,19 @@ export function exportRegionsYAML(
 }
 
 // Generate spawn region YAML
-function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; radius: number }, useModernWorldHeight: boolean = true): string {
-  const { x, z, radius } = spawnCoordinates
-  
-  // Calculate cuboid bounds based on spawn point and radius
+function generateSpawnRegionYAML(spawnCoordinates: { x: number; z: number; y: number; radius: number }, useModernWorldHeight: boolean = true): string {
+  const { x, z, y, radius } = spawnCoordinates
+
+  const worldMinY = useModernWorldHeight ? -64 : 0
+  const worldMaxY = useModernWorldHeight ? 320 : 255
+
+  // Calculate cuboid bounds based on spawn point and radius (XZ and Y use radius)
   const minX = x - radius
   const maxX = x + radius
   const minZ = z - radius
   const maxZ = z + radius
-  
-  // Set Y coordinates based on world height setting
-  const minY = useModernWorldHeight ? -64 : 0
-  const maxY = useModernWorldHeight ? 320 : 255
+  const minY = Math.max(worldMinY, y - radius)
+  const maxY = Math.min(worldMaxY, y + radius)
   
   let yaml = `  spawn:\n`
   yaml += `    min: {x: ${minX}, y: ${minY}, z: ${minZ}}\n`
@@ -296,7 +297,7 @@ export function exportRegionsMetaYAML(
   regions: Region[],
   dimension: 'overworld' | 'nether' | 'end',
   worldName: string,
-  spawnState: { coordinates: { x: number; z: number } | null; radius: number },
+  spawnState: { coordinates: { x: number; z: number; y: number } | null; radius: number },
   includeVillages: boolean,
   includeHeartRegions: boolean,
   includeSpawnRegion: boolean,
@@ -383,6 +384,7 @@ export function exportRegionsMetaYAML(
     root.spawnCenter = {
       world: getStandardWorldName(dim),
       x: spawnState.coordinates!.x,
+      y: spawnState.coordinates!.y,
       z: spawnState.coordinates!.z
     }
   }
@@ -395,6 +397,7 @@ export function exportRegionsMetaYAML(
       teleport: {
         world: getStandardWorldName(dim),
         x: spawnState.coordinates!.x,
+        y: spawnState.coordinates!.y,
         z: spawnState.coordinates!.z
       }
     }

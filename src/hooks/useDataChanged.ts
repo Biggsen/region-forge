@@ -5,7 +5,7 @@ import { getEffectiveMapImage } from '../utils/mapStateUtils'
 interface LastSavedState {
   regions: Region[]
   worldName: string
-  spawnCoordinates: { x: number; z: number; radius?: number } | null
+  spawnCoordinates: { x: number; z: number; y?: number; radius?: number } | null
   dimension: 'overworld' | 'nether' | 'end'
   mapImageSrc: string | null
 }
@@ -14,7 +14,7 @@ export function useDataChanged(
   regions: Region[],
   mapState: MapState,
   worldName: string,
-  spawnCoordinates: { x: number; z: number; radius?: number } | null,
+  spawnCoordinates: { x: number; z: number; y?: number; radius?: number } | null,
   dimension: 'overworld' | 'nether' | 'end'
 ) {
   const [hasChanged, setHasChanged] = useState(false)

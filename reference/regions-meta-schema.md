@@ -135,7 +135,7 @@ First-join spawn and discovery. If absent, mc-plugin-manager leaves `profile.onb
 |---------|--------|----------|-------------|
 | `world` | string | **Yes**  | World name. |
 | `x`     | number | **Yes**  | X coordinate. |
-| `y`     | number | No       | Y coordinate. Region Forge does not export this; it is set manually in mc-plugin-manager after checking in-game. |
+| `y`     | number | No       | Y coordinate. Region Forge exports this when set (manual; default 0). Mc-plugin-manager may override after checking in-game. |
 | `z`     | number | **Yes**  | Z coordinate. |
 | `yaw`   | number | No       | Yaw (degrees). |
 | `pitch` | number | No       | Pitch (degrees). |
@@ -150,9 +150,8 @@ Center of the spawn region. Used for distance-from-origin logic in some plugins.
 |--------|--------|----------|-------------|
 | `world`| string | **Yes**  | World name. |
 | `x`    | number | **Yes**  | X coordinate. |
+| `y`    | number | No       | Y coordinate. Region Forge exports when set (manual; default 0). |
 | `z`    | number | **Yes**  | Z coordinate. |
-
-`y` is not required; mc-plugin-manager only needs x/z for 2D distance.
 
 ---
 
@@ -209,6 +208,7 @@ onboarding:
 spawnCenter:
   world: world
   x: 0
+  y: 0
   z: 0
 
 regions:
@@ -341,6 +341,7 @@ regions:
 | 1.3    | Added optional `theme` on region objects (§3.8): up to 3 theme pairs (A + B) from Storyteller's Automaton table. |
 | 1.4    | Added optional `description` on region objects: free-form text for display, quest hooks, or discovery. |
 | 1.5    | Added `end_region` and `end_heart` recipeIds for End dimension. End exports omit `biomes` (no biome map support). |
+| 1.6    | Region Forge exports optional `y` in `spawnCenter` and `onboarding.teleport` (manual value; default 0). |
 
 ---
 

@@ -97,6 +97,7 @@ export function ExportPanel() {
     const spawnData = spawn.spawnState.coordinates ? {
       x: spawn.spawnState.coordinates.x,
       z: spawn.spawnState.coordinates.z,
+      y: spawn.spawnState.coordinates.y,
       radius: spawn.spawnState.radius
     } : null
     const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'

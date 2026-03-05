@@ -205,7 +205,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
       } else if (spawnState.isPlacing && effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
         const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
-        setSpawnCoordinates(worldPos)
+        setSpawnCoordinates({ ...worldPos, y: spawnState.coordinates?.y ?? 0 })
       } else if (drawingRegion && effectiveImage) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
         const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)

@@ -6,9 +6,11 @@ export function SpawnButton() {
   const { spawnState, startPlacingSpawn, cancelPlacingSpawn, setSpawnCoordinates, setSpawnRadius } = spawn
   const [editingX, setEditingX] = useState(false)
   const [editingZ, setEditingZ] = useState(false)
+  const [editingY, setEditingY] = useState(false)
   const [editingRadius, setEditingRadius] = useState(false)
   const [tempX, setTempX] = useState('')
   const [tempZ, setTempZ] = useState('')
+  const [tempY, setTempY] = useState('')
   const [tempRadius, setTempRadius] = useState('')
 
   const handleSpawnClick = () => {
@@ -37,6 +39,13 @@ export function SpawnButton() {
     }
   }
 
+  const handleYEdit = () => {
+    if (spawnState.coordinates) {
+      setTempY(spawnState.coordinates.y.toString())
+      setEditingY(true)
+    }
+  }
+
   const handleRadiusEdit = () => {
     setTempRadius(spawnState.radius.toString())
     setEditingRadius(true)
@@ -46,7 +55,7 @@ export function SpawnButton() {
     if (spawnState.coordinates && tempX !== '') {
       const newX = parseInt(tempX)
       if (!isNaN(newX)) {
-        setSpawnCoordinates({ x: newX, z: spawnState.coordinates.z })
+        setSpawnCoordinates({ x: newX, z: spawnState.coordinates.z, y: spawnState.coordinates.y })
       }
     }
     setEditingX(false)
@@ -56,10 +65,20 @@ export function SpawnButton() {
     if (spawnState.coordinates && tempZ !== '') {
       const newZ = parseInt(tempZ)
       if (!isNaN(newZ)) {
-        setSpawnCoordinates({ x: spawnState.coordinates.x, z: newZ })
+        setSpawnCoordinates({ x: spawnState.coordinates.x, z: newZ, y: spawnState.coordinates.y })
       }
     }
     setEditingZ(false)
+  }
+
+  const handleYSave = () => {
+    if (spawnState.coordinates && tempY !== '') {
+      const newY = parseInt(tempY)
+      if (!isNaN(newY)) {
+        setSpawnCoordinates({ x: spawnState.coordinates.x, z: spawnState.coordinates.z, y: newY })
+      }
+    }
+    setEditingY(false)
   }
 
   const handleRadiusSave = () => {
@@ -85,6 +104,14 @@ export function SpawnButton() {
       handleZSave()
     } else if (e.key === 'Escape') {
       setEditingZ(false)
+    }
+  }
+
+  const handleYKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleYSave()
+    } else if (e.key === 'Escape') {
+      setEditingY(false)
     }
   }
 
@@ -155,6 +182,28 @@ export function SpawnButton() {
                   title="Click to edit X coordinate"
                 >
                   {Math.round(spawnState.coordinates.x)}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-2 mt-1">
+              <span>Y:</span>
+              {editingY ? (
+                <input
+                  type="number"
+                  value={tempY}
+                  onChange={(e) => setTempY(e.target.value)}
+                  onBlur={handleYSave}
+                  onKeyDown={handleYKeyPress}
+                  className="bg-input-bg text-input-text px-2 py-1 rounded text-xs w-20 border border-input-border focus:border-lapis-lighter focus:outline-none"
+                  autoFocus
+                />
+              ) : (
+                <span 
+                  className="cursor-pointer hover:text-white transition-colors px-1 rounded hover:bg-gray-600"
+                  onClick={handleYEdit}
+                  title="Click to edit Y coordinate (manual)"
+                >
+                  {Math.round(spawnState.coordinates.y)}
                 </span>
               )}
             </div>
