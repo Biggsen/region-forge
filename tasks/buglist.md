@@ -2,33 +2,36 @@
 
 ## Open Issues
 
-### World Size Slider for Nether and End Dimensions
-**Priority:** Medium  
+### Region Scale Then Move — Center Point Off
+**Priority:** High  
 **Status:** Open
 
-**Description:** The Nether and End dimensions should have world size slider controls, similar to the Overworld dimension.
+**Description:** Scaling and moving regions is buggy. After scaling a region and then trying to move it, the center point is way off.
 
 **Issue:**
-- Currently, world size slider is only available for Overworld dimension in `MapLoaderControls.tsx` (line 445: `{importDimension === 'overworld' && ...}`)
-- Nether and End dimensions should also allow users to adjust world size independently
-- **Note:** Nether and End are currently disabled in the UI (`SeedInfoHeading.tsx` shows them as "Coming soon")
-- `useWorldType.ts` only supports 'overworld' and 'nether' (no 'end' support yet)
-- `WorldSizeHeading.tsx` doesn't check dimension and always shows world size selector (may need dimension awareness)
+- User scales a region, then attempts to move it
+- The move behavior uses an incorrect center point (e.g. stale or pre-scale center)
+- Results in the region jumping or moving from the wrong anchor
 
-**Affected Components:**
-- `src/components/MapLoaderControls.tsx` - World size slider only shown for overworld (line 445)
-- `src/components/WorldSizeHeading.tsx` - May need dimension awareness when Nether/End are enabled
-- `src/hooks/useWorldType.ts` - Currently only supports 'overworld' and 'nether' (needs 'end' support)
-- `src/components/SeedInfoHeading.tsx` - Nether and End options are disabled
-
-**Expected Behavior:**
-- World size slider should be available and functional for all dimensions (Overworld, Nether, End)
-- Each dimension should maintain its own world size setting if applicable
-- Implementation blocked until Nether and End dimensions are enabled in the UI
+**Expected Behavior:** After scaling, moving the region should use the current region bounds so the center (and drag) feels correct.
 
 ---
 
 ## Resolved Issues
+
+### World Size Slider for Nether and End Dimensions
+**Priority:** Medium  
+**Status:** Resolved
+
+**Description:** The Nether and End dimensions should have world size slider controls, similar to the Overworld dimension.
+
+**Original Issue:**
+- World size slider was only available for Overworld in `MapLoaderControls.tsx`
+- Nether and End dimensions needed independent world size controls
+
+**Solution Implemented:** World size slider is now available and functional for Nether and End (and Overworld) as intended.
+
+---
 
 ### Region Creation Without Map Import
 **Priority:** High  
