@@ -1,5 +1,11 @@
 # MC Region Maker – Refactor Specification
 
+**Status:** ✅ **Completed** (Phases 1, 2, 3.1, 3.2, 4.1). Optional 3.3 (context split) deferred.
+
+**Done:** Testing setup; dimension/spawn/advanced/EditMode helpers; ExportPanel settings loader; RegionPanel context usage; useRegions split (useRegionHighlight, useRegionEditMode, useRegionDrawing); useProjectImport + AppHeader; import path verification.
+
+---
+
 ## Overview
 
 This spec describes refactoring opportunities identified from a codebase review. Work is grouped into **quick wins**, **medium effort**, and **larger refactors**. Implement incrementally; later items can depend on earlier ones.
@@ -63,7 +69,7 @@ seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === '
 - Add type and helper (e.g. in `src/utils/dimensionUtils.ts` or extend `src/utils/constants.ts`):
   - `export type Dimension = 'overworld' | 'nether' | 'end'`
   - `export function getValidDimension(value: string | undefined): Dimension`
-- Optionally expose normalized dimension from `useSeedInfo()` (e.g. `dimension: Dimension`) so consumers don’t need the helper.
+- Optionally expose normalized dimension from `useSeedInfo()` (e.g. `dimension: Dimension`) so consumers don't need the helper.
 - Replace every inline dimension normalization with the helper or `seedInfo.dimension`.
 
 **Files to update:**
@@ -314,6 +320,8 @@ Glob/search shows both `src/components/...` and `src\components\...`. Imports sh
 
 - All `src/**/*.ts`, `src/**/*.tsx` import statements.
 - Repository file list for duplicates.
+
+**Done:** Verified; all imports use forward slashes (relative paths like `'../context/AppContext'`). No duplicate files found—single file per path under `src/`. The `src\...` vs `src/...` in tool output is Windows path display only.
 
 ---
 

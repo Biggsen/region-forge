@@ -19,57 +19,41 @@ export function ExportPanel() {
   const [viewingImage, setViewingImage] = useState<{ type: 'greeting' | 'farewell', size: 'large' | 'small' | 'chat' } | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Load saved export settings on mount
+  const applyExportSettingsFromStorage = useCallback(() => {
+    const saved = loadExportSettings()
+    if (!saved) return
+    setIncludeVillages(saved.includeVillages)
+    setIncludeHeartRegions(saved.includeHeartRegions)
+    setIncludeSpawnRegion(saved.includeSpawnRegion)
+    setUseModernWorldHeight(saved.useModernWorldHeight)
+    setUseGreetingsAndFarewells(saved.useGreetingsAndFarewells)
+    setGreetingSize(saved.greetingSize)
+    setIncludeChallengeLevelSubheading(saved.includeChallengeLevelSubheading)
+  }, [])
+
   useEffect(() => {
-    const savedSettings = loadExportSettings()
-    if (savedSettings) {
-      setIncludeVillages(savedSettings.includeVillages)
-      setIncludeHeartRegions(savedSettings.includeHeartRegions)
-      setIncludeSpawnRegion(savedSettings.includeSpawnRegion)
-      setUseModernWorldHeight(savedSettings.useModernWorldHeight)
-      setUseGreetingsAndFarewells(savedSettings.useGreetingsAndFarewells)
-      setGreetingSize(savedSettings.greetingSize)
-      setIncludeChallengeLevelSubheading(savedSettings.includeChallengeLevelSubheading)
-    }
+    applyExportSettingsFromStorage()
     setIsInitialized(true)
-  }, [])
+  }, [applyExportSettingsFromStorage])
 
-  // Load saved export settings when they're updated externally (e.g., from project load)
-  const loadSettings = useCallback(() => {
-    const savedSettings = loadExportSettings()
-    if (savedSettings) {
-      setIncludeVillages(savedSettings.includeVillages)
-      setIncludeHeartRegions(savedSettings.includeHeartRegions)
-      setIncludeSpawnRegion(savedSettings.includeSpawnRegion)
-      setUseModernWorldHeight(savedSettings.useModernWorldHeight)
-      setUseGreetingsAndFarewells(savedSettings.useGreetingsAndFarewells)
-      setGreetingSize(savedSettings.greetingSize)
-      setIncludeChallengeLevelSubheading(savedSettings.includeChallengeLevelSubheading)
-    }
-  }, [])
-
-  // Listen for export settings updates (from project load or other sources)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'mc-region-maker-export-settings') {
-        loadSettings()
+        applyExportSettingsFromStorage()
       }
     }
 
     window.addEventListener('storage', handleStorageChange)
-    
-    // Also listen for custom events for same-tab updates
     const handleExportSettingsUpdate = () => {
-      loadSettings()
+      applyExportSettingsFromStorage()
     }
-    
     window.addEventListener('exportSettingsUpdated', handleExportSettingsUpdate)
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('exportSettingsUpdated', handleExportSettingsUpdate)
     }
-  }, [loadSettings])
+  }, [applyExportSettingsFromStorage])
 
   // Save export settings whenever they change (but not during initial load)
   useEffect(() => {

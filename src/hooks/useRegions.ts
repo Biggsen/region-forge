@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Region, EditMode, HighlightMode, ChallengeLevel } from '../types'
-import { DEFAULT_EDIT_MODE, editModeForEditing, editModeForMove, editModeForSplit } from '../utils/editModeUtils'
+import { Region, ChallengeLevel } from '../types'
+import { DEFAULT_EDIT_MODE, editModeForMove, editModeForSplit } from '../utils/editModeUtils'
+import { useRegionHighlight } from './useRegionHighlight'
+import { useRegionEditMode } from './useRegionEditMode'
+import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from '../utils/persistenceUtils'
 import { parseVillageCSV, createVillageSubregion, findParentRegion } from '../utils/villageUtils'
@@ -10,20 +13,12 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
   const [regions, setRegions] = useState<Region[]>([])
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null)
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null)
-  const [drawingRegion, setDrawingRegion] = useState<Region | null>(null)
-  const [freehandEnabled, setFreehandEnabled] = useState<boolean>(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [editMode, setEditMode] = useState<EditMode>(DEFAULT_EDIT_MODE)
-  const [highlightMode, setHighlightMode] = useState<HighlightMode>({
-    highlightAll: false,
-    showRegions: true,
-    showVillages: true,
-    showCenterPoints: true,
-    showChallengeLevels: false,
-    showGrid: false,
-    showNames: true
-  })
   const [isolatedRegionId, setIsolatedRegionId] = useState<string | null>(null)
+
+  const highlight = useRegionHighlight()
+  const editModeApi = useRegionEditMode()
+  const { editMode, setEditMode } = editModeApi
 
   // Load saved data on mount
   useEffect(() => {
@@ -91,9 +86,14 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     }
     setRegions(prev => [...prev, newRegion])
     setSelectedRegionId(newRegion.id)
-    setDrawingRegion(null)
     return true // Return true on success
   }, [regions])
+
+  const drawing = useRegionDrawing({
+    onAddRegion: addRegion,
+    onExitEditMode: editModeApi.stopEditMode
+  })
+  const { drawingRegion, freehandEnabled, setFreehandEnabled, startDrawingRegion, addPointToDrawing, finishDrawingRegion, cancelDrawingRegion } = drawing
 
   const updateRegion = useCallback((id: string, updates: Partial<Region>) => {
     // Check for duplicate names if name is being updated (case-insensitive)
@@ -127,56 +127,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     if (editMode.editingRegionId === id) {
       setEditMode(DEFAULT_EDIT_MODE)
     }
-  }, [selectedRegionId, editMode.editingRegionId, isolatedRegionId])
-
-  const startDrawingRegion = useCallback((name: string) => {
-    const newRegion: Region = {
-      id: generateId(),
-      name,
-      points: [],
-      centerPoint: null,
-      challengeLevel: 'easy',
-      hasSpawn: false
-    }
-    setDrawingRegion(newRegion)
-    setEditMode(DEFAULT_EDIT_MODE)
-  }, [])
-
-  const addPointToDrawing = useCallback((x: number, z: number) => {
-    if (!drawingRegion) return
-    
-    setDrawingRegion(prev => prev ? {
-      ...prev,
-      points: [...prev.points, { x, z }]
-    } : null)
-  }, [drawingRegion])
-
-  const finishDrawingRegion = useCallback(() => {
-    if (drawingRegion && drawingRegion.points.length >= 3) {
-      // If freehand, lightly simplify before saving to reduce noise
-      const points = freehandEnabled
-        ? simplifyPolygonVertices(drawingRegion.points, 3)
-        : drawingRegion.points
-
-      const success = addRegion({
-        ...drawingRegion,
-        points
-      })
-      
-      if (!success) {
-        // Duplicate name detected - this shouldn't happen if validation in RegionCreationForm works,
-        // but we'll keep the drawing region so user can fix the name
-        console.warn('Cannot add region: duplicate name detected')
-        return false
-      }
-      return true
-    }
-    return false
-  }, [drawingRegion, freehandEnabled, addRegion])
-
-  const cancelDrawingRegion = useCallback(() => {
-    setDrawingRegion(null)
-  }, [])
+  }, [selectedRegionId, editMode.editingRegionId, isolatedRegionId, setEditMode])
 
   const getSelectedRegion = useCallback(() => {
     return regions.find(region => region.id === selectedRegionId) || null
@@ -191,30 +142,10 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     setRegions(newRegions)
   }, [])
 
-  // Edit mode functions
   const startEditMode = useCallback((regionId: string) => {
-    setEditMode(editModeForEditing(regionId))
+    editModeApi.startEditMode(regionId)
     setSelectedRegionId(regionId)
-  }, [])
-
-  const stopEditMode = useCallback(() => {
-    setEditMode(DEFAULT_EDIT_MODE)
-  }, [])
-
-  const startDraggingPoint = useCallback((regionId: string, pointIndex: number) => {
-    setEditMode(prev => ({
-      ...prev,
-      editingRegionId: regionId,
-      draggingPointIndex: pointIndex
-    }))
-  }, [])
-
-  const stopDraggingPoint = useCallback(() => {
-    setEditMode(prev => ({
-      ...prev,
-      draggingPointIndex: null
-    }))
-  }, [])
+  }, [editModeApi])
 
   const updatePointPosition = useCallback((regionId: string, pointIndex: number, x: number, z: number) => {
     setRegions(prev => prev.map(region => {
@@ -353,63 +284,23 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     }))
   }, [regions])
 
-  const finishMoveRegion = useCallback(() => {
-    setEditMode(prev => ({
-      ...prev,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null
-    }))
-  }, [])
+  const finishMoveRegion = editModeApi.finishMoveRegion
 
   const cancelMoveRegion = useCallback(() => {
     if (!editMode.movingRegionId || !editMode.originalRegionPoints) return
-
-    // Restore original points
     setRegions(prev => prev.map(region => {
       if (region.id === editMode.movingRegionId) {
         return { ...region, points: [...editMode.originalRegionPoints!] }
       }
       return region
     }))
+    editModeApi.finishMoveRegion()
+  }, [editMode.movingRegionId, editMode.originalRegionPoints, editModeApi])
 
-    setEditMode(prev => ({
-      ...prev,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null
-    }))
-  }, [editMode.movingRegionId, editMode.originalRegionPoints])
-
-  const toggleHighlightAll = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, highlightAll: !prev.highlightAll }))
-  }, [])
-
-  const toggleShowRegions = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showRegions: !prev.showRegions }))
-  }, [])
-
-  const toggleShowVillages = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showVillages: !prev.showVillages }))
-  }, [])
-
-  const toggleShowCenterPoints = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showCenterPoints: !prev.showCenterPoints }))
-  }, [])
-
-  const toggleShowChallengeLevels = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showChallengeLevels: !prev.showChallengeLevels }))
-  }, [])
-
-  const toggleShowGrid = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showGrid: !prev.showGrid }))
-  }, [])
-
-  const toggleShowNames = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showNames: !prev.showNames }))
-  }, [])
+  const { highlightMode, toggleHighlightAll, toggleShowRegions, toggleShowVillages, toggleShowCenterPoints, toggleShowChallengeLevels, toggleShowGrid, toggleShowNames } = highlight
+  const stopEditMode = editModeApi.stopEditMode
+  const startDraggingPoint = editModeApi.startDraggingPoint
+  const stopDraggingPoint = editModeApi.stopDraggingPoint
 
   const importVillagesFromCSV = useCallback((csvContent: string) => {
     try {
@@ -580,18 +471,11 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
 
   const addSplitPoint = useCallback((x: number, z: number) => {
     if (!editMode.isSplittingRegion || !editMode.splittingRegionId) return
-
     const region = regions.find(r => r.id === editMode.splittingRegionId)
     if (!region) return
-
-    // Find the closest point on the polygon edge
     const closestPoint = findClosestPointOnPolygonEdge({ x, z }, region.points)
-    
-    setEditMode(prev => ({
-      ...prev,
-      splitPoints: [...prev.splitPoints, closestPoint]
-    }))
-  }, [editMode.isSplittingRegion, editMode.splittingRegionId, regions])
+    editModeApi.addSplitPoint(closestPoint)
+  }, [editMode.isSplittingRegion, editMode.splittingRegionId, regions, editModeApi])
 
   const finishSplitRegion = useCallback(() => {
     if (!editMode.isSplittingRegion || !editMode.splittingRegionId || editMode.splitPoints.length !== 2) return
@@ -632,9 +516,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     setEditMode(DEFAULT_EDIT_MODE)
   }, [editMode, regions])
 
-  const cancelSplitRegion = useCallback(() => {
-    setEditMode(DEFAULT_EDIT_MODE)
-  }, [])
+  const cancelSplitRegion = editModeApi.cancelSplitRegion
 
   const randomizeChallengeLevels = useCallback(() => {
     // Find regions with spawn and exclude them from randomization

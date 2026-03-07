@@ -13,7 +13,7 @@ import { Trash2, Search, LineSquiggle, ZoomIn } from 'lucide-react'
 import { loadRegionSort, saveRegionSort } from '../utils/persistenceUtils'
 
 export function RegionPanel() {
-  const { regions, seedInfo, dimension, mapState: mapStateHook, toast, regionFillOpacity } = useAppContext()
+  const { regions, seedInfo, dimension, mapState: mapStateHook, mapCanvas, toast, regionFillOpacity } = useAppContext()
   const {
     regions: regionsList,
     selectedRegionId,
@@ -45,9 +45,8 @@ export function RegionPanel() {
     setIsolatedRegionId
   } = regions
 
-  const { startSettingCenterPoint, stopSettingCenterPoint, startPlacingLabel, stopPlacingLabel, isPlacingLabel, placingLabelRegionId } = useAppContext().mapCanvas
-  const { isWarping, setIsWarping, warpRadius, setWarpRadius, warpStrength, setWarpStrength } = useAppContext().mapCanvas
   const { mapState, setScale, setOffset } = mapStateHook
+  const { startSettingCenterPoint, stopSettingCenterPoint, startPlacingLabel, stopPlacingLabel, isPlacingLabel, placingLabelRegionId, isWarping, setIsWarping, warpRadius, setWarpRadius, warpStrength, setWarpStrength } = mapCanvas
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
