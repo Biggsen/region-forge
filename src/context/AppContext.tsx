@@ -9,6 +9,7 @@ import { useSeedInfo } from '../hooks/useSeedInfo'
 import { useToast } from '../hooks/useToast'
 import { useBiomeLabelVisibility } from '../hooks/useBiomeLabelVisibility'
 import { useRegionFillOpacity } from '../hooks/useRegionFillOpacity'
+import { getValidDimension, type Dimension } from '../utils/dimensionUtils'
 
 interface AppContextType {
   regions: ReturnType<typeof useRegions>
@@ -18,6 +19,7 @@ interface AppContextType {
   mapCanvas: ReturnType<typeof useMapCanvas>
   customMarkers: ReturnType<typeof useCustomMarkers>
   seedInfo: ReturnType<typeof useSeedInfo>
+  dimension: Dimension
   toast: ReturnType<typeof useToast>
   biomeLabelVisibility: ReturnType<typeof useBiomeLabelVisibility>
   regionFillOpacity: ReturnType<typeof useRegionFillOpacity>
@@ -27,9 +29,7 @@ const AppContext = createContext<AppContextType | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const seedInfo = useSeedInfo()
-  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-    ? seedInfo.seedInfo.dimension 
-    : 'overworld'
+  const dimension = getValidDimension(seedInfo.seedInfo.dimension)
   const regions = useRegions(dimension)
   const mapState = useMapState()
   const worldName = useWorldName()
@@ -41,7 +41,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const regionFillOpacity = useRegionFillOpacity()
 
   return (
-    <AppContext.Provider value={{ regions, mapState, worldName, spawn, mapCanvas, customMarkers, seedInfo, toast, biomeLabelVisibility, regionFillOpacity }}>
+    <AppContext.Provider value={{ regions, mapState, worldName, spawn, mapCanvas, customMarkers, seedInfo, dimension, toast, biomeLabelVisibility, regionFillOpacity }}>
       {children}
     </AppContext.Provider>
   )

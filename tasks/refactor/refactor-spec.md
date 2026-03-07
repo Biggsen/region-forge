@@ -13,6 +13,34 @@ This spec describes refactoring opportunities identified from a codebase review.
 
 ---
 
+## Testing setup (prerequisite)
+
+A minimal test pipeline is in place so refactors can be validated without manual checks.
+
+**Stack:** Vitest, jsdom, React Testing Library, jest-dom matchers.
+
+**Commands:**
+- `npm run test` – watch mode
+- `npm run test:run` – single run (e.g. for CI)
+
+**Where tests live:** Next to the code they test. For example:
+- `src/utils/dimensionUtils.ts` → `src/utils/dimensionUtils.test.ts`
+- `src/hooks/useAdvancedFeatures.ts` → `src/hooks/useAdvancedFeatures.test.ts`
+
+**What to test as you refactor:**
+- **Phase 1 helpers** – Unit test every new or moved pure function: `getValidDimension`, `getSpawnExportData`, `DEFAULT_EDIT_MODE` / editMode factories. No React, no mocks, fast.
+- **Hooks** – When adding or changing hooks (e.g. `useAdvancedFeatures`, later `useProjectImport`), add tests using `renderHook` from `@testing-library/react`. Wrap in providers if the hook uses context.
+- **Components** – Optional. Add component or integration tests only where they add clear value (e.g. critical save/load or export flows). Prefer testing the underlying hooks and utils first.
+
+**Setup files:**
+- `vite.config.ts` – `test` block: `globals: true`, `environment: 'jsdom'`, `setupFiles: './src/test/setup.ts'`.
+- `src/test/setup.ts` – React Testing Library `cleanup` and jest-dom matchers.
+- `src/vitest-env.d.ts` – Reference to Vitest globals for TypeScript.
+
+Run `npm run test:run` after any refactor step to confirm nothing is broken.
+
+---
+
 ## Phase 1: Quick wins
 
 ### 1.1 Dimension normalization
@@ -307,7 +335,7 @@ Glob/search shows both `src/components/...` and `src\components\...`. Imports sh
 ## Out of scope (for this spec)
 
 - New features or product changes.
-- Test coverage requirements (recommended to add tests when touching refactored code).
+- Mandatory coverage targets or full-suite E2E tests (targeted unit/hook tests for refactored code are in scope; see Testing setup above).
 - API or data format changes beyond internal helpers and types.
 
 ---

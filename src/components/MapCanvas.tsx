@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
+import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
 import { canvasToImage, pixelToWorld, worldToPixel, imageToCanvas, isPointInPolygon } from '../utils/coordinateUtils'
 import { SIDEBAR_WIDTH } from '../utils/constants'
 import { getEffectiveMapImage } from '../utils/mapStateUtils'
@@ -16,7 +17,7 @@ interface MapCanvasProps {
 
 export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const showAdvanced = new URLSearchParams(window.location.search).get('advanced') === 'true'
+  const showAdvanced = useAdvancedFeatures()
   const { mapState: mapStateHook, regions, spawn, mapCanvas, customMarkers, worldName, seedInfo, biomeLabelVisibility, regionFillOpacity } = useAppContext()
   const { mapState, setScale, setOffset, setOrigin, startDragging, stopDragging, handleMouseMove, handleWheel, setImageOpacity, setTerrainOpacity, setBiomeOpacity, setTerrainVisible, setBiomeVisible } = mapStateHook
   const effectiveImage = getEffectiveMapImage(mapState)

@@ -15,17 +15,16 @@ import { Map, Edit3, Download, FolderOpen, Save, Settings } from 'lucide-react'
 import { ImportConfirmationModal } from './ImportConfirmationModal'
 import { Button } from './Button'
 import { useDataChanged } from '../hooks/useDataChanged'
+import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
+import { getSpawnExportData } from '../utils/spawnUtils'
 
 type TabType = 'map' | 'regions' | 'export' | 'advanced'
 
 function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) {
-  const { regions, mapState, worldName, spawn, seedInfo, toast } = useAppContext()
+  const { regions, mapState, worldName, spawn, seedInfo, dimension, toast } = useAppContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showLoadModal, setShowLoadModal] = useState(false)
-  
-  // Check URL parameter for advanced features
-  const urlParams = new URLSearchParams(window.location.search)
-  const showAdvancedTab = urlParams.get('advanced') === 'true'
+  const showAdvancedTab = useAdvancedFeatures()
   
   const tabs = [
     { id: 'map', label: 'Map', icon: Map },
@@ -34,16 +33,8 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
     ...(showAdvancedTab ? [{ id: 'advanced', label: 'Advanced', icon: Settings }] : [])
   ] as const
 
-  const spawnData = spawn.spawnState.coordinates ? {
-    x: spawn.spawnState.coordinates.x,
-    z: spawn.spawnState.coordinates.z,
-    y: spawn.spawnState.coordinates.y,
-    radius: spawn.spawnState.radius
-  } : null
+  const spawnData = getSpawnExportData(spawn.spawnState)
 
-  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-    ? seedInfo.seedInfo.dimension 
-    : 'overworld'
   const { hasChanged, markAsSaved } = useDataChanged(
     regions.regions,
     mapState.mapState,
@@ -53,12 +44,7 @@ function TabNavigation({ activeTab, onTabChange }: { activeTab: TabType; onTabCh
   )
 
   const handleSave = async () => {
-    // Load image details for export
     const imageDetails = loadImageDetails()
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-      ? seedInfo.seedInfo.dimension 
-      : 'overworld'
-    
     await exportCompleteMap(
       regions.regions, 
       mapState.mapState, 

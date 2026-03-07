@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '../context/AppContext'
+import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
 import { exportRegionsYAML, exportRegionsMetaYAML } from '../utils/exportUtils'
 import { loadExportSettings, saveExportSettings } from '../utils/persistenceUtils'
+import { getSpawnExportData } from '../utils/spawnUtils'
 import { BaseModal } from './BaseModal'
 import { Button } from './Button'
 
 export function ExportPanel() {
-  const { regions, spawn, seedInfo, worldName, toast, mapState } = useAppContext()
+  const { regions, spawn, worldName, dimension, toast, mapState } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
@@ -94,24 +96,13 @@ export function ExportPanel() {
   ])
 
   const handleExportYAML = () => {
-    const spawnData = spawn.spawnState.coordinates ? {
-      x: spawn.spawnState.coordinates.x,
-      z: spawn.spawnState.coordinates.z,
-      y: spawn.spawnState.coordinates.y,
-      radius: spawn.spawnState.radius
-    } : null
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-      ? seedInfo.seedInfo.dimension 
-      : 'overworld'
+    const spawnData = getSpawnExportData(spawn.spawnState)
     // Force spawn region to false for nether and end since they don't have spawn
     const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
     exportRegionsYAML(regions.regions, includeVillages, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
   const handleExportRegionsMeta = () => {
-    const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-      ? seedInfo.seedInfo.dimension 
-      : 'overworld'
     const finalIncludeSpawnRegion = dimension === 'nether' ? false : includeSpawnRegion
     exportRegionsMetaYAML(
       regions.regions,
@@ -128,16 +119,10 @@ export function ExportPanel() {
 
   const computedHasVillages = regions.regions.some(region => region.subregions && region.subregions.length > 0)
   const hasSpawn = !!spawn.spawnState.coordinates
-  const dimension = seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-    ? seedInfo.seedInfo.dimension 
-    : 'overworld'
 
   const canExportSpawnForMeta = dimension === 'overworld' && includeSpawnRegion && hasSpawn && !!spawn.spawnState.radius
   const hasAnythingForRegionsMeta = regions.regions.length > 0 || canExportSpawnForMeta
-
-  // Check URL parameter for advanced features
-  const urlParams = new URLSearchParams(window.location.search)
-  const showAdvanced = urlParams.get('advanced') === 'true'
+  const showAdvanced = useAdvancedFeatures()
 
   return (
     <div className="space-y-4">

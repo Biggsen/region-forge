@@ -13,7 +13,7 @@ import { Trash2, Search, LineSquiggle, ZoomIn } from 'lucide-react'
 import { loadRegionSort, saveRegionSort } from '../utils/persistenceUtils'
 
 export function RegionPanel() {
-  const { regions, seedInfo, mapState: mapStateHook, toast, regionFillOpacity } = useAppContext()
+  const { regions, seedInfo, dimension, mapState: mapStateHook, toast, regionFillOpacity } = useAppContext()
   const {
     regions: regionsList,
     selectedRegionId,
@@ -158,9 +158,7 @@ export function RegionPanel() {
             <div className="flex-shrink-0 mb-2">
               <RegionCreationForm
                 existingRegions={regionsList}
-                dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-                  ? seedInfo.seedInfo.dimension 
-                  : 'overworld'}
+                dimension={dimension}
                 onStartDrawing={(name, freehand) => {
                   regions.setFreehandEnabled(freehand)
                   startDrawingRegion(name)
@@ -394,9 +392,7 @@ export function RegionPanel() {
         <RegionDetailsView
           selectedRegion={selectedRegion}
           editMode={editMode}
-dimension={seedInfo.seedInfo.dimension === 'overworld' || seedInfo.seedInfo.dimension === 'nether' || seedInfo.seedInfo.dimension === 'end'
-            ? seedInfo.seedInfo.dimension
-            : 'overworld'}
+dimension={dimension}
           isWarping={isWarping}
           warpRadius={warpRadius}
           warpStrength={warpStrength}

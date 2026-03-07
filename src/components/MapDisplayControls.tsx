@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronRight, ChevronUp, Eye, EyeOff } from 'lucide-react'
+import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
 
 interface MapDisplayControlsProps {
   highlightMode: {
@@ -53,9 +54,7 @@ export function MapDisplayControls({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isExpanded])
   
-  // Check URL parameter for advanced features
-  const urlParams = new URLSearchParams(window.location.search)
-  const showAdvanced = urlParams.get('advanced') === 'true'
+  const showAdvanced = useAdvancedFeatures()
 
   const ToggleButton = ({ 
     isActive, 

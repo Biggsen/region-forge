@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Region, EditMode, HighlightMode, ChallengeLevel } from '../types'
+import { DEFAULT_EDIT_MODE, editModeForEditing, editModeForMove, editModeForSplit } from '../utils/editModeUtils'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from '../utils/persistenceUtils'
 import { parseVillageCSV, createVillageSubregion, findParentRegion } from '../utils/villageUtils'
@@ -12,18 +13,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
   const [drawingRegion, setDrawingRegion] = useState<Region | null>(null)
   const [freehandEnabled, setFreehandEnabled] = useState<boolean>(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [editMode, setEditMode] = useState<EditMode>({
-    isEditing: false,
-    editingRegionId: null,
-    draggingPointIndex: null,
-    isMovingRegion: false,
-    movingRegionId: null,
-    moveStartPosition: null,
-    originalRegionPoints: null,
-    isSplittingRegion: false,
-    splittingRegionId: null,
-    splitPoints: []
-  })
+  const [editMode, setEditMode] = useState<EditMode>(DEFAULT_EDIT_MODE)
   const [highlightMode, setHighlightMode] = useState<HighlightMode>({
     highlightAll: false,
     showRegions: true,
@@ -134,20 +124,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     if (isolatedRegionId === id) {
       setIsolatedRegionId(null)
     }
-    // Exit edit mode if the deleted region was being edited
     if (editMode.editingRegionId === id) {
-      setEditMode({
-        isEditing: false,
-        editingRegionId: null,
-        draggingPointIndex: null,
-        isMovingRegion: false,
-        movingRegionId: null,
-        moveStartPosition: null,
-        originalRegionPoints: null,
-        isSplittingRegion: false,
-        splittingRegionId: null,
-        splitPoints: []
-      })
+      setEditMode(DEFAULT_EDIT_MODE)
     }
   }, [selectedRegionId, editMode.editingRegionId, isolatedRegionId])
 
@@ -161,19 +139,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       hasSpawn: false
     }
     setDrawingRegion(newRegion)
-    // Exit edit mode when starting to draw
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(DEFAULT_EDIT_MODE)
   }, [])
 
   const addPointToDrawing = useCallback((x: number, z: number) => {
@@ -227,34 +193,12 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
 
   // Edit mode functions
   const startEditMode = useCallback((regionId: string) => {
-    setEditMode({
-      isEditing: true,
-      editingRegionId: regionId,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(editModeForEditing(regionId))
     setSelectedRegionId(regionId)
   }, [])
 
   const stopEditMode = useCallback(() => {
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(DEFAULT_EDIT_MODE)
   }, [])
 
   const startDraggingPoint = useCallback((regionId: string, pointIndex: number) => {
@@ -369,19 +313,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
   const startMoveRegion = useCallback((regionId: string, startX: number, startZ: number) => {
     const region = regions.find(r => r.id === regionId)
     if (!region) return
-
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: true,
-      movingRegionId: regionId,
-      moveStartPosition: { x: startX, z: startZ },
-      originalRegionPoints: [...region.points], // Store original points for preview
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(editModeForMove(regionId, startX, startZ, [...region.points]))
     setSelectedRegionId(regionId)
   }, [regions])
 
@@ -642,18 +574,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
 
   // Split region functions
   const startSplitRegion = useCallback((regionId: string) => {
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: true,
-      splittingRegionId: regionId,
-      splitPoints: []
-    })
+    setEditMode(editModeForSplit(regionId))
     setSelectedRegionId(regionId)
   }, [])
 
@@ -708,34 +629,11 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       setSelectedRegionId(leftRegion.id)
     }
 
-    // Reset split mode
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(DEFAULT_EDIT_MODE)
   }, [editMode, regions])
 
   const cancelSplitRegion = useCallback(() => {
-    setEditMode({
-      isEditing: false,
-      editingRegionId: null,
-      draggingPointIndex: null,
-      isMovingRegion: false,
-      movingRegionId: null,
-      moveStartPosition: null,
-      originalRegionPoints: null,
-      isSplittingRegion: false,
-      splittingRegionId: null,
-      splitPoints: []
-    })
+    setEditMode(DEFAULT_EDIT_MODE)
   }, [])
 
   const randomizeChallengeLevels = useCallback(() => {

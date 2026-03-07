@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
 import { calculatePolygonArea, formatArea, calculateRegionCenter, calculatePolygonCenter } from '../utils/polygonUtils'
 import { generateRegionName } from '../utils/nameGenerator'
 import { Region, EditMode } from '../types'
@@ -96,9 +97,7 @@ export function RegionDetailsView({
     setNameError(null)
   }, [selectedRegion.id])
   
-  // Check URL parameter for advanced features
-  const urlParams = new URLSearchParams(window.location.search)
-  const showAdvanced = urlParams.get('advanced') === 'true'
+  const showAdvanced = useAdvancedFeatures()
 
   // Update resize percentage when selected region changes
   useEffect(() => {
