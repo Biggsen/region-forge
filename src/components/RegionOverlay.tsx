@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { MapState, Region, EditMode, HighlightMode, Subregion, WorldCoordinate, ChallengeLevel } from '../types'
+import { MapState, Region, EditMode, HighlightMode, Subregion, WorldCoordinate, ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { worldToPixel, imageToCanvas, canvasToImage, pixelToWorld } from '../utils/coordinateUtils'
 import { getEffectiveMapImage } from '../utils/mapStateUtils'
 import { scanBiomesWithCentroids } from '../utils/biomeScanner'
@@ -26,6 +26,12 @@ function wrapBiomeLabel(text: string): string[] {
   }
   if (current) lines.push(current)
   return lines
+}
+
+const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fillUnselected: string }> = {
+  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { fillSelected: 'rgba(255, 180, 50, 1)', fillUnselected: 'rgba(255, 180, 50, 0.85)' },
+  [STRUCTURE_TYPES.IGLOO]: { fillSelected: 'rgba(180, 220, 255, 1)', fillUnselected: 'rgba(180, 220, 255, 0.85)' },
+  [STRUCTURE_TYPES.DESERT_PYRAMID]: { fillSelected: 'rgba(230, 190, 130, 1)', fillUnselected: 'rgba(230, 190, 130, 0.85)' },
 }
 
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
@@ -462,21 +468,23 @@ export function RegionOverlay({
   ) => {
     const pixelPos = worldToPixel(subregion.x, subregion.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
-    
-    // Draw village center point
-    ctx.fillStyle = isParentSelected 
-      ? 'rgba(255, 255, 255, 1)' // White center
-      : 'rgba(255, 255, 255, 0.8)' // White center
-    
-    ctx.strokeStyle = isParentSelected 
-      ? 'rgba(0, 0, 0, 1)' // Black border
-      : 'rgba(0, 0, 0, 0.8)' // Black border
-    
-    ctx.lineWidth = 2
-    
-    // Draw village marker (small circle)
+
+    const strokeStyle = isParentSelected ? 'rgba(0, 0, 0, 1)' : 'rgba(0, 0, 0, 0.8)'
+    const isStructure = subregion.type === 'structure' && subregion.structureType
+    const structureType = subregion.structureType
+
+    const fillStyle = structureType && STRUCTURE_MARKER_STYLE[structureType]
+      ? (isParentSelected ? STRUCTURE_MARKER_STYLE[structureType].fillSelected : STRUCTURE_MARKER_STYLE[structureType].fillUnselected)
+      : (isParentSelected ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)')
+    const markerRadius = isStructure ? 4 : 6
+
+    ctx.fillStyle = fillStyle
+    ctx.strokeStyle = strokeStyle
+    ctx.lineWidth = isStructure ? 1.5 : 2
+
+    // Draw marker (small circle)
     ctx.beginPath()
-    ctx.arc(canvasPos.x, canvasPos.y, 6, 0, 2 * Math.PI)
+    ctx.arc(canvasPos.x, canvasPos.y, markerRadius, 0, 2 * Math.PI)
     ctx.fill()
     ctx.stroke()
     

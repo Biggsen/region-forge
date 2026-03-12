@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData } from '../utils/persistenceUtils'
 import { scanBiomes, scanBiomesFullImage, getGroupedLandVsSea } from '../utils/biomeScanner'
-import { ChallengeLevel } from '../types'
+import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
@@ -16,17 +16,28 @@ import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 
+const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel: string; buttonLabel: string }> = {
+  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { countLabel: 'Jungle Pyramid', pluralLabel: 'jungle pyramids', buttonLabel: 'Import Jungle Pyramids (CSV)' },
+  [STRUCTURE_TYPES.IGLOO]: { countLabel: 'Igloo', pluralLabel: 'igloos', buttonLabel: 'Import Igloos (CSV)' },
+  [STRUCTURE_TYPES.DESERT_PYRAMID]: { countLabel: 'Desert Pyramid', pluralLabel: 'desert pyramids', buttonLabel: 'Import Desert Pyramids (CSV)' },
+}
+
 export function AdvancedPanel() {
   const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility, customMarkers } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
+  const structureFileInputRef = useRef<HTMLInputElement>(null)
+  const pendingStructureTypeRef = useRef<StructureType | null>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
+  const [isImportingStructures, setIsImportingStructures] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
+  const [structureImportError, setStructureImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [isOtherRegionTypesExpanded, setIsOtherRegionTypesExpanded] = useState(false)
   const [isPluginsExpanded, setIsPluginsExpanded] = useState(false)
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
+  const [isStructuresExpanded, setIsStructuresExpanded] = useState(false)
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
@@ -103,6 +114,32 @@ export function AdvancedPanel() {
     }
   }
 
+  const handleStructureImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    const structureType = pendingStructureTypeRef.current
+    pendingStructureTypeRef.current = null
+    if (!file || !structureType) return
+    setIsImportingStructures(true)
+    setStructureImportError(null)
+    try {
+      const text = await file.text()
+      if (!text.trim()) throw new Error('File is empty or contains no valid data')
+      const results = regions.importStructuresFromCSV(text, structureType)
+      customMarkers.addOrphanedVillageMarkers(results.orphanedVillages)
+      const label = STRUCTURE_DISPLAY[structureType].pluralLabel
+      const msg = results.orphaned > 0
+        ? `${results.added} ${label} added to regions. ${results.orphaned} orphaned (not in any region) - shown as red dots on the map.`
+        : `${results.added} ${label} added to regions.`
+      alert(msg)
+      if (structureFileInputRef.current) structureFileInputRef.current.value = ''
+    } catch (error) {
+      console.error('Structure import error:', error)
+      setStructureImportError(error instanceof Error ? error.message : 'Failed to import structures')
+    } finally {
+      setIsImportingStructures(false)
+    }
+  }
+
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -135,6 +172,11 @@ export function AdvancedPanel() {
 
   const triggerVillageFileInput = () => {
     villageFileInputRef.current?.click()
+  }
+
+  const triggerStructureFileInput = (structureType: StructureType) => {
+    pendingStructureTypeRef.current = structureType
+    structureFileInputRef.current?.click()
   }
 
   const handleSetCustomCenter = () => {
@@ -739,8 +781,8 @@ export function AdvancedPanel() {
               <div className="ml-4 space-y-4">
                 {/* Villages Counter */}
                 {(() => {
-                  const hasVillages = availableRegions.some(region => region.subregions && region.subregions.length > 0)
-                  const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions?.length || 0), 0)
+                  const hasVillages = availableRegions.some(region => (region.subregions || []).some(s => s.type === 'village'))
+                  const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions || []).filter(s => s.type === 'village').length, 0)
                   
                   if (hasVillages) {
                     return (
@@ -784,6 +826,79 @@ export function AdvancedPanel() {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Structures */}
+            <button
+              onClick={() => setIsStructuresExpanded(!isStructuresExpanded)}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+            >
+              <span className="flex items-center gap-2">
+                <TreePine className="w-4 h-4" />
+                Structures
+              </span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${isStructuresExpanded ? 'rotate-90' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            {isStructuresExpanded && (
+              <div className="ml-4 space-y-4">
+                {(() => {
+                  const structureSubregionsByType = (r: { subregions?: { type: string; structureType?: StructureType }[] }, type: StructureType) =>
+                    (r.subregions || []).filter(s => s.type === 'structure' && s.structureType === type)
+                  return (
+                    <>
+                      {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(structureType => {
+                        const subs = (region: typeof availableRegions[0]) => structureSubregionsByType(region, structureType)
+                        const total = availableRegions.reduce((sum, r) => sum + subs(r).length, 0)
+                        const regionCount = availableRegions.filter(r => subs(r).length > 0).length
+                        const display = STRUCTURE_DISPLAY[structureType]
+                        if (total === 0) return null
+                        return (
+                          <div key={structureType}>
+                            <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{display.countLabel} Count</h5>
+                            <div className="text-lg font-semibold text-white">
+                              {total} {display.pluralLabel} across {regionCount} region{regionCount !== 1 ? 's' : ''}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </>
+                  )
+                })()}
+                {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(structureType => {
+                  const display = STRUCTURE_DISPLAY[structureType]
+                  return (
+                    <div key={structureType} className="space-y-2">
+                      <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import {display.countLabel}s</h5>
+                      <button
+                        onClick={() => triggerStructureFileInput(structureType)}
+                        disabled={isImportingStructures}
+                        className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                      >
+                        {isImportingStructures ? 'Importing...' : display.buttonLabel}
+                      </button>
+                    </div>
+                  )
+                })}
+                <input
+                  ref={structureFileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleStructureImport}
+                  className="hidden"
+                />
+                {structureImportError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                    {structureImportError}
+                  </div>
+                )}
               </div>
             )}
           </div>

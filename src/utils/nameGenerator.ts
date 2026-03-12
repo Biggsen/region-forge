@@ -443,3 +443,55 @@ export function generateVillageNameByWorldType(dimension: 'overworld' | 'nether'
   // Villages don't exist in the nether or end, so always use overworld village names
   return generateVillageName()
 }
+
+const junglePyramidPrefixes = [
+  'Temple of the', 'Shrine of', 'Sanctum of', 'Ruins of', 'Altar of',
+  'Emerald', 'Jade', 'Vine', 'Canopy', 'Moss', 'Fern', 'Jungle',
+  'Ancient', 'Hidden', 'Lost', 'Forgotten', 'Overgrown', 'Silent'
+]
+const junglePyramidSuffixes = [
+  'Vine', 'Stone', 'Leaf', 'Serpent', 'Jaguar', 'Emerald', 'Jade',
+  'Canopy', 'Dusk', 'Dawn', 'Whisper', 'Shadow', 'Thorn', 'Root'
+]
+
+export function generateJunglePyramidName(): string {
+  const usePrefix = Math.random() < 0.5
+  if (usePrefix) {
+    const prefix = junglePyramidPrefixes[Math.floor(Math.random() * junglePyramidPrefixes.length)]
+    const suffix = junglePyramidSuffixes[Math.floor(Math.random() * junglePyramidSuffixes.length)]
+    return `${prefix} ${suffix}`
+  }
+  const p = junglePyramidPrefixes[Math.floor(Math.random() * junglePyramidPrefixes.length)]
+  const s = junglePyramidSuffixes[Math.floor(Math.random() * junglePyramidSuffixes.length)]
+  return `${p} ${s}`
+}
+
+const iglooPrefixes = [
+  'Frost', 'Ice', 'Snow', 'Glacier', 'Drift', 'Blizzard', 'Polar', 'Arctic',
+  'White', 'Crystal', 'Frozen', 'Shiver', 'North', 'Cold', 'Hearth'
+]
+const iglooSuffixes = [
+  'Rest', 'Hollow', 'Den', 'Lodge', 'Shelter', 'Refuge', 'Haven', 'Nook',
+  'Peak', 'Vale', 'Ridge', 'Cave', 'Dome', 'Hall', 'Chamber'
+]
+
+export function generateIglooName(): string {
+  const prefix = iglooPrefixes[Math.floor(Math.random() * iglooPrefixes.length)]
+  const suffix = iglooSuffixes[Math.floor(Math.random() * iglooSuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
+const desertPyramidPrefixes = [
+  'Sand', 'Dune', 'Sun', 'Oasis', 'Dust', 'Drought', 'Mirage', 'Sphinx',
+  'Golden', 'Amber', 'Desert', 'Dunes', 'Scorch', 'Bone', 'Tomb'
+]
+const desertPyramidSuffixes = [
+  'Temple', 'Sanctum', 'Vault', 'Shrine', 'Crypt', 'Tomb', 'Rest', 'Ruin',
+  'Pyramid', 'Monument', 'Hall', 'Chamber', 'Gate', 'Oasis', 'Dune'
+]
+
+export function generateDesertPyramidName(): string {
+  const prefix = desertPyramidPrefixes[Math.floor(Math.random() * desertPyramidPrefixes.length)]
+  const suffix = desertPyramidSuffixes[Math.floor(Math.random() * desertPyramidSuffixes.length)]
+  return `${prefix} ${suffix}`
+}

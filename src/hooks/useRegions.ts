@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Region, ChallengeLevel } from '../types'
+import { Region, ChallengeLevel, StructureType } from '../types'
 import { DEFAULT_EDIT_MODE, editModeForMove, editModeForSplit } from '../utils/editModeUtils'
 import { useRegionHighlight } from './useRegionHighlight'
 import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, findParentRegion } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworld') {
@@ -357,6 +357,52 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     }
   }, [regions])
 
+  const importStructuresFromCSV = useCallback((csvContent: string, structureType: StructureType) => {
+    try {
+      const rows = parseVillageCSV(csvContent)
+      const results = {
+        added: 0,
+        orphaned: 0,
+        orphanedVillages: [] as { x: number; z: number; details: string; type: string }[]
+      }
+      const existingNames = new Set<string>()
+
+      setRegions(prev => prev.map(region => ({
+        ...region,
+        subregions: (region.subregions || []).filter(
+          sub => !(sub.type === 'structure' && sub.structureType === structureType)
+        )
+      })))
+
+      rows.forEach((row, index) => {
+        const parentRegion = findParentRegion(row, regions)
+        if (parentRegion) {
+          const subregion = createStructureSubregion(row, index, structureType, parentRegion.id, existingNames)
+          existingNames.add(subregion.name)
+          setRegions(prev => prev.map(region =>
+            region.id === parentRegion.id
+              ? { ...region, subregions: [...(region.subregions || []), subregion] }
+              : region
+          ))
+          results.added++
+        } else {
+          results.orphaned++
+          results.orphanedVillages.push({
+            x: row.x,
+            z: row.z,
+            details: row.details,
+            type: structureType
+          })
+        }
+      })
+
+      return results
+    } catch (error) {
+      console.error('Failed to import structures:', error)
+      throw new Error(`Failed to parse structure CSV data for ${structureType}`)
+    }
+  }, [regions])
+
   const removeSubregionFromRegion = useCallback((regionId: string, subregionId: string) => {
     setRegions(prev => prev.map(region => 
       region.id === regionId 
@@ -599,6 +645,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     toggleShowGrid,
     toggleShowNames,
     importVillagesFromCSV,
+    importStructuresFromCSV,
     removeSubregionFromRegion,
     updateSubregionName,
     regenerateVillageNames,

@@ -1,5 +1,13 @@
 export type ChallengeLevel = 'easy' | 'normal' | 'hard' | 'severe' | 'deadly'
 
+export const STRUCTURE_TYPES = {
+  JUNGLE_PYRAMID: 'jungle_pyramid',
+  IGLOO: 'igloo',
+  DESERT_PYRAMID: 'desert_pyramid',
+} as const
+
+export type StructureType = typeof STRUCTURE_TYPES[keyof typeof STRUCTURE_TYPES]
+
 export type Region = {
   id: string
   name: string
@@ -25,6 +33,8 @@ export type Subregion = {
   z: number
   radius: number
   type: 'village' | 'structure'
+  /** Specific structure kind for type === 'structure'. Used for display and future icon key. */
+  structureType?: StructureType
   details?: string
   parentRegionId?: string
 }

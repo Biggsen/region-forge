@@ -1,6 +1,12 @@
-import { Subregion, Region } from '../types'
+import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName } from './nameGenerator'
+
+const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
+  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
+  [STRUCTURE_TYPES.IGLOO]: generateIglooName,
+  [STRUCTURE_TYPES.DESERT_PYRAMID]: generateDesertPyramidName,
+}
 
 export interface VillageData {
   x: number
@@ -91,12 +97,49 @@ export function createVillageSubregion(village: VillageData, index: number, pare
   }
 }
 
+export function createStructureSubregion(
+  row: VillageData,
+  index: number,
+  structureType: StructureType,
+  parentRegionId?: string,
+  existingNames: Set<string> = new Set()
+): Subregion {
+  const generateName = STRUCTURE_NAME_GENERATORS[structureType]
+  let generatedName = generateName()
+  let attempts = 0
+  const maxAttempts = 100
+  while (existingNames.has(generatedName) && attempts < maxAttempts) {
+    generatedName = generateName()
+    attempts++
+  }
+  if (existingNames.has(generatedName)) {
+    let counter = 1
+    const baseName = generatedName
+    while (existingNames.has(generatedName) && counter < 1000) {
+      generatedName = `${baseName} ${counter}`
+      counter++
+    }
+  }
+  return {
+    id: `structure_${structureType}_${index}`,
+    name: generatedName,
+    x: row.x,
+    z: row.z,
+    radius: 64,
+    type: 'structure',
+    structureType,
+    details: row.details,
+    parentRegionId
+  }
+}
+
 export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string {
   const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
   const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
   
-  // Villages always use "Welcome to" regardless of world type since villages don't exist in the nether
-  const greetingText = 'Welcome to'
+  const isVillage = subregion.type === 'village'
+  const greetingText = isVillage ? 'Welcome to' : 'Entering'
+  const locationLabel = isVillage ? `${subregion.name} village` : subregion.name
   
   // Use world height setting instead of subregion's minY/maxY
   const minY = useModernWorldHeight ? -64 : 0
@@ -105,27 +148,23 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   let flags: string
   if (useGreetingsAndFarewells) {
     if (greetingSize === 'chat') {
-      // Chat format uses greeting: and farewell: with single-line values
-      flags = `      greeting: §2Entering §7${subregion.name} village\n      farewell: §6Leaving §7${subregion.name} village\n      passthrough: allow`
+      flags = `      greeting: §2Entering §7${locationLabel}\n      farewell: §6Leaving §7${locationLabel}\n      passthrough: allow`
     } else {
-      // Build greeting and farewell lines based on greeting size (same format as main regions)
       let greetingLine1: string
       let greetingLine2: string
       let farewellLine1: string
       let farewellLine2: string
       
       if (greetingSize === 'large') {
-        // Large: greeting text on first line, §f on second
-        greetingLine1 = `§f${greetingText} ${subregion.name} village`
+        greetingLine1 = `§f${isVillage ? greetingText + ' ' : ''}${locationLabel}`
         greetingLine2 = `§f`
-        farewellLine1 = `§fLeaving ${subregion.name} village`
+        farewellLine1 = `§fLeaving ${locationLabel}`
         farewellLine2 = `§f`
       } else {
-        // Small: §f on first line, greeting text on second line
         greetingLine1 = `§f`
-        greetingLine2 = `§f${greetingText} ${subregion.name} village`
+        greetingLine2 = `§f${isVillage ? greetingText + ' ' : ''}${locationLabel}`
         farewellLine1 = `§f`
-        farewellLine2 = `§fLeaving ${subregion.name} village`
+        farewellLine2 = `§fLeaving ${locationLabel}`
       }
       
       flags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      passthrough: allow`
