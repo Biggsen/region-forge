@@ -7,7 +7,7 @@ import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, Highlighter } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
@@ -20,6 +20,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { countLabel: 'Jungle Pyramid', pluralLabel: 'jungle pyramids', buttonLabel: 'Import Jungle Pyramids (CSV)' },
   [STRUCTURE_TYPES.IGLOO]: { countLabel: 'Igloo', pluralLabel: 'igloos', buttonLabel: 'Import Igloos (CSV)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { countLabel: 'Desert Pyramid', pluralLabel: 'desert pyramids', buttonLabel: 'Import Desert Pyramids (CSV)' },
+  [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
 }
 
 export function AdvancedPanel() {
@@ -852,24 +853,57 @@ export function AdvancedPanel() {
                 {(() => {
                   const structureSubregionsByType = (r: { subregions?: { type: string; structureType?: StructureType }[] }, type: StructureType) =>
                     (r.subregions || []).filter(s => s.type === 'structure' && s.structureType === type)
+                  const structureTypes = Object.values(STRUCTURE_TYPES) as StructureType[]
                   return (
-                    <>
-                      {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(structureType => {
-                        const subs = (region: typeof availableRegions[0]) => structureSubregionsByType(region, structureType)
-                        const total = availableRegions.reduce((sum, r) => sum + subs(r).length, 0)
-                        const regionCount = availableRegions.filter(r => subs(r).length > 0).length
-                        const display = STRUCTURE_DISPLAY[structureType]
-                        if (total === 0) return null
-                        return (
-                          <div key={structureType}>
-                            <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{display.countLabel} Count</h5>
-                            <div className="text-lg font-semibold text-white">
-                              {total} {display.pluralLabel} across {regionCount} region{regionCount !== 1 ? 's' : ''}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border border-gray-600 border-collapse">
+                        <thead>
+                          <tr className="bg-gray-700/70">
+                            <th className="text-left text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Structure type</th>
+                            <th className="text-right text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Count</th>
+                            <th className="text-right text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Regions</th>
+                            <th className="text-center text-gray-300 font-medium px-2 py-1.5 border border-gray-600 w-0" />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {structureTypes.map(structureType => {
+                            const subs = (region: typeof availableRegions[0]) => structureSubregionsByType(region, structureType)
+                            const total = availableRegions.reduce((sum, r) => sum + subs(r).length, 0)
+                            const regionCount = availableRegions.filter(r => subs(r).length > 0).length
+                            const display = STRUCTURE_DISPLAY[structureType]
+                            const visible = regions.highlightMode.visibleStructureTypes?.[structureType] !== false
+                            const highlighted = regions.highlightMode.highlightedStructureType === structureType
+                            return (
+                              <tr key={structureType} className="border-b border-gray-600 hover:bg-gray-700/30">
+                                <td className="px-2 py-1.5 border border-gray-600 text-white">{display.countLabel}</td>
+                                <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{total}</td>
+                                <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{regionCount}</td>
+                                <td className="px-2 py-1.5 border border-gray-600">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => regions.setStructureTypeVisible(structureType, !visible)}
+                                      title={visible ? 'Hide on map' : 'Show on map'}
+                                      className={`p-1 rounded ${visible ? 'bg-viridian/80 hover:bg-viridian text-white' : 'bg-gray-500 hover:bg-gray-600 text-gray-200'}`}
+                                    >
+                                      {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => regions.setHighlightedStructureType(highlighted ? null : structureType)}
+                                      title={highlighted ? 'Clear highlight' : 'Highlight on map'}
+                                      className={`p-1 rounded ${highlighted ? 'bg-amber-500/80 hover:bg-amber-500 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-300'}`}
+                                    >
+                                      <Highlighter className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   )
                 })()}
                 {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(structureType => {

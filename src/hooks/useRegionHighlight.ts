@@ -1,9 +1,20 @@
 import { useState, useCallback } from 'react'
-import type { HighlightMode } from '../types'
+import type { HighlightMode, StructureType } from '../types'
 import { DEFAULT_HIGHLIGHT_MODE } from '../utils/highlightModeUtils'
 
 export function useRegionHighlight() {
   const [highlightMode, setHighlightMode] = useState<HighlightMode>(DEFAULT_HIGHLIGHT_MODE)
+
+  const setStructureTypeVisible = useCallback((structureType: StructureType, visible: boolean) => {
+    setHighlightMode(prev => ({
+      ...prev,
+      visibleStructureTypes: { ...prev.visibleStructureTypes, [structureType]: visible },
+    }))
+  }, [])
+
+  const setHighlightedStructureType = useCallback((structureType: StructureType | null) => {
+    setHighlightMode(prev => ({ ...prev, highlightedStructureType: structureType }))
+  }, [])
 
   const toggleHighlightAll = useCallback(() => {
     setHighlightMode(prev => ({ ...prev, highlightAll: !prev.highlightAll }))
@@ -36,6 +47,8 @@ export function useRegionHighlight() {
   return {
     highlightMode,
     setHighlightMode,
+    setStructureTypeVisible,
+    setHighlightedStructureType,
     toggleHighlightAll,
     toggleShowRegions,
     toggleShowVillages,

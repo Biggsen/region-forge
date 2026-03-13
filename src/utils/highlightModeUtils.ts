@@ -1,4 +1,10 @@
-import type { HighlightMode } from '../types'
+import type { HighlightMode, StructureType } from '../types'
+import { STRUCTURE_TYPES } from '../types'
+
+const defaultVisibleStructures: Partial<Record<StructureType, boolean>> = (Object.values(STRUCTURE_TYPES) as StructureType[]).reduce(
+  (acc, k) => ({ ...acc, [k]: true }),
+  {} as Partial<Record<StructureType, boolean>>
+)
 
 export const DEFAULT_HIGHLIGHT_MODE: HighlightMode = {
   highlightAll: false,
@@ -8,4 +14,6 @@ export const DEFAULT_HIGHLIGHT_MODE: HighlightMode = {
   showChallengeLevels: false,
   showGrid: false,
   showNames: true,
+  visibleStructureTypes: defaultVisibleStructures,
+  highlightedStructureType: null,
 }

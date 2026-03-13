@@ -495,3 +495,93 @@ export function generateDesertPyramidName(): string {
   const suffix = desertPyramidSuffixes[Math.floor(Math.random() * desertPyramidSuffixes.length)]
   return `${prefix} ${suffix}`
 }
+
+// --- Buried Treasure name generator (spec: tasks/buried_treasure_name_generator_spec.md) ---
+
+const BURIED_TREASURE_OBJECTS = [
+  'Cache', 'Hoard', 'Chest', 'Strongbox', 'Lockbox', 'Coffer', 'Stash', 'Vault', 'Booty', 'Bounty', 'Reliquary'
+]
+
+const BURIED_TREASURE_ADJECTIVES = [
+  'Buried', 'Sunken', 'Forgotten', 'Salt-Stained', 'Ancient', 'Hidden', 'Lost', 'Weathered', 'Gilded', 'Rusted',
+  'Blackened', 'Drifted', 'Dusty', 'Sealed', 'Forsaken', 'Drowned', 'Bleached', 'Stormworn'
+]
+
+const BURIED_TREASURE_OWNERS = [
+  'Blacktide', 'Marrow Jack', 'Calder', 'Durnan', 'Virel', 'Red Kellan', 'Storm Garrick', 'Harrick', 'Old Fen',
+  'Gravehook', 'Salt Mara', 'Thorne', 'Morrow Pike', 'Edda Vane', 'Cutter Voss'
+]
+
+const BURIED_TREASURE_PLACES = [
+  'Reef', 'Cove', 'Mangrove', 'Dune', 'Shore', 'Tide', 'Lagoon', 'Shoal', 'Cliff', 'Hollow', 'Inlet', 'Coast', 'Bay', 'Sandbar', 'Marsh'
+]
+
+const BURIED_TREASURE_BANNED_WORDS = ['Treasure', 'Loot', 'Gold', 'Riches']
+
+type BuriedTreasurePatternId = 'owner_object' | 'adj_object' | 'place_object' | 'adj_place_object' | 'owner_lost_object' | 'object_of_owner_or_place'
+
+const BURIED_TREASURE_PATTERN_WEIGHTS: { id: BuriedTreasurePatternId; weight: number }[] = [
+  { id: 'owner_object', weight: 30 },
+  { id: 'adj_object', weight: 30 },
+  { id: 'place_object', weight: 15 },
+  { id: 'adj_place_object', weight: 15 },
+  { id: 'owner_lost_object', weight: 7 },
+  { id: 'object_of_owner_or_place', weight: 3 },
+]
+
+function pickWeightedBuriedTreasurePattern(): BuriedTreasurePatternId {
+  const total = BURIED_TREASURE_PATTERN_WEIGHTS.reduce((s, p) => s + p.weight, 0)
+  let r = Math.random() * total
+  for (const { id, weight } of BURIED_TREASURE_PATTERN_WEIGHTS) {
+    r -= weight
+    if (r <= 0) return id
+  }
+  return BURIED_TREASURE_PATTERN_WEIGHTS[0].id
+}
+
+function buildBuriedTreasureCandidate(pattern: BuriedTreasurePatternId): string {
+  const obj = () => BURIED_TREASURE_OBJECTS[Math.floor(Math.random() * BURIED_TREASURE_OBJECTS.length)]
+  const adj = () => BURIED_TREASURE_ADJECTIVES[Math.floor(Math.random() * BURIED_TREASURE_ADJECTIVES.length)]
+  const owner = () => BURIED_TREASURE_OWNERS[Math.floor(Math.random() * BURIED_TREASURE_OWNERS.length)]
+  const place = () => BURIED_TREASURE_PLACES[Math.floor(Math.random() * BURIED_TREASURE_PLACES.length)]
+
+  switch (pattern) {
+    case 'owner_object':
+      return `${owner()}'s ${obj()}`
+    case 'adj_object':
+      return `The ${adj()} ${obj()}`
+    case 'place_object':
+      return `The ${place()} ${obj()}`
+    case 'adj_place_object':
+      return `The ${adj()} ${place()} ${obj()}`
+    case 'owner_lost_object':
+      return `${owner()}'s Lost ${obj()}`
+    case 'object_of_owner_or_place':
+      const o = obj()
+      return Math.random() < 0.6 ? `The ${o} of ${owner()}` : `The ${o} of the ${place()}`
+    default:
+      return `${owner()}'s ${obj()}`
+  }
+}
+
+function passesBuriedTreasureValidation(name: string): boolean {
+  const words = name.split(/\s+/)
+  for (const banned of BURIED_TREASURE_BANNED_WORDS) {
+    if (name.includes(banned)) return false
+  }
+  for (let i = 0; i < words.length - 1; i++) {
+    if (words[i].toLowerCase() === words[i + 1].toLowerCase()) return false
+  }
+  if (words.length < 2 || words.length > 5) return false
+  return true
+}
+
+export function generateBuriedTreasureName(): string {
+  const maxAttempts = 50
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const pattern = pickWeightedBuriedTreasurePattern()
+    const candidate = buildBuriedTreasureCandidate(pattern).replace(/\s+/g, ' ').trim()
+    if (passesBuriedTreasureValidation(candidate)) return candidate
+  }
+  return `${BURIED_TREASURE_OWNERS[0]}'s ${BURIED_TREASURE_OBJECTS[0]}`
+}

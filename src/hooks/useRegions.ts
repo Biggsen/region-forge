@@ -297,7 +297,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     editModeApi.finishMoveRegion()
   }, [editMode.movingRegionId, editMode.originalRegionPoints, editModeApi])
 
-  const { highlightMode, toggleHighlightAll, toggleShowRegions, toggleShowVillages, toggleShowCenterPoints, toggleShowChallengeLevels, toggleShowGrid, toggleShowNames } = highlight
+  const { highlightMode, setStructureTypeVisible, setHighlightedStructureType, toggleHighlightAll, toggleShowRegions, toggleShowVillages, toggleShowCenterPoints, toggleShowChallengeLevels, toggleShowGrid, toggleShowNames } = highlight
   const stopEditMode = editModeApi.stopEditMode
   const startDraggingPoint = editModeApi.startDraggingPoint
   const stopDraggingPoint = editModeApi.stopDraggingPoint
@@ -637,6 +637,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     moveRegionToPosition,
     finishMoveRegion,
     cancelMoveRegion,
+    setStructureTypeVisible,
+    setHighlightedStructureType,
     toggleHighlightAll,
     toggleShowRegions,
     toggleShowVillages,

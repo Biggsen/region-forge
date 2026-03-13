@@ -4,6 +4,7 @@ export const STRUCTURE_TYPES = {
   JUNGLE_PYRAMID: 'jungle_pyramid',
   IGLOO: 'igloo',
   DESERT_PYRAMID: 'desert_pyramid',
+  BURIED_TREASURE: 'buried_treasure',
 } as const
 
 export type StructureType = typeof STRUCTURE_TYPES[keyof typeof STRUCTURE_TYPES]
@@ -101,6 +102,10 @@ export type HighlightMode = {
   showChallengeLevels: boolean
   showGrid: boolean
   showNames: boolean
+  /** Per-structure-type visibility on the map. Undefined or true = show, false = hide. */
+  visibleStructureTypes?: Partial<Record<StructureType, boolean>>
+  /** When set, this structure type is highlighted on the map (e.g. ring around markers). */
+  highlightedStructureType?: StructureType | null
 }
 
 export type CustomMarker = {

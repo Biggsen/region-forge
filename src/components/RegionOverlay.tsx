@@ -32,6 +32,7 @@ const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fill
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { fillSelected: 'rgba(255, 180, 50, 1)', fillUnselected: 'rgba(255, 180, 50, 0.85)' },
   [STRUCTURE_TYPES.IGLOO]: { fillSelected: 'rgba(180, 220, 255, 1)', fillUnselected: 'rgba(180, 220, 255, 0.85)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { fillSelected: 'rgba(230, 190, 130, 1)', fillUnselected: 'rgba(230, 190, 130, 0.85)' },
+  [STRUCTURE_TYPES.BURIED_TREASURE]: { fillSelected: 'rgba(255, 215, 0, 1)', fillUnselected: 'rgba(255, 215, 0, 0.85)' },
 }
 
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
@@ -109,12 +110,17 @@ export function RegionOverlay({
     // Clear overlay
     ctx.clearRect(0, 0, overlay.width, overlay.height)
 
-    // Draw villages first (so they appear behind region labels)
+    // Draw villages and structures (so they appear behind region labels)
     if (highlightMode.showVillages) {
       regions.forEach(region => {
         if (region.subregions) {
           region.subregions.forEach(subregion => {
-            drawVillage(ctx, subregion, mapState, img, region.id === selectedRegionId, highlightMode.showNames)
+            const isStructure = subregion.type === 'structure' && subregion.structureType
+            const hidden = isStructure && highlightMode.visibleStructureTypes?.[subregion.structureType!] === false
+            if (!hidden) {
+              const isHighlighted = isStructure && highlightMode.highlightedStructureType === subregion.structureType
+              drawVillage(ctx, subregion, mapState, img, region.id === selectedRegionId, highlightMode.showNames, isHighlighted)
+            }
           })
         }
       })
@@ -464,7 +470,8 @@ export function RegionOverlay({
     mapState: MapState,
     img: HTMLImageElement,
     isParentSelected: boolean = false,
-    showNames: boolean = true
+    showNames: boolean = true,
+    isHighlighted: boolean = false
   ) => {
     const pixelPos = worldToPixel(subregion.x, subregion.z, img.width, img.height, mapState.originOffset)
     const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
@@ -487,7 +494,15 @@ export function RegionOverlay({
     ctx.arc(canvasPos.x, canvasPos.y, markerRadius, 0, 2 * Math.PI)
     ctx.fill()
     ctx.stroke()
-    
+
+    if (isHighlighted) {
+      ctx.strokeStyle = 'rgba(255, 200, 0, 0.9)'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(canvasPos.x, canvasPos.y, markerRadius + 6, 0, 2 * Math.PI)
+      ctx.stroke()
+    }
+
     // Draw village name
     if (showNames && isParentSelected) {
       ctx.font = '10px Arial'
