@@ -444,26 +444,35 @@ export function generateVillageNameByWorldType(dimension: 'overworld' | 'nether'
   return generateVillageName()
 }
 
-const junglePyramidPrefixes = [
-  'Temple of the', 'Shrine of', 'Sanctum of', 'Ruins of', 'Altar of',
-  'Emerald', 'Jade', 'Vine', 'Canopy', 'Moss', 'Fern', 'Jungle',
-  'Ancient', 'Hidden', 'Lost', 'Forgotten', 'Overgrown', 'Silent'
+const junglePyramidAdjectives = [
+  'Verdant', 'Emerald', 'Jade', 'Mossbound', 'Overgrown', 'Ancient', 'Sunken',
+  'Hidden', 'Forgotten', 'Silent', 'Drowned', 'Rootbound', 'Canopy', 'Verdigris', 'Rainworn'
 ]
-const junglePyramidSuffixes = [
-  'Vine', 'Stone', 'Leaf', 'Serpent', 'Jaguar', 'Emerald', 'Jade',
-  'Canopy', 'Dusk', 'Dawn', 'Whisper', 'Shadow', 'Thorn', 'Root'
+const junglePyramidRuins = [
+  'Temple', 'Sanctum', 'Shrine', 'Pyramid', 'Vault', 'Hall', 'Reliquary',
+  'Sanctuary', 'Altar', 'Ziggurat'
+]
+const junglePyramidEntities = [
+  'Jaguar', 'Serpent', 'Sun', 'Moon', 'Canopy', 'Rain', 'Idol',
+  'Spirit', 'Guardian', 'Watcher', 'Oracle'
+]
+const junglePyramidAncientNames = [
+  'Xalora', 'Teshara', 'Icarun', 'Zarathi', 'Kethra', 'Ossaru',
+  'Velkar', 'Mireth', 'Thalara', 'Zeruun'
 ]
 
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
 export function generateJunglePyramidName(): string {
-  const usePrefix = Math.random() < 0.5
-  if (usePrefix) {
-    const prefix = junglePyramidPrefixes[Math.floor(Math.random() * junglePyramidPrefixes.length)]
-    const suffix = junglePyramidSuffixes[Math.floor(Math.random() * junglePyramidSuffixes.length)]
-    return `${prefix} ${suffix}`
-  }
-  const p = junglePyramidPrefixes[Math.floor(Math.random() * junglePyramidPrefixes.length)]
-  const s = junglePyramidSuffixes[Math.floor(Math.random() * junglePyramidSuffixes.length)]
-  return `${p} ${s}`
+  const patterns = [
+    () => `The ${pick(junglePyramidAdjectives)} ${pick(junglePyramidRuins)}`,
+    () => `Temple of the ${pick(junglePyramidAdjectives)} ${pick(junglePyramidEntities)}`,
+    () => `The ${pick(junglePyramidRuins)} of ${pick(junglePyramidAncientNames)}`,
+    () => `The ${pick(junglePyramidEntities)} ${pick(junglePyramidRuins)}`
+  ]
+  return pick(patterns)()
 }
 
 const iglooPrefixes = [
