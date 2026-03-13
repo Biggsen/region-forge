@@ -35,6 +35,7 @@ const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fill
   [STRUCTURE_TYPES.DESERT_WELL]: { fillSelected: 'rgba(210, 180, 140, 1)', fillUnselected: 'rgba(210, 180, 140, 0.85)' },
   [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { fillSelected: 'rgba(120, 80, 120, 1)', fillUnselected: 'rgba(120, 80, 120, 0.85)' },
   [STRUCTURE_TYPES.ANCIENT_CITY]: { fillSelected: 'rgba(80, 140, 160, 1)', fillUnselected: 'rgba(80, 140, 160, 0.85)' },
+  [STRUCTURE_TYPES.TRAIL_RUINS]: { fillSelected: 'rgba(140, 120, 90, 1)', fillUnselected: 'rgba(140, 120, 90, 0.85)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { fillSelected: 'rgba(255, 215, 0, 1)', fillUnselected: 'rgba(255, 215, 0, 0.85)' },
 }
 

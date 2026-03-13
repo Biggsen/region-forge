@@ -23,6 +23,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.DESERT_WELL]: { countLabel: 'Desert Well', pluralLabel: 'desert wells', buttonLabel: 'Import Desert Wells (CSV)' },
   [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { countLabel: 'Pillager Outpost', pluralLabel: 'pillager outposts', buttonLabel: 'Import Pillager Outposts (CSV)' },
   [STRUCTURE_TYPES.ANCIENT_CITY]: { countLabel: 'Ancient City', pluralLabel: 'ancient cities', buttonLabel: 'Import Ancient Cities (CSV)' },
+  [STRUCTURE_TYPES.TRAIL_RUINS]: { countLabel: 'Trail Ruins', pluralLabel: 'trail ruins', buttonLabel: 'Import Trail Ruins (CSV)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
 }
 

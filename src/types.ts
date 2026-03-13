@@ -7,6 +7,7 @@ export const STRUCTURE_TYPES = {
   DESERT_WELL: 'desert_well',
   PILLAGER_OUTPOST: 'pillager_outpost',
   ANCIENT_CITY: 'ancient_city',
+  TRAIL_RUINS: 'trail_ruins',
   BURIED_TREASURE: 'buried_treasure',
 } as const
 

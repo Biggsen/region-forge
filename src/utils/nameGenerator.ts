@@ -523,6 +523,15 @@ export function generateAncientCityName(): string {
   return `${prefix} ${suffix}`
 }
 
+const trailRuinsPrefixes = ['Old', 'Lost', 'Overgrown', 'Broken', 'Ancient', 'Mossy', 'Weathered', 'Hidden', 'Faded', 'Crumbling']
+const trailRuinsSuffixes = ['Trail', 'Path', 'Site', 'Remnants', 'Dig', 'Ruin', 'Relic', 'Find']
+
+export function generateTrailRuinsName(): string {
+  const prefix = trailRuinsPrefixes[Math.floor(Math.random() * trailRuinsPrefixes.length)]
+  const suffix = trailRuinsSuffixes[Math.floor(Math.random() * trailRuinsSuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
 // --- Buried Treasure name generator (spec: tasks/buried_treasure_name_generator_spec.md) ---
 
 const BURIED_TREASURE_OBJECTS = [
