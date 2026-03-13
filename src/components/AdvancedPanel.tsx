@@ -861,6 +861,41 @@ export function AdvancedPanel() {
             </button>
             {isStructuresExpanded && (
               <div className="ml-4 space-y-4">
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import structures</h5>
+                  <div className="flex gap-2 items-center">
+                    <select
+                      value={selectedStructureTypeForImport}
+                      onChange={e => setSelectedStructureTypeForImport(e.target.value as StructureType)}
+                      className="flex-1 rounded-md border border-gray-600 bg-gray-700 text-white px-3 py-2 text-sm focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+                    >
+                      {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(type => (
+                        <option key={type} value={type}>
+                          {STRUCTURE_DISPLAY[type].countLabel}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => triggerStructureFileInput(selectedStructureTypeForImport)}
+                      disabled={isImportingStructures}
+                      className="bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors whitespace-nowrap"
+                    >
+                      {isImportingStructures ? 'Importing...' : 'Import (CSV)'}
+                    </button>
+                  </div>
+                </div>
+                <input
+                  ref={structureFileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleStructureImport}
+                  className="hidden"
+                />
+                {structureImportError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                    {structureImportError}
+                  </div>
+                )}
                 {(() => {
                   const structureSubregionsByType = (r: { subregions?: { type: string; structureType?: StructureType }[] }, type: StructureType) =>
                     (r.subregions || []).filter(s => s.type === 'structure' && s.structureType === type)
@@ -946,41 +981,6 @@ export function AdvancedPanel() {
                     </div>
                   )
                 })()}
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import structures</h5>
-                  <div className="flex gap-2 items-center">
-                    <select
-                      value={selectedStructureTypeForImport}
-                      onChange={e => setSelectedStructureTypeForImport(e.target.value as StructureType)}
-                      className="flex-1 rounded-md border border-gray-600 bg-gray-700 text-white px-3 py-2 text-sm focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-                    >
-                      {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(type => (
-                        <option key={type} value={type}>
-                          {STRUCTURE_DISPLAY[type].countLabel}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => triggerStructureFileInput(selectedStructureTypeForImport)}
-                      disabled={isImportingStructures}
-                      className="bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors whitespace-nowrap"
-                    >
-                      {isImportingStructures ? 'Importing...' : 'Import (CSV)'}
-                    </button>
-                  </div>
-                </div>
-                <input
-                  ref={structureFileInputRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleStructureImport}
-                  className="hidden"
-                />
-                {structureImportError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
-                    {structureImportError}
-                  </div>
-                )}
               </div>
             )}
             </div>
