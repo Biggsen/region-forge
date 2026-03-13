@@ -7,7 +7,7 @@ import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, Highlighter } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
@@ -20,6 +20,9 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { countLabel: 'Jungle Pyramid', pluralLabel: 'jungle pyramids', buttonLabel: 'Import Jungle Pyramids (CSV)' },
   [STRUCTURE_TYPES.IGLOO]: { countLabel: 'Igloo', pluralLabel: 'igloos', buttonLabel: 'Import Igloos (CSV)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { countLabel: 'Desert Pyramid', pluralLabel: 'desert pyramids', buttonLabel: 'Import Desert Pyramids (CSV)' },
+  [STRUCTURE_TYPES.DESERT_WELL]: { countLabel: 'Desert Well', pluralLabel: 'desert wells', buttonLabel: 'Import Desert Wells (CSV)' },
+  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { countLabel: 'Pillager Outpost', pluralLabel: 'pillager outposts', buttonLabel: 'Import Pillager Outposts (CSV)' },
+  [STRUCTURE_TYPES.ANCIENT_CITY]: { countLabel: 'Ancient City', pluralLabel: 'ancient cities', buttonLabel: 'Import Ancient Cities (CSV)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
 }
 
@@ -31,6 +34,9 @@ export function AdvancedPanel() {
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
   const [isImportingStructures, setIsImportingStructures] = useState(false)
+  const [selectedStructureTypeForImport, setSelectedStructureTypeForImport] = useState<StructureType>(
+    (Object.values(STRUCTURE_TYPES) as StructureType[])[0]
+  )
   const [isImporting, setIsImporting] = useState(false)
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
@@ -39,6 +45,7 @@ export function AdvancedPanel() {
   const [isPluginsExpanded, setIsPluginsExpanded] = useState(false)
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
   const [isStructuresExpanded, setIsStructuresExpanded] = useState(false)
+  const [structureTableSort, setStructureTableSort] = useState<{ column: 'type' | 'count' | 'regions'; dir: 'asc' | 'desc' }>({ column: 'type', dir: 'asc' })
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
@@ -757,81 +764,84 @@ export function AdvancedPanel() {
         </div>
 
         {seedInfo.seedInfo.dimension !== 'nether' && (
-          <div>
-            {/* Villages */}
-            <button
-              onClick={() => setIsVillagesExpanded(!isVillagesExpanded)}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-            >
-              <span className="flex items-center gap-2">
-                <Home className="w-4 h-4" />
-                Villages
-              </span>
-              <svg
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  isVillagesExpanded ? 'rotate-90' : ''
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <>
+            <div>
+              {/* Villages */}
+              <button
+                onClick={() => setIsVillagesExpanded(!isVillagesExpanded)}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            {isVillagesExpanded && (
-              <div className="ml-4 space-y-4">
-                {/* Villages Counter */}
-                {(() => {
-                  const hasVillages = availableRegions.some(region => (region.subregions || []).some(s => s.type === 'village'))
-                  const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions || []).filter(s => s.type === 'village').length, 0)
-                  
-                  if (hasVillages) {
-                    return (
-                      <div>
-                        <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Village Count</h5>
-                        <div className="text-lg font-semibold text-white">
-                          {totalVillages} villages across {availableRegions.length} regions
+                <span className="flex items-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Villages
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isVillagesExpanded ? 'rotate-90' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              {isVillagesExpanded && (
+                <div className="ml-4 space-y-4">
+                  {/* Villages Counter */}
+                  {(() => {
+                    const hasVillages = availableRegions.some(region => (region.subregions || []).some(s => s.type === 'village'))
+                    const totalVillages = availableRegions.reduce((total, region) => total + (region.subregions || []).filter(s => s.type === 'village').length, 0)
+                    
+                    if (hasVillages) {
+                      return (
+                        <div>
+                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Village Count</h5>
+                          <div className="text-lg font-semibold text-white">
+                            {totalVillages} villages across {availableRegions.length} regions
+                          </div>
                         </div>
-                      </div>
-                    )
-                  }
-                  return null
-                })()}
+                      )
+                    }
+                    return null
+                  })()}
 
-                {/* Village Import */}
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import Villages</h5>
-                  <div className="text-sm text-gray-300">
-                    Import villages from CSV files generated by seed map tools
-                  </div>
-                  
-                  <button
-                    onClick={triggerVillageFileInput}
-                    disabled={isImportingVillages}
-                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                  >
-                    {isImportingVillages ? 'Importing...' : 'Import Villages (CSV)'}
-                  </button>
-
-                  <input
-                    ref={villageFileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={handleVillageImport}
-                    className="hidden"
-                  />
-
-                  {villageImportError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
-                      {villageImportError}
+                  {/* Village Import */}
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import Villages</h5>
+                    <div className="text-sm text-gray-300">
+                      Import villages from CSV files generated by seed map tools
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+                    
+                    <button
+                      onClick={triggerVillageFileInput}
+                      disabled={isImportingVillages}
+                      className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                    >
+                      {isImportingVillages ? 'Importing...' : 'Import Villages (CSV)'}
+                    </button>
 
-            {/* Structures */}
-            <button
+                    <input
+                      ref={villageFileInputRef}
+                      type="file"
+                      accept=".csv"
+                      onChange={handleVillageImport}
+                      className="hidden"
+                    />
+
+                    {villageImportError && (
+                      <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                        {villageImportError}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              {/* Structures */}
+              <button
               onClick={() => setIsStructuresExpanded(!isStructuresExpanded)}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
@@ -854,73 +864,110 @@ export function AdvancedPanel() {
                   const structureSubregionsByType = (r: { subregions?: { type: string; structureType?: StructureType }[] }, type: StructureType) =>
                     (r.subregions || []).filter(s => s.type === 'structure' && s.structureType === type)
                   const structureTypes = Object.values(STRUCTURE_TYPES) as StructureType[]
+                  const rows = structureTypes.map(structureType => {
+                    const subs = (region: typeof availableRegions[0]) => structureSubregionsByType(region, structureType)
+                    const total = availableRegions.reduce((sum, r) => sum + subs(r).length, 0)
+                    const regionCount = availableRegions.filter(r => subs(r).length > 0).length
+                    const display = STRUCTURE_DISPLAY[structureType]
+                    const visible = regions.highlightMode.visibleStructureTypes?.[structureType] !== false
+                    const highlighted = regions.highlightMode.highlightedStructureType === structureType
+                    return { structureType, total, regionCount, display, visible, highlighted }
+                  })
+                  const sortedRows = [...rows].sort((a, b) => {
+                    const { column, dir } = structureTableSort
+                    const mult = dir === 'asc' ? 1 : -1
+                    if (column === 'type') {
+                      return mult * a.display.countLabel.localeCompare(b.display.countLabel)
+                    }
+                    if (column === 'count') return mult * (a.total - b.total)
+                    return mult * (a.regionCount - b.regionCount)
+                  })
+                  const SortHeader = ({ col, label, align = 'left' }: { col: 'type' | 'count' | 'regions'; label: string; align?: 'left' | 'right' }) => {
+                    const isActive = structureTableSort.column === col
+                    return (
+                      <th className={`${align === 'right' ? 'text-right' : 'text-left'} text-gray-300 font-medium px-2 py-1.5 border border-gray-600`}>
+                        <button
+                          type="button"
+                          onClick={() => setStructureTableSort(prev => ({
+                            column: col,
+                            dir: prev.column === col && prev.dir === 'asc' ? 'desc' : 'asc'
+                          }))}
+                          className="flex items-center gap-1 w-full hover:text-white focus:outline-none focus:ring-2 focus:ring-lapis-lazuli rounded -m-1 p-1"
+                          style={align === 'right' ? { justifyContent: 'flex-end' } : undefined}
+                        >
+                          {label}
+                          {isActive && (structureTableSort.dir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </button>
+                      </th>
+                    )
+                  }
                   return (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm border border-gray-600 border-collapse">
                         <thead>
                           <tr className="bg-gray-700/70">
-                            <th className="text-left text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Structure type</th>
-                            <th className="text-right text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Count</th>
-                            <th className="text-right text-gray-300 font-medium px-2 py-1.5 border border-gray-600">Regions</th>
+                            <SortHeader col="type" label="Structure type" />
+                            <SortHeader col="count" label="Count" align="right" />
+                            <SortHeader col="regions" label="Regions" align="right" />
                             <th className="text-center text-gray-300 font-medium px-2 py-1.5 border border-gray-600 w-0" />
                           </tr>
                         </thead>
                         <tbody>
-                          {structureTypes.map(structureType => {
-                            const subs = (region: typeof availableRegions[0]) => structureSubregionsByType(region, structureType)
-                            const total = availableRegions.reduce((sum, r) => sum + subs(r).length, 0)
-                            const regionCount = availableRegions.filter(r => subs(r).length > 0).length
-                            const display = STRUCTURE_DISPLAY[structureType]
-                            const visible = regions.highlightMode.visibleStructureTypes?.[structureType] !== false
-                            const highlighted = regions.highlightMode.highlightedStructureType === structureType
-                            return (
-                              <tr key={structureType} className="border-b border-gray-600 hover:bg-gray-700/30">
-                                <td className="px-2 py-1.5 border border-gray-600 text-white">{display.countLabel}</td>
-                                <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{total}</td>
-                                <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{regionCount}</td>
-                                <td className="px-2 py-1.5 border border-gray-600">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => regions.setStructureTypeVisible(structureType, !visible)}
-                                      title={visible ? 'Hide on map' : 'Show on map'}
-                                      className={`p-1 rounded ${visible ? 'bg-viridian/80 hover:bg-viridian text-white' : 'bg-gray-500 hover:bg-gray-600 text-gray-200'}`}
-                                    >
-                                      {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => regions.setHighlightedStructureType(highlighted ? null : structureType)}
-                                      title={highlighted ? 'Clear highlight' : 'Highlight on map'}
-                                      className={`p-1 rounded ${highlighted ? 'bg-amber-500/80 hover:bg-amber-500 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-300'}`}
-                                    >
-                                      <Highlighter className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
+                          {sortedRows.map(({ structureType, total, regionCount, display, visible, highlighted }) => (
+                            <tr key={structureType} className="border-b border-gray-600 hover:bg-gray-700/30">
+                              <td className="px-2 py-1.5 border border-gray-600 text-white">{display.countLabel}</td>
+                              <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{total}</td>
+                              <td className="px-2 py-1.5 border border-gray-600 text-right text-white">{regionCount}</td>
+                              <td className="px-2 py-1.5 border border-gray-600">
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => regions.setStructureTypeVisible(structureType, !visible)}
+                                    title={visible ? 'Hide on map' : 'Show on map'}
+                                    className={`p-1 rounded ${visible ? 'bg-viridian/80 hover:bg-viridian text-white' : 'bg-gray-500 hover:bg-gray-600 text-gray-200'}`}
+                                  >
+                                    {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => regions.setHighlightedStructureType(highlighted ? null : structureType)}
+                                    title={highlighted ? 'Clear highlight' : 'Highlight on map'}
+                                    className={`p-1 rounded ${highlighted ? 'bg-amber-500/80 hover:bg-amber-500 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-300'}`}
+                                  >
+                                    <Highlighter className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
                   )
                 })()}
-                {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(structureType => {
-                  const display = STRUCTURE_DISPLAY[structureType]
-                  return (
-                    <div key={structureType} className="space-y-2">
-                      <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import {display.countLabel}s</h5>
-                      <button
-                        onClick={() => triggerStructureFileInput(structureType)}
-                        disabled={isImportingStructures}
-                        className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                      >
-                        {isImportingStructures ? 'Importing...' : display.buttonLabel}
-                      </button>
-                    </div>
-                  )
-                })}
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import structures</h5>
+                  <div className="flex gap-2 items-center">
+                    <select
+                      value={selectedStructureTypeForImport}
+                      onChange={e => setSelectedStructureTypeForImport(e.target.value as StructureType)}
+                      className="flex-1 rounded-md border border-gray-600 bg-gray-700 text-white px-3 py-2 text-sm focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+                    >
+                      {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(type => (
+                        <option key={type} value={type}>
+                          {STRUCTURE_DISPLAY[type].countLabel}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => triggerStructureFileInput(selectedStructureTypeForImport)}
+                      disabled={isImportingStructures}
+                      className="bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors whitespace-nowrap"
+                    >
+                      {isImportingStructures ? 'Importing...' : 'Import (CSV)'}
+                    </button>
+                  </div>
+                </div>
                 <input
                   ref={structureFileInputRef}
                   type="file"
@@ -935,7 +982,8 @@ export function AdvancedPanel() {
                 )}
               </div>
             )}
-          </div>
+            </div>
+          </>
         )}
 
         {/* Import regions */}

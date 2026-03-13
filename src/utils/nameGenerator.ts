@@ -496,6 +496,33 @@ export function generateDesertPyramidName(): string {
   return `${prefix} ${suffix}`
 }
 
+const desertWellPrefixes = ['Oasis', 'Dune', 'Sand', 'Dry', 'Mirage', 'Sun', 'Dust', 'Drought', 'Shade', 'Cistern']
+const desertWellSuffixes = ['Well', 'Spring', 'Cistern', 'Pool', 'Respite', 'Haven', 'Rest', 'Refuge']
+
+export function generateDesertWellName(): string {
+  const prefix = desertWellPrefixes[Math.floor(Math.random() * desertWellPrefixes.length)]
+  const suffix = desertWellSuffixes[Math.floor(Math.random() * desertWellSuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
+const pillagerOutpostPrefixes = ['Raid', 'Watch', 'Banner', 'Crossbow', 'Outpost', 'Bastion', 'Watchtower', 'Ravager', 'Pillage']
+const pillagerOutpostSuffixes = ['Tower', 'Camp', 'Watch', 'Hold', 'Post', 'Keep', 'Spire', 'Redoubt']
+
+export function generatePillagerOutpostName(): string {
+  const prefix = pillagerOutpostPrefixes[Math.floor(Math.random() * pillagerOutpostPrefixes.length)]
+  const suffix = pillagerOutpostSuffixes[Math.floor(Math.random() * pillagerOutpostSuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
+const ancientCityPrefixes = ['Deep', 'Echo', 'Hollow', 'Sculk', 'Warden', 'Vault', 'Abandoned', 'Sunken', 'Silent', 'Forgotten']
+const ancientCitySuffixes = ['City', 'Ruins', 'Halls', 'Sanctum', 'Nexus', 'Depths', 'Citadel', 'Remnant']
+
+export function generateAncientCityName(): string {
+  const prefix = ancientCityPrefixes[Math.floor(Math.random() * ancientCityPrefixes.length)]
+  const suffix = ancientCitySuffixes[Math.floor(Math.random() * ancientCitySuffixes.length)]
+  return `${prefix} ${suffix}`
+}
+
 // --- Buried Treasure name generator (spec: tasks/buried_treasure_name_generator_spec.md) ---
 
 const BURIED_TREASURE_OBJECTS = [

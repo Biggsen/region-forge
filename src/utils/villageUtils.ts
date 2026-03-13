@@ -1,11 +1,14 @@
 import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateBuriedTreasureName } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateBuriedTreasureName } from './nameGenerator'
 
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
   [STRUCTURE_TYPES.DESERT_PYRAMID]: generateDesertPyramidName,
+  [STRUCTURE_TYPES.DESERT_WELL]: generateDesertWellName,
+  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: generatePillagerOutpostName,
+  [STRUCTURE_TYPES.ANCIENT_CITY]: generateAncientCityName,
   [STRUCTURE_TYPES.BURIED_TREASURE]: generateBuriedTreasureName,
 }
 

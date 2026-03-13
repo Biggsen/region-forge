@@ -32,6 +32,9 @@ const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fill
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { fillSelected: 'rgba(255, 180, 50, 1)', fillUnselected: 'rgba(255, 180, 50, 0.85)' },
   [STRUCTURE_TYPES.IGLOO]: { fillSelected: 'rgba(180, 220, 255, 1)', fillUnselected: 'rgba(180, 220, 255, 0.85)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { fillSelected: 'rgba(230, 190, 130, 1)', fillUnselected: 'rgba(230, 190, 130, 0.85)' },
+  [STRUCTURE_TYPES.DESERT_WELL]: { fillSelected: 'rgba(210, 180, 140, 1)', fillUnselected: 'rgba(210, 180, 140, 0.85)' },
+  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { fillSelected: 'rgba(120, 80, 120, 1)', fillUnselected: 'rgba(120, 80, 120, 0.85)' },
+  [STRUCTURE_TYPES.ANCIENT_CITY]: { fillSelected: 'rgba(80, 140, 160, 1)', fillUnselected: 'rgba(80, 140, 160, 0.85)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { fillSelected: 'rgba(255, 215, 0, 1)', fillUnselected: 'rgba(255, 215, 0, 0.85)' },
 }
 
@@ -110,7 +113,24 @@ export function RegionOverlay({
     // Clear overlay
     ctx.clearRect(0, 0, overlay.width, overlay.height)
 
-    // Draw villages and structures (so they appear behind region labels)
+    // Phase 1: Draw all region borders (fill + stroke) so they stay below markers and vertices
+    if (!isolatedMode) {
+      regions.forEach(region => {
+        const isSelected = region.id === selectedRegionId
+        const isHovered = region.id === hoveredRegionId
+        const isEditing = editMode.isEditing && editMode.editingRegionId === region.id
+        const isMoving = editMode.isMovingRegion && editMode.movingRegionId === region.id
+        const isHighlighted = highlightMode.highlightAll
+        const showChallengeLevels = highlightMode.showChallengeLevels
+        const isDisabled = region.disabled === true
+        drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames, regionFillOpacity, true)
+      })
+    }
+    if (drawingRegion && drawingRegion.points.length > 0) {
+      drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames, regionFillOpacity, true)
+    }
+
+    // Phase 2: Villages, structure markers, center points, vertices, labels (always on top of borders)
     if (highlightMode.showVillages) {
       regions.forEach(region => {
         if (region.subregions) {
@@ -126,7 +146,6 @@ export function RegionOverlay({
       })
     }
 
-    // Draw all regions (with labels on top) - skip boundaries when isolated, but keep label
     if (!isolatedMode) {
       regions.forEach(region => {
         const isSelected = region.id === selectedRegionId
@@ -137,12 +156,10 @@ export function RegionOverlay({
         const isHighlighted = highlightMode.highlightAll
         const showChallengeLevels = highlightMode.showChallengeLevels
         const isDisabled = region.disabled === true
-        drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames, regionFillOpacity)
-        
         if (highlightMode.showCenterPoints) {
           drawCenterPoint(ctx, region, mapState, img, isSelected)
         }
-
+        drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames, regionFillOpacity, false)
         if (isSplitting) {
           drawSplitPoints(ctx, mapState, img, editMode.splitPoints)
         }
@@ -212,9 +229,8 @@ export function RegionOverlay({
       }
     }
 
-    // Draw drawing region
     if (drawingRegion && drawingRegion.points.length > 0) {
-      drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames, regionFillOpacity)
+      drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames, regionFillOpacity, false)
       if (highlightMode.showCenterPoints) {
         drawCenterPoint(ctx, drawingRegion, mapState, img, false)
       }
@@ -244,7 +260,8 @@ export function RegionOverlay({
     isHovered: boolean = false,
     isDisabled: boolean = false,
     showNames: boolean = true,
-    fillOpacity: number = 0.2
+    fillOpacity: number = 0.2,
+    bordersOnly: boolean = false
   ) => {
     if (region.points.length < 2) return
 
@@ -254,76 +271,77 @@ export function RegionOverlay({
       return imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
     })
 
-    // Draw polygon fill (fillOpacity 0 = transparent, 1 = fully opaque)
-    let fillColor: string
-    if (isMoving) {
-      fillColor = `rgba(255, 165, 0, ${fillOpacity})` // Orange for moving regions
-    } else if (isSelected) {
-      fillColor = `rgba(0, 255, 0, ${fillOpacity})`
-    } else if (isDrawing) {
-      fillColor = `rgba(255, 255, 0, ${fillOpacity})`
-    } else if (isHighlighted) {
-      fillColor = `rgba(255, 255, 0, ${fillOpacity})`
-    } else if (isHovered) {
-      fillColor = `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered regions
-    } else if (showChallengeLevels && !isDisabled) {
-      const challengeLevel = region.challengeLevel || 'easy'
-      const base = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
-      const match = base.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-      fillColor = match ? `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${fillOpacity})` : base
-    } else {
-      fillColor = `rgba(0, 100, 255, ${fillOpacity})`
-    }
-    ctx.fillStyle = fillColor
-    
-    ctx.beginPath()
-    ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
-    for (let i = 1; i < canvasPoints.length; i++) {
-      ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
-    }
-    ctx.closePath()
-    ctx.fill()
+    if (bordersOnly) {
+      // Draw polygon fill (fillOpacity 0 = transparent, 1 = fully opaque)
+      let fillColor: string
+      if (isMoving) {
+        fillColor = `rgba(255, 165, 0, ${fillOpacity})` // Orange for moving regions
+      } else if (isSelected) {
+        fillColor = `rgba(0, 255, 0, ${fillOpacity})`
+      } else if (isDrawing) {
+        fillColor = `rgba(255, 255, 0, ${fillOpacity})`
+      } else if (isHighlighted) {
+        fillColor = `rgba(255, 255, 0, ${fillOpacity})`
+      } else if (isHovered) {
+        fillColor = `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered regions
+      } else if (showChallengeLevels && !isDisabled) {
+        const challengeLevel = region.challengeLevel || 'easy'
+        const base = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
+        const match = base.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+        fillColor = match ? `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${fillOpacity})` : base
+      } else {
+        fillColor = `rgba(0, 100, 255, ${fillOpacity})`
+      }
+      ctx.fillStyle = fillColor
 
-    // Draw polygon outline
-    let strokeColor: string
-    if (isMoving) {
-      strokeColor = 'rgba(255, 165, 0, 1)' // Orange outline for moving regions
-    } else if (isSelected) {
-      strokeColor = 'rgba(0, 255, 0, 0.8)'
-    } else if (isDrawing) {
-      strokeColor = 'rgba(0, 0, 0, 1)'
-    } else if (isHighlighted) {
-      strokeColor = 'rgba(0, 0, 0, 1)'
-    } else if (isHovered) {
-      strokeColor = 'rgba(0, 0, 0, 1)'
-    } else if (showChallengeLevels && !isDisabled) {
-      strokeColor = 'rgba(0, 0, 0, 1)'
-    } else {
-      strokeColor = 'rgba(0, 0, 0, 1)'
-    }
-    ctx.strokeStyle = strokeColor
-    ctx.lineWidth = isMoving ? 4 : isSelected ? 3 : isHighlighted ? 4 : isHovered ? 3 : 2
-    
-    // Use dashed line for disabled regions
-    if (isDisabled) {
-      ctx.setLineDash([5, 5])
-    } else {
-      ctx.setLineDash([])
-    }
-    
-    ctx.beginPath()
-    ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
-    for (let i = 1; i < canvasPoints.length; i++) {
-      ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
-    }
-    if (!isDrawing) {
+      ctx.beginPath()
+      ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
+      for (let i = 1; i < canvasPoints.length; i++) {
+        ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
+      }
       ctx.closePath()
-    }
-    ctx.stroke()
-    
-    // Reset line dash
-    ctx.setLineDash([])
+      ctx.fill()
 
+      // Draw polygon outline
+      let strokeColor: string
+      if (isMoving) {
+        strokeColor = 'rgba(255, 165, 0, 1)' // Orange outline for moving regions
+      } else if (isSelected) {
+        strokeColor = 'rgba(0, 255, 0, 0.8)'
+      } else if (isDrawing) {
+        strokeColor = 'rgba(0, 0, 0, 1)'
+      } else if (isHighlighted) {
+        strokeColor = 'rgba(0, 0, 0, 1)'
+      } else if (isHovered) {
+        strokeColor = 'rgba(0, 0, 0, 1)'
+      } else if (showChallengeLevels && !isDisabled) {
+        strokeColor = 'rgba(0, 0, 0, 1)'
+      } else {
+        strokeColor = 'rgba(0, 0, 0, 1)'
+      }
+      ctx.strokeStyle = strokeColor
+      ctx.lineWidth = isMoving ? 4 : isSelected ? 3 : isHighlighted ? 4 : isHovered ? 3 : 2
+
+      if (isDisabled) {
+        ctx.setLineDash([5, 5])
+      } else {
+        ctx.setLineDash([])
+      }
+
+      ctx.beginPath()
+      ctx.moveTo(canvasPoints[0].x, canvasPoints[0].y)
+      for (let i = 1; i < canvasPoints.length; i++) {
+        ctx.lineTo(canvasPoints[i].x, canvasPoints[i].y)
+      }
+      if (!isDrawing) {
+        ctx.closePath()
+      }
+      ctx.stroke()
+      ctx.setLineDash([])
+      return
+    }
+
+    // Overlay only (vertices, insertion points, name) — fill/stroke drawn in phase 1
     // Draw points only when region is selected or being edited
     if (isSelected || isEditing || isDrawing) {
       canvasPoints.forEach((point, index) => {
