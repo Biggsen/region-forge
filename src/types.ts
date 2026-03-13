@@ -40,6 +40,8 @@ export type Subregion = {
   type: 'village' | 'structure'
   /** Specific structure kind for type === 'structure'. Used for display and future icon key. */
   structureType?: StructureType
+  /** Optional Y coordinate for structure subregions (e.g. for teleport/export). */
+  y?: number
   details?: string
   parentRegionId?: string
 }

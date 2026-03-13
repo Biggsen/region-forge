@@ -47,6 +47,7 @@ export function AdvancedPanel() {
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
   const [isStructuresExpanded, setIsStructuresExpanded] = useState(false)
   const [structureTableSort, setStructureTableSort] = useState<{ column: 'type' | 'count' | 'regions'; dir: 'asc' | 'desc' }>({ column: 'type', dir: 'asc' })
+  const [expandedStructureAccordion, setExpandedStructureAccordion] = useState<StructureType | null>(null)
   const [isImportExpanded, setIsImportExpanded] = useState(false)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
@@ -58,6 +59,7 @@ export function AdvancedPanel() {
   const [loreSimplerMode, setLoreSimplerMode] = useState(false)
   const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
+  const [editingStructureY, setEditingStructureY] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
 
   const toggleRegionCategory = (key: string) => {
     setExpandedRegionCategories(prev => {
@@ -981,6 +983,114 @@ export function AdvancedPanel() {
                     </div>
                   )
                 })()}
+                <div className="space-y-1">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">By structure type</h5>
+                  {[...(Object.values(STRUCTURE_TYPES) as StructureType[])]
+                    .sort((a, b) => STRUCTURE_DISPLAY[a].countLabel.localeCompare(STRUCTURE_DISPLAY[b].countLabel))
+                    .map(structureType => {
+                    const items = availableRegions.flatMap(region =>
+                      (region.subregions || [])
+                        .filter((s): s is typeof s & { structureType: StructureType } => s.type === 'structure' && s.structureType === structureType)
+                        .map(s => ({ regionId: region.id, subregionId: s.id, name: s.name, x: s.x, z: s.z, y: s.y, regionName: region.name }))
+                    )
+                    if (items.length === 0) return null
+                    const display = STRUCTURE_DISPLAY[structureType]
+                    const isExpanded = expandedStructureAccordion === structureType
+                    return (
+                      <div key={structureType} className="border border-gray-600 rounded-md overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedStructureAccordion(prev => prev === structureType ? null : structureType)}
+                          className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 hover:text-white border-0"
+                        >
+                          <span>{display.countLabel}</span>
+                          <svg className={`w-4 h-4 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        {isExpanded && (
+                          <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
+                            <ul className="space-y-1.5 text-sm">
+                              {items.map((item, idx) => (
+                                <li key={item.subregionId} className="flex flex-col gap-y-0.5">
+                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                    <span className="text-white font-medium">{item.name}</span>
+                                    <span className="text-gray-400">({item.x}, </span>
+                                    {editingStructureY?.subregionId === item.subregionId ? (
+                                      <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 py-0"
+                                        style={{ width: `${Math.max(2, (editingStructureY.value.length || 0) + 1)}ch` }}
+                                        placeholder="y"
+                                        autoFocus
+                                        value={editingStructureY.value}
+                                        onChange={e => setEditingStructureY(prev => prev ? { ...prev, value: e.target.value } : null)}
+                                        onBlur={() => {
+                                          if (editingStructureY) {
+                                            const v = editingStructureY.value.trim()
+                                            const n = v === '' ? undefined : parseInt(v, 10)
+                                            if (v === '' || !Number.isNaN(n)) regions.updateStructureSubregionY(editingStructureY.regionId, editingStructureY.subregionId, v === '' ? undefined : n)
+                                          }
+                                          setEditingStructureY(null)
+                                        }}
+                                        onKeyDown={e => {
+                                          if (e.key === 'Enter') {
+                                            if (editingStructureY) {
+                                              const v = editingStructureY.value.trim()
+                                              const n = v === '' ? undefined : parseInt(v, 10)
+                                              if (v === '' || !Number.isNaN(n)) regions.updateStructureSubregionY(editingStructureY.regionId, editingStructureY.subregionId, v === '' ? undefined : n)
+                                            }
+                                            setEditingStructureY(null)
+                                          }
+                                        }}
+                                      />
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingStructureY({ regionId: item.regionId, subregionId: item.subregionId, value: String(item.y ?? '') })}
+                                        className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 py-0 cursor-pointer focus:outline-none"
+                                        title="Set Y coordinate"
+                                      >
+                                        {item.y != null ? item.y : '\u00a0'}
+                                      </button>
+                                    )}
+                                    <span className="text-gray-400">, {item.z})</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const y = item.y != null ? item.y : '~'
+                                        const tpCommand = `/tp @s ${item.x} ${y} ${item.z}`
+                                        navigator.clipboard.writeText(tpCommand)
+                                        toast.showToast('Teleport command copied', 'success')
+                                      }}
+                                      className="ml-auto text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
+                                      title="Copy /tp command to clipboard"
+                                    >
+                                      <ClipboardCopy className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const names = items.map(i => i.name).join(', ')
+                                navigator.clipboard.writeText(names)
+                                toast.showToast('Names copied to clipboard', 'success')
+                              }}
+                              className="mt-2 text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                            >
+                              Copy names
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )}
             </div>

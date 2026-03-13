@@ -454,6 +454,21 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     ))
   }, [regions])
 
+  const updateStructureSubregionY = useCallback((regionId: string, subregionId: string, y: number | undefined) => {
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub =>
+              sub.id === subregionId && sub.type === 'structure'
+                ? { ...sub, y }
+                : sub
+            )
+          }
+        : region
+    ))
+  }, [])
+
   const regenerateVillageNames = useCallback(() => {
     setRegions(prev => {
       // Track existing village names to ensure uniqueness
@@ -650,6 +665,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     importStructuresFromCSV,
     removeSubregionFromRegion,
     updateSubregionName,
+    updateStructureSubregionY,
     regenerateVillageNames,
     setCustomCenterPoint,
     warpRegion,
