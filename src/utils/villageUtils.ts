@@ -2,6 +2,18 @@ import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
 import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName } from './nameGenerator'
 
+/** Cuboid bounds for jungle pyramid (x, z = origin, topY = top of pyramid). */
+export function getJunglePyramidCuboid(x: number, z: number, topY: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  return {
+    minX: x - 2,
+    maxX: x + 16,
+    minZ: z - 2,
+    maxZ: z + 16,
+    minY: topY - 16,
+    maxY: topY + 2
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -138,17 +150,44 @@ export function createStructureSubregion(
   }
 }
 
-export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string {
+export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string | null {
   const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
   const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
   
   const isVillage = subregion.type === 'village'
+  const isStructure = subregion.type === 'structure'
+  const isJunglePyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.JUNGLE_PYRAMID
+
+  if (isStructure && subregion.y === undefined) {
+    return null
+  }
+
+  let minX: number
+  let maxX: number
+  let minZ: number
+  let maxZ: number
+  let minY: number
+  let maxY: number
+
+  if (isJunglePyramid && subregion.y !== undefined) {
+    const cuboid = getJunglePyramidCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = cuboid.minY
+    maxY = cuboid.maxY
+  } else {
+    minY = useModernWorldHeight ? -64 : 0
+    maxY = useModernWorldHeight ? 320 : 255
+    minX = subregion.x - subregion.radius
+    maxX = subregion.x + subregion.radius
+    minZ = subregion.z - subregion.radius
+    maxZ = subregion.z + subregion.radius
+  }
+
   const greetingText = isVillage ? 'Welcome to' : 'Entering'
   const locationLabel = isVillage ? `${subregion.name} village` : subregion.name
-  
-  // Use world height setting instead of subregion's minY/maxY
-  const minY = useModernWorldHeight ? -64 : 0
-  const maxY = useModernWorldHeight ? 320 : 255
 
   let flags: string
   if (useGreetingsAndFarewells) {
@@ -185,6 +224,6 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     priority: 10
     parent: ${parentRegionNameForYAML}
     ${useGreetingsAndFarewells ? `flags:\n${flags}` : `flags: ${flags}`}
-    min: {x: ${subregion.x - subregion.radius}, y: ${minY}, z: ${subregion.z - subregion.radius}}
-    max: {x: ${subregion.x + subregion.radius}, y: ${maxY}, z: ${subregion.z + subregion.radius}}`
+    min: {x: ${minX}, y: ${minY}, z: ${minZ}}
+    max: {x: ${maxX}, y: ${maxY}, z: ${maxZ}}`
 }

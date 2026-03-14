@@ -10,6 +10,7 @@ import { Button } from './Button'
 export function ExportPanel() {
   const { regions, spawn, worldName, dimension, toast, mapState } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
+  const [includeStructures, setIncludeStructures] = useState(true)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
   const [useModernWorldHeight, setUseModernWorldHeight] = useState(true)
@@ -23,6 +24,7 @@ export function ExportPanel() {
     const saved = loadExportSettings()
     if (!saved) return
     setIncludeVillages(saved.includeVillages)
+    setIncludeStructures(saved.includeStructures ?? true)
     setIncludeHeartRegions(saved.includeHeartRegions)
     setIncludeSpawnRegion(saved.includeSpawnRegion)
     setUseModernWorldHeight(saved.useModernWorldHeight)
@@ -60,6 +62,7 @@ export function ExportPanel() {
     if (isInitialized) {
       saveExportSettings({
         includeVillages,
+        includeStructures,
         includeHeartRegions,
         includeSpawnRegion,
         useModernWorldHeight,
@@ -71,6 +74,7 @@ export function ExportPanel() {
   }, [
     isInitialized,
     includeVillages,
+    includeStructures,
     includeHeartRegions,
     includeSpawnRegion,
     useModernWorldHeight,
@@ -83,7 +87,7 @@ export function ExportPanel() {
     const spawnData = getSpawnExportData(spawn.spawnState)
     // Force spawn region to false for nether and end since they don't have spawn
     const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
-    exportRegionsYAML(regions.regions, includeVillages, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
+    exportRegionsYAML(regions.regions, includeVillages, includeStructures, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
   }
 
   const handleExportRegionsMeta = () => {
@@ -94,6 +98,7 @@ export function ExportPanel() {
       worldName.worldName,
       spawn.spawnState,
       includeVillages,
+      includeStructures,
       includeHeartRegions,
       finalIncludeSpawnRegion,
       toast.showToast,
@@ -101,7 +106,8 @@ export function ExportPanel() {
     )
   }
 
-  const computedHasVillages = regions.regions.some(region => region.subregions && region.subregions.length > 0)
+  const computedHasVillages = regions.regions.some(region => region.subregions?.some(s => s.type === 'village'))
+  const computedHasStructures = regions.regions.some(region => region.subregions?.some(s => s.type === 'structure'))
   const hasSpawn = !!spawn.spawnState.coordinates
 
   const canExportSpawnForMeta = dimension === 'overworld' && includeSpawnRegion && hasSpawn && !!spawn.spawnState.radius
@@ -290,6 +296,21 @@ export function ExportPanel() {
                 </label>
               </div>
               
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="includeStructures"
+                  checked={includeStructures}
+                  onChange={(e) => setIncludeStructures(e.target.checked)}
+                  disabled={!computedHasStructures}
+                  className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <label htmlFor="includeStructures" className="ml-2 text-white">
+                  Include Structures
+                  {!computedHasStructures && <span className="text-gray-400 ml-1">(No structures available)</span>}
+                </label>
+              </div>
+
               <div className="flex items-center">
                 <input
                   type="checkbox"

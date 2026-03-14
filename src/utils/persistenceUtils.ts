@@ -10,6 +10,7 @@ export interface ImageDetails {
 
 export interface ExportSettings {
   includeVillages: boolean
+  includeStructures: boolean
   includeHeartRegions: boolean
   includeSpawnRegion: boolean
   useModernWorldHeight: boolean
@@ -265,7 +266,12 @@ export function saveExportSettings(settings: ExportSettings): void {
 export function loadExportSettings(): ExportSettings | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.EXPORT_SETTINGS)
-    return saved ? JSON.parse(saved) : null
+    if (!saved) return null
+    const parsed = JSON.parse(saved) as Partial<ExportSettings>
+    if (parsed.includeStructures === undefined) {
+      parsed.includeStructures = true
+    }
+    return parsed as ExportSettings
   } catch (error) {
     console.error('Failed to load export settings:', error)
     return null

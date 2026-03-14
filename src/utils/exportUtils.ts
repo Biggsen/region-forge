@@ -145,7 +145,8 @@ function exportFilenamePrefix(worldName: string, dimension: 'overworld' | 'nethe
 // Export all regions to YAML file in WorldGuard format
 export function exportRegionsYAML(
   regions: Region[], 
-  includeVillages: boolean = true, 
+  includeVillages: boolean = true,
+  includeStructures: boolean = true,
   includeHeartRegions: boolean = true,
   includeSpawnRegion: boolean = false,
   spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null,
@@ -179,7 +180,7 @@ export function exportRegionsYAML(
   }
   
   enabledRegions.forEach((region, index) => {
-    yamlContent += generateRegionYAML(region, includeVillages, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
+    yamlContent += generateRegionYAML(region, includeVillages, includeStructures, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
     // Add a blank line between regions (except after the last one)
     if (index < enabledRegions.length - 1) {
       yamlContent += '\n'
@@ -299,6 +300,7 @@ export function exportRegionsMetaYAML(
   worldName: string,
   spawnState: { coordinates: { x: number; z: number; y: number } | null; radius: number },
   includeVillages: boolean,
+  includeStructures: boolean,
   includeHeartRegions: boolean,
   includeSpawnRegion: boolean,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
@@ -355,14 +357,22 @@ export function exportRegionsMetaYAML(
         discover: { method: 'on_enter', recipeId: getRecipeId('heart', dim) }
       })
     }
-    if (includeVillages && dim !== 'nether' && region.subregions) {
+    if ((includeVillages || includeStructures) && dim !== 'nether' && region.subregions) {
       for (const sub of region.subregions) {
-        if (sub.type === 'village') {
+        if (sub.type === 'village' && includeVillages) {
           metaRegions.push({
             id: toRegionId(sub.name),
             world: dim,
             kind: 'village',
             discover: { method: 'on_enter', recipeId: getRecipeId('village', dim) }
+          })
+        }
+        if (sub.type === 'structure' && includeStructures) {
+          metaRegions.push({
+            id: toRegionId(sub.name),
+            world: dim,
+            kind: 'structure',
+            discover: { method: 'on_enter', recipeId: getRecipeId('region', dim) }
           })
         }
       }

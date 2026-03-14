@@ -19,7 +19,7 @@ function getChallengeLevelColor(challengeLevel: ChallengeLevel): string {
   }
 }
 
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeStructures: boolean = true, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -150,12 +150,16 @@ ${points}`
     priority: 10`
   }
 
-  // Add subregions if they exist and includeVillages is true
-  if (includeVillages && region.subregions && region.subregions.length > 0) {
-    yaml += '\n\n'
-    yaml += region.subregions.map(subregion => 
-      generateSubregionYAML(subregion, region.name, dimension || 'overworld', useModernWorldHeight, useGreetingsAndFarewells, greetingSize)
-    ).join('\n\n')
+  // Add subregions when includeVillages (villages) or includeStructures (structures) is true (structures without required data e.g. jungle pyramid without y are skipped)
+  if ((includeVillages || includeStructures) && region.subregions && region.subregions.length > 0) {
+    const subregionBlocks = region.subregions
+      .filter(sub => (sub.type === 'village' && includeVillages) || (sub.type === 'structure' && includeStructures))
+      .map(subregion => generateSubregionYAML(subregion, region.name, dimension || 'overworld', useModernWorldHeight, useGreetingsAndFarewells, greetingSize))
+      .filter((block): block is string => block !== null)
+    if (subregionBlocks.length > 0) {
+      yaml += '\n\n'
+      yaml += subregionBlocks.join('\n\n')
+    }
   }
   
   return yaml
