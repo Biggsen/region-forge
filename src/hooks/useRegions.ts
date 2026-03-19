@@ -309,7 +309,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         added: 0,
         skipped: 0,
         orphaned: 0,
-        orphanedVillages: [] as { x: number; z: number; details: string; type: string }[]
+        orphanedVillages: [] as { x: number; z: number; y?: number; details: string; type: string }[]
       }
       
       // Track existing village names to ensure uniqueness
@@ -344,6 +344,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
           results.orphanedVillages.push({
             x: village.x,
             z: village.z,
+            ...(village.y !== undefined ? { y: village.y } : {}),
             details: village.details,
             type: village.type
           })
@@ -363,7 +364,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       const results = {
         added: 0,
         orphaned: 0,
-        orphanedVillages: [] as { x: number; z: number; details: string; type: string }[]
+        orphanedVillages: [] as { x: number; z: number; y?: number; details: string; type: string }[]
       }
       const existingNames = new Set<string>()
 
@@ -390,6 +391,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
           results.orphanedVillages.push({
             x: row.x,
             z: row.z,
+            ...(row.y !== undefined ? { y: row.y } : {}),
             details: row.details,
             type: structureType
           })
@@ -461,6 +463,21 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
             ...region,
             subregions: (region.subregions || []).map(sub =>
               sub.id === subregionId && sub.type === 'structure'
+                ? { ...sub, y }
+                : sub
+            )
+          }
+        : region
+    ))
+  }, [])
+
+  const updateVillageSubregionY = useCallback((regionId: string, subregionId: string, y: number | undefined) => {
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub =>
+              sub.id === subregionId && sub.type === 'village'
                 ? { ...sub, y }
                 : sub
             )
@@ -666,6 +683,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     removeSubregionFromRegion,
     updateSubregionName,
     updateStructureSubregionY,
+    updateVillageSubregionY,
     regenerateVillageNames,
     setCustomCenterPoint,
     warpRegion,

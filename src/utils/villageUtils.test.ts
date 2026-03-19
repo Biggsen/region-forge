@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, generateSubregionYAML } from './villageUtils'
+import { getJunglePyramidCuboid, generateSubregionYAML, parseVillageCSV } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getJunglePyramidCuboid', () => {
@@ -21,6 +21,31 @@ describe('getJunglePyramidCuboid', () => {
     expect(r.maxZ).toBe(16)
     expect(r.minY).toBe(48)
     expect(r.maxY).toBe(66)
+  })
+})
+
+describe('parseVillageCSV', () => {
+  it('parses seed map format with x;y;z columns', () => {
+    const csv = `Sep=;
+#X1;-4000
+seed;structure;x;y;z;details
+3069048097508106794;village;-3952;66;-432;plains_meeting_point_2
+3069048097508106794;village;-3488;84;-1376;plains_meeting_point_2
+`
+    const rows = parseVillageCSV(csv)
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toMatchObject({ x: -3952, y: 66, z: -432, type: 'village', details: 'plains_meeting_point_2' })
+    expect(rows[1]).toMatchObject({ x: -3488, y: 84, z: -1376, type: 'village', details: 'plains_meeting_point_2' })
+  })
+
+  it('parses legacy format without y column', () => {
+    const csv = `seed;structure;x;z;details
+1;village;100;200;plains_meeting_point_1
+`
+    const rows = parseVillageCSV(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ x: 100, z: 200, type: 'village', details: 'plains_meeting_point_1' })
+    expect(rows[0].y).toBeUndefined()
   })
 })
 
@@ -57,5 +82,25 @@ describe('generateSubregionYAML', () => {
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('min: {x: 98, y: 64, z: -52}')
     expect(yaml).toContain('max: {x: 116, y: 82, z: -34}')
+    expect(yaml).not.toContain('min-y:')
+    expect(yaml).not.toContain('max-y:')
+  })
+
+  it('returns cuboid YAML for village with y offsets', () => {
+    const subregion = {
+      id: 'v1',
+      name: 'Bradford',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'village' as const,
+      y: 66,
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 36, y: 46, z: -114}')
+    expect(yaml).toContain('max: {x: 164, y: 96, z: 14}')
+    expect(yaml).not.toContain('min-y:')
+    expect(yaml).not.toContain('max-y:')
   })
 })

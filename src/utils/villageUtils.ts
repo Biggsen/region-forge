@@ -28,46 +28,63 @@ const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
 export interface VillageData {
   x: number
   z: number
+  /** Present when CSV uses seed;structure;x;y;z;details */
+  y?: number
   details: string
   type: string
+}
+
+function csvRowHasYColumn(headerLine: string): boolean {
+  const line = headerLine.trim().toLowerCase()
+  return line.includes('x;y;z') || /^seed[^;]*;structure[^;]*;x[^;]*;y[^;]*;z/i.test(line)
 }
 
 export function parseVillageCSV(csvContent: string): VillageData[] {
   const lines = csvContent.split('\n')
   const villages: VillageData[] = []
-  
-  // Skip header lines and find the data start
+
   let dataStartIndex = 0
+  let hasYColumn = false
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
-    // Skip empty lines, separator declarations, and coordinate boundaries
     if (!line || line.startsWith('Sep=') || line.startsWith('#')) {
       continue
     }
-    if (line.startsWith('seed;structure;x;z;details')) {
+    if (line.startsWith('seed') && line.includes('structure') && line.includes('x') && line.includes('z')) {
+      hasYColumn = csvRowHasYColumn(line)
       dataStartIndex = i + 1
       break
     }
   }
-  
-  // Parse village data
+
   for (let i = dataStartIndex; i < lines.length; i++) {
     const line = lines[i].trim()
-    // Skip empty lines, separator declarations, and coordinate boundaries
     if (!line || line.startsWith('Sep=') || line.startsWith('#')) continue
-    
+
     const parts = line.split(';')
-    if (parts.length >= 5) {
-      const [, structure, x, z, details] = parts
+    if (hasYColumn && parts.length >= 6) {
+      const [, structure, xs, ys, zs] = parts
+      const details = parts.slice(5).join(';')
+      const yNum = parseInt(ys, 10)
       villages.push({
-        x: parseInt(x),
-        z: parseInt(z),
-        details: details,
+        x: parseInt(xs, 10),
+        z: parseInt(zs, 10),
+        ...(!Number.isNaN(yNum) ? { y: yNum } : {}),
+        details,
+        type: structure
+      })
+    } else if (!hasYColumn && parts.length >= 5) {
+      const [, structure, xs, zs] = parts
+      const details = parts.slice(4).join(';')
+      villages.push({
+        x: parseInt(xs, 10),
+        z: parseInt(zs, 10),
+        details,
         type: structure
       })
     }
   }
-  
+
   return villages
 }
 
@@ -107,6 +124,7 @@ export function createVillageSubregion(village: VillageData, index: number, pare
     name: generatedName,
     x: village.x,
     z: village.z,
+    ...(village.y !== undefined ? { y: village.y } : {}),
     radius: 64, // Default village radius
     type: 'village',
     details: village.details, // Keep original details for reference
@@ -142,6 +160,7 @@ export function createStructureSubregion(
     name: generatedName,
     x: row.x,
     z: row.z,
+    ...(row.y !== undefined ? { y: row.y } : {}),
     radius: 64,
     type: 'structure',
     structureType,
@@ -169,6 +188,9 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   let minY: number
   let maxY: number
 
+  const worldMinY = useModernWorldHeight ? -64 : 0
+  const worldMaxY = useModernWorldHeight ? 320 : 255
+
   if (isJunglePyramid && subregion.y !== undefined) {
     const cuboid = getJunglePyramidCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
@@ -177,9 +199,19 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxZ = cuboid.maxZ
     minY = cuboid.minY
     maxY = cuboid.maxY
+  } else if (isVillage && subregion.y !== undefined) {
+    // Villages: use village Y to size the WorldGuard cuboid.
+    // Requested behavior: min = y-20, max = y+30.
+    minX = subregion.x - subregion.radius
+    maxX = subregion.x + subregion.radius
+    minZ = subregion.z - subregion.radius
+    maxZ = subregion.z + subregion.radius
+    minY = subregion.y - 20
+    maxY = subregion.y + 30
   } else {
-    minY = useModernWorldHeight ? -64 : 0
-    maxY = useModernWorldHeight ? 320 : 255
+    // Fallback (no structure Y for non-jungle structures; no village Y from legacy CSVs).
+    minY = worldMinY
+    maxY = worldMaxY
     minX = subregion.x - subregion.radius
     maxX = subregion.x + subregion.radius
     minZ = subregion.z - subregion.radius
@@ -219,8 +251,6 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
 
   return `  ${subregionName}:
     type: cuboid
-    min-y: ${minY}
-    max-y: ${maxY}
     priority: 10
     parent: ${parentRegionNameForYAML}
     ${useGreetingsAndFarewells ? `flags:\n${flags}` : `flags: ${flags}`}

@@ -5,6 +5,7 @@ interface Subregion {
   name: string
   x: number
   z: number
+  y?: number
   details?: string
 }
 
@@ -85,7 +86,7 @@ export function VillageManager({
                   </button>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  ({subregion.x}, {subregion.z}){subregion.details ? ` - ${subregion.details}` : ''}
+                  ({subregion.x}, {subregion.y != null ? subregion.y : '—'}, {subregion.z}){subregion.details ? ` - ${subregion.details}` : ''}
                 </div>
               </div>
             ) : (
@@ -107,7 +108,7 @@ export function VillageManager({
                   </button>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  ({subregion.x}, {subregion.z}){subregion.details ? ` - ${subregion.details}` : ''}
+                  ({subregion.x}, {subregion.y != null ? subregion.y : '—'}, {subregion.z}){subregion.details ? ` - ${subregion.details}` : ''}
                 </div>
               </div>
             )}

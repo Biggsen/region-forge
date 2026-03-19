@@ -60,6 +60,7 @@ export function AdvancedPanel() {
   const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
   const [editingStructureY, setEditingStructureY] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
+  const [editingVillageY, setEditingVillageY] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
 
   const toggleRegionCategory = (key: string) => {
     setExpandedRegionCategories(prev => {
@@ -837,6 +838,124 @@ export function AdvancedPanel() {
                         {villageImportError}
                       </div>
                     )}
+
+                    {(() => {
+                      const items = availableRegions.flatMap(region =>
+                        (region.subregions || [])
+                          .filter(s => s.type === 'village')
+                          .map(s => ({
+                            regionId: region.id,
+                            subregionId: s.id,
+                            name: s.name,
+                            x: s.x,
+                            z: s.z,
+                            y: s.y,
+                            regionName: region.name
+                          }))
+                      )
+                      if (items.length === 0) return null
+                      const sorted = [...items].sort((a, b) => a.name.localeCompare(b.name))
+                      return (
+                        <div className="space-y-1 pt-2">
+                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Villages</h5>
+                          <div className="bg-gray-800/50 px-3 py-2 border border-gray-600 rounded-md max-h-48 overflow-y-auto">
+                            <ul className="space-y-1.5 text-sm">
+                              {sorted.map(item => (
+                                <li key={item.subregionId} className="flex flex-col gap-y-0.5">
+                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                    <span className="text-white font-medium">{item.name}</span>
+                                    <span className="text-gray-400">({item.x}, </span>
+                                    {editingVillageY?.subregionId === item.subregionId ? (
+                                      <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 py-0"
+                                        style={{ width: `${Math.max(2, (editingVillageY.value.length || 0) + 1)}ch` }}
+                                        placeholder="y"
+                                        autoFocus
+                                        value={editingVillageY.value}
+                                        onChange={e => setEditingVillageY(prev => (prev ? { ...prev, value: e.target.value } : null))}
+                                        onBlur={() => {
+                                          if (editingVillageY) {
+                                            const v = editingVillageY.value.trim()
+                                            const n = v === '' ? undefined : parseInt(v, 10)
+                                            if (v === '' || !Number.isNaN(n)) {
+                                              regions.updateVillageSubregionY(
+                                                editingVillageY.regionId,
+                                                editingVillageY.subregionId,
+                                                v === '' ? undefined : n
+                                              )
+                                            }
+                                          }
+                                          setEditingVillageY(null)
+                                        }}
+                                        onKeyDown={e => {
+                                          if (e.key === 'Enter') {
+                                            if (editingVillageY) {
+                                              const v = editingVillageY.value.trim()
+                                              const n = v === '' ? undefined : parseInt(v, 10)
+                                              if (v === '' || !Number.isNaN(n)) {
+                                                regions.updateVillageSubregionY(
+                                                  editingVillageY.regionId,
+                                                  editingVillageY.subregionId,
+                                                  v === '' ? undefined : n
+                                                )
+                                              }
+                                            }
+                                            setEditingVillageY(null)
+                                          }
+                                        }}
+                                      />
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setEditingVillageY({
+                                            regionId: item.regionId,
+                                            subregionId: item.subregionId,
+                                            value: String(item.y ?? '')
+                                          })
+                                        }
+                                        className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 py-0 cursor-pointer focus:outline-none"
+                                        title="Set Y coordinate"
+                                      >
+                                        {item.y != null ? item.y : '\u00a0'}
+                                      </button>
+                                    )}
+                                    <span className="text-gray-400">, {item.z})</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const y = item.y != null ? item.y : '~'
+                                        const tpCommand = `/tp @s ${item.x} ${y} ${item.z}`
+                                        navigator.clipboard.writeText(tpCommand)
+                                        toast.showToast('Teleport command copied', 'success')
+                                      }}
+                                      className="ml-auto text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
+                                      title="Copy /tp command to clipboard"
+                                    >
+                                      <ClipboardCopy className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const names = sorted.map(i => i.name).join(', ')
+                                navigator.clipboard.writeText(names)
+                                toast.showToast('Names copied to clipboard', 'success')
+                              }}
+                              className="mt-2 text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                            >
+                              Copy names
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
               )}
