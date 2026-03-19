@@ -9,6 +9,10 @@ import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from
 import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
+type ImportVillagesOptions = {
+  preserveExistingNames?: boolean
+}
+
 export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworld') {
   const [regions, setRegions] = useState<Region[]>([])
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null)
@@ -302,8 +306,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
   const startDraggingPoint = editModeApi.startDraggingPoint
   const stopDraggingPoint = editModeApi.stopDraggingPoint
 
-  const importVillagesFromCSV = useCallback((csvContent: string) => {
+  const importVillagesFromCSV = useCallback((csvContent: string, options: ImportVillagesOptions = {}) => {
     try {
+      const { preserveExistingNames = false } = options
       const villages = parseVillageCSV(csvContent)
       const results = {
         added: 0,
@@ -314,6 +319,14 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       
       // Track existing village names to ensure uniqueness
       const existingVillageNames = new Set<string>()
+      const existingVillagesByRegion = new Map<string, Region['subregions']>()
+      const existingVillageCursorByRegion = new Map<string, number>()
+      if (preserveExistingNames) {
+        regions.forEach(region => {
+          const villagesInRegion = (region.subregions || []).filter(sub => sub.type === 'village')
+          existingVillagesByRegion.set(region.id, villagesInRegion)
+        })
+      }
       
       // Clear existing villages first
       setRegions(prev => prev.map(region => ({
@@ -325,7 +338,20 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         const parentRegion = findParentRegion(village, regions)
         
         if (parentRegion) {
-          const subregion = createVillageSubregion(village, index, parentRegion.id, existingVillageNames, dimension)
+          let subregion = createVillageSubregion(village, index, parentRegion.id, existingVillageNames, dimension)
+          if (preserveExistingNames) {
+            const existingVillagesInRegion = existingVillagesByRegion.get(parentRegion.id) || []
+            const cursor = existingVillageCursorByRegion.get(parentRegion.id) || 0
+            const existingVillage = existingVillagesInRegion[cursor]
+            if (existingVillage) {
+              subregion = {
+                ...subregion,
+                id: existingVillage.id,
+                name: existingVillage.name
+              }
+            }
+            existingVillageCursorByRegion.set(parentRegion.id, cursor + 1)
+          }
           
           // Add the new village name to our tracking set
           existingVillageNames.add(subregion.name)
@@ -356,7 +382,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       console.error('Failed to import villages:', error)
       throw new Error('Failed to parse village CSV data')
     }
-  }, [regions])
+  }, [regions, dimension])
 
   const importStructuresFromCSV = useCallback((csvContent: string, structureType: StructureType) => {
     try {
