@@ -15,6 +15,7 @@ import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
+import { DeleteSubregionModal } from './DeleteSubregionModal'
 
 const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel: string; buttonLabel: string }> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { countLabel: 'Jungle Pyramid', pluralLabel: 'jungle pyramids', buttonLabel: 'Import Jungle Pyramids (CSV)' },
@@ -25,6 +26,106 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.ANCIENT_CITY]: { countLabel: 'Ancient City', pluralLabel: 'ancient cities', buttonLabel: 'Import Ancient Cities (CSV)' },
   [STRUCTURE_TYPES.TRAIL_RUINS]: { countLabel: 'Trail Ruins', pluralLabel: 'trail ruins', buttonLabel: 'Import Trail Ruins (CSV)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
+}
+
+type YEditState = { regionId: string; subregionId: string; value: string } | null
+
+type SubregionListItem = {
+  regionId: string
+  subregionId: string
+  name: string
+  x: number
+  y?: number
+  z: number
+  regionName?: string
+}
+
+function SubregionListRow({
+  item,
+  editingY,
+  setEditingY,
+  updateY,
+  onDelete,
+  deleteLabel,
+  onCopyTp
+}: {
+  item: SubregionListItem
+  editingY: YEditState
+  setEditingY: React.Dispatch<React.SetStateAction<YEditState>>
+  updateY: (regionId: string, subregionId: string, y: number | undefined) => void
+  onDelete: (item: SubregionListItem) => void
+  deleteLabel: string
+  onCopyTp: (item: SubregionListItem) => void
+}) {
+  const saveY = () => {
+    if (!editingY) return
+    const v = editingY.value.trim()
+    const n = v === '' ? undefined : parseInt(v, 10)
+    if (v === '' || !Number.isNaN(n)) {
+      updateY(editingY.regionId, editingY.subregionId, v === '' ? undefined : n)
+    }
+    setEditingY(null)
+  }
+
+  return (
+    <li className="flex flex-col gap-y-0.5">
+      <div className="flex items-start gap-x-2">
+        <span className="text-white font-medium flex-1 min-w-0">{item.name}</span>
+        <button
+          type="button"
+          onClick={() => onCopyTp(item)}
+          className="text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
+          title="Copy /tp command to clipboard"
+        >
+          <ClipboardCopy className="w-3.5 h-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(item)}
+          className="text-gray-400 p-0.5 rounded transition-colors hover:bg-red-600/30 hover:text-red-300 shrink-0"
+          title={deleteLabel}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-1 text-gray-400">
+        <span>{item.x},</span>
+        {editingY?.subregionId === item.subregionId ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
+            style={{ width: `${Math.max(2, (editingY.value.length || 0) + 1)}ch` }}
+            placeholder="y"
+            autoFocus
+            value={editingY.value}
+            onChange={e => setEditingY(prev => (prev ? { ...prev, value: e.target.value } : null))}
+            onBlur={saveY}
+            onKeyDown={e => {
+              if (e.key === 'Enter') saveY()
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() =>
+              setEditingY({
+                regionId: item.regionId,
+                subregionId: item.subregionId,
+                value: String(item.y ?? '')
+              })
+            }
+            className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
+            title="Set Y coordinate"
+          >
+            {item.y != null ? item.y : '\u00a0'}
+          </button>
+        )}
+        <span>, {item.z}</span>
+      </div>
+      {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
+    </li>
+  )
 }
 
 export function AdvancedPanel() {
@@ -59,8 +160,8 @@ export function AdvancedPanel() {
   const [loreSimplerMode, setLoreSimplerMode] = useState(false)
   const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
-  const [editingStructureY, setEditingStructureY] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
-  const [editingVillageY, setEditingVillageY] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
+  const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
+  const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
 
   const toggleRegionCategory = (key: string) => {
     setExpandedRegionCategories(prev => {
@@ -84,6 +185,10 @@ export function AdvancedPanel() {
   const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
+  const [pendingSubregionDelete, setPendingSubregionDelete] = useState<{
+    type: 'village' | 'structure'
+    item: { regionId: string; subregionId: string; name: string }
+  } | null>(null)
   const [editCategory, setEditCategory] = useState('')
   const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
   const [editThemePairs, setEditThemePairs] = useState<{ a: string; b: string }[]>([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
@@ -861,84 +966,30 @@ export function AdvancedPanel() {
                           <div className="bg-gray-800/50 px-3 py-2 border border-gray-600 rounded-md max-h-48 overflow-y-auto">
                             <ul className="space-y-1.5 text-sm">
                               {sorted.map(item => (
-                                <li key={item.subregionId} className="flex flex-col gap-y-0.5">
-                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                    <span className="text-white font-medium">{item.name}</span>
-                                    <span className="text-gray-400">({item.x}, </span>
-                                    {editingVillageY?.subregionId === item.subregionId ? (
-                                      <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        className="bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 py-0"
-                                        style={{ width: `${Math.max(2, (editingVillageY.value.length || 0) + 1)}ch` }}
-                                        placeholder="y"
-                                        autoFocus
-                                        value={editingVillageY.value}
-                                        onChange={e => setEditingVillageY(prev => (prev ? { ...prev, value: e.target.value } : null))}
-                                        onBlur={() => {
-                                          if (editingVillageY) {
-                                            const v = editingVillageY.value.trim()
-                                            const n = v === '' ? undefined : parseInt(v, 10)
-                                            if (v === '' || !Number.isNaN(n)) {
-                                              regions.updateVillageSubregionY(
-                                                editingVillageY.regionId,
-                                                editingVillageY.subregionId,
-                                                v === '' ? undefined : n
-                                              )
-                                            }
-                                          }
-                                          setEditingVillageY(null)
-                                        }}
-                                        onKeyDown={e => {
-                                          if (e.key === 'Enter') {
-                                            if (editingVillageY) {
-                                              const v = editingVillageY.value.trim()
-                                              const n = v === '' ? undefined : parseInt(v, 10)
-                                              if (v === '' || !Number.isNaN(n)) {
-                                                regions.updateVillageSubregionY(
-                                                  editingVillageY.regionId,
-                                                  editingVillageY.subregionId,
-                                                  v === '' ? undefined : n
-                                                )
-                                              }
-                                            }
-                                            setEditingVillageY(null)
-                                          }
-                                        }}
-                                      />
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          setEditingVillageY({
-                                            regionId: item.regionId,
-                                            subregionId: item.subregionId,
-                                            value: String(item.y ?? '')
-                                          })
-                                        }
-                                        className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 py-0 cursor-pointer focus:outline-none"
-                                        title="Set Y coordinate"
-                                      >
-                                        {item.y != null ? item.y : '\u00a0'}
-                                      </button>
-                                    )}
-                                    <span className="text-gray-400">, {item.z})</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const y = item.y != null ? item.y : '~'
-                                        const tpCommand = `/tp @s ${item.x} ${y} ${item.z}`
-                                        navigator.clipboard.writeText(tpCommand)
-                                        toast.showToast('Teleport command copied', 'success')
-                                      }}
-                                      className="ml-auto text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
-                                      title="Copy /tp command to clipboard"
-                                    >
-                                      <ClipboardCopy className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                  {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
-                                </li>
+                                <SubregionListRow
+                                  key={item.subregionId}
+                                  item={item}
+                                  editingY={editingVillageY}
+                                  setEditingY={setEditingVillageY}
+                                  updateY={regions.updateVillageSubregionY}
+                                  onCopyTp={target => {
+                                    const y = target.y != null ? target.y : '~'
+                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    navigator.clipboard.writeText(tpCommand)
+                                    toast.showToast('Teleport command copied', 'success')
+                                  }}
+                                  deleteLabel="Delete village"
+                                  onDelete={target => {
+                                    setPendingSubregionDelete({
+                                      type: 'village',
+                                      item: {
+                                        regionId: target.regionId,
+                                        subregionId: target.subregionId,
+                                        name: target.name
+                                      }
+                                    })
+                                  }}
+                                />
                               ))}
                             </ul>
                             <button
@@ -1130,67 +1181,31 @@ export function AdvancedPanel() {
                         {isExpanded && (
                           <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
                             <ul className="space-y-1.5 text-sm">
-                              {items.map((item, idx) => (
-                                <li key={item.subregionId} className="flex flex-col gap-y-0.5">
-                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                    <span className="text-white font-medium">{item.name}</span>
-                                    <span className="text-gray-400">({item.x}, </span>
-                                    {editingStructureY?.subregionId === item.subregionId ? (
-                                      <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        className="bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 py-0"
-                                        style={{ width: `${Math.max(2, (editingStructureY.value.length || 0) + 1)}ch` }}
-                                        placeholder="y"
-                                        autoFocus
-                                        value={editingStructureY.value}
-                                        onChange={e => setEditingStructureY(prev => prev ? { ...prev, value: e.target.value } : null)}
-                                        onBlur={() => {
-                                          if (editingStructureY) {
-                                            const v = editingStructureY.value.trim()
-                                            const n = v === '' ? undefined : parseInt(v, 10)
-                                            if (v === '' || !Number.isNaN(n)) regions.updateStructureSubregionY(editingStructureY.regionId, editingStructureY.subregionId, v === '' ? undefined : n)
-                                          }
-                                          setEditingStructureY(null)
-                                        }}
-                                        onKeyDown={e => {
-                                          if (e.key === 'Enter') {
-                                            if (editingStructureY) {
-                                              const v = editingStructureY.value.trim()
-                                              const n = v === '' ? undefined : parseInt(v, 10)
-                                              if (v === '' || !Number.isNaN(n)) regions.updateStructureSubregionY(editingStructureY.regionId, editingStructureY.subregionId, v === '' ? undefined : n)
-                                            }
-                                            setEditingStructureY(null)
-                                          }
-                                        }}
-                                      />
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        onClick={() => setEditingStructureY({ regionId: item.regionId, subregionId: item.subregionId, value: String(item.y ?? '') })}
-                                        className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 py-0 cursor-pointer focus:outline-none"
-                                        title="Set Y coordinate"
-                                      >
-                                        {item.y != null ? item.y : '\u00a0'}
-                                      </button>
-                                    )}
-                                    <span className="text-gray-400">, {item.z})</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const y = item.y != null ? item.y : '~'
-                                        const tpCommand = `/tp @s ${item.x} ${y} ${item.z}`
-                                        navigator.clipboard.writeText(tpCommand)
-                                        toast.showToast('Teleport command copied', 'success')
-                                      }}
-                                      className="ml-auto text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
-                                      title="Copy /tp command to clipboard"
-                                    >
-                                      <ClipboardCopy className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                  {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
-                                </li>
+                              {items.map(item => (
+                                <SubregionListRow
+                                  key={item.subregionId}
+                                  item={item}
+                                  editingY={editingStructureY}
+                                  setEditingY={setEditingStructureY}
+                                  updateY={regions.updateStructureSubregionY}
+                                  onCopyTp={target => {
+                                    const y = target.y != null ? target.y : '~'
+                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    navigator.clipboard.writeText(tpCommand)
+                                    toast.showToast('Teleport command copied', 'success')
+                                  }}
+                                  deleteLabel="Delete structure"
+                                  onDelete={target => {
+                                    setPendingSubregionDelete({
+                                      type: 'structure',
+                                      item: {
+                                        regionId: target.regionId,
+                                        subregionId: target.subregionId,
+                                        name: target.name
+                                      }
+                                    })
+                                  }}
+                                />
                               ))}
                             </ul>
                             <button
@@ -1848,6 +1863,22 @@ export function AdvancedPanel() {
         isOpen={showClearDataModal}
         onConfirm={handleConfirmClearData}
         onCancel={() => setShowClearDataModal(false)}
+      />
+
+      <DeleteSubregionModal
+        isOpen={pendingSubregionDelete != null}
+        targetLabel={pendingSubregionDelete?.type ?? 'subregion'}
+        targetName={pendingSubregionDelete?.item.name ?? ''}
+        onCancel={() => setPendingSubregionDelete(null)}
+        onConfirm={() => {
+          if (!pendingSubregionDelete) return
+          const { type, item } = pendingSubregionDelete
+          regions.removeSubregionFromRegion(item.regionId, item.subregionId)
+          setEditingVillageY(prev => (prev?.subregionId === item.subregionId ? null : prev))
+          setEditingStructureY(prev => (prev?.subregionId === item.subregionId ? null : prev))
+          toast.showToast(type === 'village' ? 'Village deleted' : 'Structure deleted', 'success')
+          setPendingSubregionDelete(null)
+        }}
       />
 
       {regions.selectedRegionId && (
