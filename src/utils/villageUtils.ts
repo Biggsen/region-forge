@@ -9,8 +9,8 @@ export function getJunglePyramidCuboid(x: number, z: number, topY: number): { mi
     maxX: x + 16,
     minZ: z - 2,
     maxZ: z + 16,
-    minY: topY - 16,
-    maxY: topY + 2
+    minY: topY - 7,
+    maxY: topY + 9
   }
 }
 

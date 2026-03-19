@@ -1,4 +1,4 @@
-import { MapState, Region } from '../types'
+import { MapState, Region, HighlightMode, StructureType, STRUCTURE_TYPES } from '../types'
 import { validateImageDimensions } from './imageValidation'
 
 export interface ImageDetails {
@@ -19,6 +19,26 @@ export interface ExportSettings {
   includeChallengeLevelSubheading: boolean
 }
 
+export type StructureTableSort = {
+  column: 'type' | 'count' | 'regions'
+  dir: 'asc' | 'desc'
+}
+
+export type AdvancedPanelSectionsState = {
+  isOtherRegionTypesExpanded: boolean
+  isPluginsExpanded: boolean
+  isVillagesExpanded: boolean
+  isStructuresExpanded: boolean
+  isImportExpanded: boolean
+  isRegionSpecificExpanded: boolean
+  isRegionDescriptionExpanded: boolean
+  isBiomeDataExpanded: boolean
+  isWorldBiomeDataExpanded: boolean
+  isMinecraftDataExpanded: boolean
+  isRegionThemeExpanded: boolean
+  isLoreInstructionsExpanded: boolean
+}
+
 const STORAGE_KEYS = {
   MAP_STATE: 'mc-region-maker-map-state',
   REGIONS: 'mc-region-maker-regions',
@@ -30,7 +50,10 @@ const STORAGE_KEYS = {
   WORLD_SEED: 'mc-region-maker-world-seed',
   EXPORT_SETTINGS: 'mc-region-maker-export-settings',
   REGION_SORT: 'mc-region-maker-region-sort',
-  REGION_FILL_OPACITY: 'mc-region-maker-region-fill-opacity'
+  REGION_FILL_OPACITY: 'mc-region-maker-region-fill-opacity',
+  HIGHLIGHT_MODE: 'mc-region-maker-highlight-mode',
+  STRUCTURE_TABLE_SORT: 'mc-region-maker-structure-table-sort',
+  ADVANCED_PANEL_SECTIONS: 'mc-region-maker-advanced-panel-sections'
 }
 
 // Get image source URL for storage
@@ -275,6 +298,101 @@ export function loadExportSettings(): ExportSettings | null {
   } catch (error) {
     console.error('Failed to load export settings:', error)
     return null
+  }
+}
+
+export function saveHighlightMode(mode: HighlightMode): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_MODE, JSON.stringify(mode))
+  } catch (error) {
+    console.error('Failed to save highlight mode:', error)
+  }
+}
+
+export function loadHighlightMode(defaultMode: HighlightMode): HighlightMode {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_MODE)
+    if (!saved) return defaultMode
+
+    const parsed = JSON.parse(saved) as Partial<HighlightMode>
+    const structureTypes = Object.values(STRUCTURE_TYPES) as StructureType[]
+    const visibleStructureTypes: Partial<Record<StructureType, boolean>> = { ...(defaultMode.visibleStructureTypes || {}) }
+    for (const structureType of structureTypes) {
+      const raw = parsed.visibleStructureTypes?.[structureType]
+      if (typeof raw === 'boolean') {
+        visibleStructureTypes[structureType] = raw
+      }
+    }
+
+    const highlightedStructureType =
+      parsed.highlightedStructureType && structureTypes.includes(parsed.highlightedStructureType)
+        ? parsed.highlightedStructureType
+        : null
+
+    return {
+      ...defaultMode,
+      ...parsed,
+      visibleStructureTypes,
+      highlightedStructureType,
+    }
+  } catch (error) {
+    console.error('Failed to load highlight mode:', error)
+    return defaultMode
+  }
+}
+
+export function saveStructureTableSort(sort: StructureTableSort): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.STRUCTURE_TABLE_SORT, JSON.stringify(sort))
+  } catch (error) {
+    console.error('Failed to save structure table sort:', error)
+  }
+}
+
+export function loadStructureTableSort(): StructureTableSort {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.STRUCTURE_TABLE_SORT)
+    if (!saved) return { column: 'type', dir: 'asc' }
+    const parsed = JSON.parse(saved) as Partial<StructureTableSort>
+    const column = parsed.column === 'type' || parsed.column === 'count' || parsed.column === 'regions' ? parsed.column : 'type'
+    const dir = parsed.dir === 'asc' || parsed.dir === 'desc' ? parsed.dir : 'asc'
+    return { column, dir }
+  } catch (error) {
+    console.error('Failed to load structure table sort:', error)
+    return { column: 'type', dir: 'asc' }
+  }
+}
+
+export function saveAdvancedPanelSectionsState(state: AdvancedPanelSectionsState): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ADVANCED_PANEL_SECTIONS, JSON.stringify(state))
+  } catch (error) {
+    console.error('Failed to save advanced panel sections state:', error)
+  }
+}
+
+export function loadAdvancedPanelSectionsState(defaultState: AdvancedPanelSectionsState): AdvancedPanelSectionsState {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.ADVANCED_PANEL_SECTIONS)
+    if (!saved) return defaultState
+    const parsed = JSON.parse(saved) as Partial<AdvancedPanelSectionsState>
+    return {
+      isOtherRegionTypesExpanded: typeof parsed.isOtherRegionTypesExpanded === 'boolean' ? parsed.isOtherRegionTypesExpanded : defaultState.isOtherRegionTypesExpanded,
+      isPluginsExpanded: typeof parsed.isPluginsExpanded === 'boolean' ? parsed.isPluginsExpanded : defaultState.isPluginsExpanded,
+      isVillagesExpanded: typeof parsed.isVillagesExpanded === 'boolean' ? parsed.isVillagesExpanded : defaultState.isVillagesExpanded,
+      isStructuresExpanded: typeof parsed.isStructuresExpanded === 'boolean' ? parsed.isStructuresExpanded : defaultState.isStructuresExpanded,
+      isImportExpanded: typeof parsed.isImportExpanded === 'boolean' ? parsed.isImportExpanded : defaultState.isImportExpanded,
+      isRegionSpecificExpanded: typeof parsed.isRegionSpecificExpanded === 'boolean' ? parsed.isRegionSpecificExpanded : defaultState.isRegionSpecificExpanded,
+      isRegionDescriptionExpanded: typeof parsed.isRegionDescriptionExpanded === 'boolean' ? parsed.isRegionDescriptionExpanded : defaultState.isRegionDescriptionExpanded,
+      isBiomeDataExpanded: typeof parsed.isBiomeDataExpanded === 'boolean' ? parsed.isBiomeDataExpanded : defaultState.isBiomeDataExpanded,
+      isWorldBiomeDataExpanded: typeof parsed.isWorldBiomeDataExpanded === 'boolean' ? parsed.isWorldBiomeDataExpanded : defaultState.isWorldBiomeDataExpanded,
+      isMinecraftDataExpanded: typeof parsed.isMinecraftDataExpanded === 'boolean' ? parsed.isMinecraftDataExpanded : defaultState.isMinecraftDataExpanded,
+      isRegionThemeExpanded: typeof parsed.isRegionThemeExpanded === 'boolean' ? parsed.isRegionThemeExpanded : defaultState.isRegionThemeExpanded,
+      isLoreInstructionsExpanded: typeof parsed.isLoreInstructionsExpanded === 'boolean' ? parsed.isLoreInstructionsExpanded : defaultState.isLoreInstructionsExpanded,
+    }
+  } catch (error) {
+    console.error('Failed to load advanced panel sections state:', error)
+    return defaultState
   }
 }
 

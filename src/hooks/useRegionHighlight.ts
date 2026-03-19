@@ -1,9 +1,14 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { HighlightMode, StructureType } from '../types'
 import { DEFAULT_HIGHLIGHT_MODE } from '../utils/highlightModeUtils'
+import { loadHighlightMode, saveHighlightMode } from '../utils/persistenceUtils'
 
 export function useRegionHighlight() {
-  const [highlightMode, setHighlightMode] = useState<HighlightMode>(DEFAULT_HIGHLIGHT_MODE)
+  const [highlightMode, setHighlightMode] = useState<HighlightMode>(() => loadHighlightMode(DEFAULT_HIGHLIGHT_MODE))
+
+  useEffect(() => {
+    saveHighlightMode(highlightMode)
+  }, [highlightMode])
 
   const setStructureTypeVisible = useCallback((structureType: StructureType, visible: boolean) => {
     setHighlightMode(prev => ({

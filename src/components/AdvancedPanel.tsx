@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
-import { clearSavedData } from '../utils/persistenceUtils'
+import { clearSavedData, loadStructureTableSort, saveStructureTableSort, loadAdvancedPanelSectionsState, saveAdvancedPanelSectionsState } from '../utils/persistenceUtils'
 import { scanBiomes, scanBiomesFullImage, getGroupedLandVsSea } from '../utils/biomeScanner'
 import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
@@ -29,6 +29,21 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
 }
 
 type YEditState = { regionId: string; subregionId: string; value: string } | null
+
+const DEFAULT_ADVANCED_PANEL_SECTIONS = {
+  isOtherRegionTypesExpanded: false,
+  isPluginsExpanded: false,
+  isVillagesExpanded: false,
+  isStructuresExpanded: false,
+  isImportExpanded: false,
+  isRegionSpecificExpanded: false,
+  isRegionDescriptionExpanded: false,
+  isBiomeDataExpanded: false,
+  isWorldBiomeDataExpanded: false,
+  isMinecraftDataExpanded: false,
+  isRegionThemeExpanded: false,
+  isLoreInstructionsExpanded: false,
+}
 
 type SubregionListItem = {
   regionId: string
@@ -143,25 +158,63 @@ export function AdvancedPanel() {
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
-  const [isOtherRegionTypesExpanded, setIsOtherRegionTypesExpanded] = useState(false)
-  const [isPluginsExpanded, setIsPluginsExpanded] = useState(false)
-  const [isVillagesExpanded, setIsVillagesExpanded] = useState(false)
-  const [isStructuresExpanded, setIsStructuresExpanded] = useState(false)
-  const [structureTableSort, setStructureTableSort] = useState<{ column: 'type' | 'count' | 'regions'; dir: 'asc' | 'desc' }>({ column: 'type', dir: 'asc' })
+  const savedSectionState = useMemo(
+    () => loadAdvancedPanelSectionsState(DEFAULT_ADVANCED_PANEL_SECTIONS),
+    []
+  )
+  const [isOtherRegionTypesExpanded, setIsOtherRegionTypesExpanded] = useState(savedSectionState.isOtherRegionTypesExpanded)
+  const [isPluginsExpanded, setIsPluginsExpanded] = useState(savedSectionState.isPluginsExpanded)
+  const [isVillagesExpanded, setIsVillagesExpanded] = useState(savedSectionState.isVillagesExpanded)
+  const [isStructuresExpanded, setIsStructuresExpanded] = useState(savedSectionState.isStructuresExpanded)
+  const [structureTableSort, setStructureTableSort] = useState<{ column: 'type' | 'count' | 'regions'; dir: 'asc' | 'desc' }>(() => loadStructureTableSort())
   const [expandedStructureAccordion, setExpandedStructureAccordion] = useState<StructureType | null>(null)
-  const [isImportExpanded, setIsImportExpanded] = useState(false)
-  const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(false)
-  const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(false)
-  const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(false)
-  const [isWorldBiomeDataExpanded, setIsWorldBiomeDataExpanded] = useState(false)
-  const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(false)
-  const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(false)
-  const [isLoreInstructionsExpanded, setIsLoreInstructionsExpanded] = useState(false)
+  const [isImportExpanded, setIsImportExpanded] = useState(savedSectionState.isImportExpanded)
+  const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(savedSectionState.isRegionSpecificExpanded)
+  const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(savedSectionState.isRegionDescriptionExpanded)
+  const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(savedSectionState.isBiomeDataExpanded)
+  const [isWorldBiomeDataExpanded, setIsWorldBiomeDataExpanded] = useState(savedSectionState.isWorldBiomeDataExpanded)
+  const [isMinecraftDataExpanded, setIsMinecraftDataExpanded] = useState(savedSectionState.isMinecraftDataExpanded)
+  const [isRegionThemeExpanded, setIsRegionThemeExpanded] = useState(savedSectionState.isRegionThemeExpanded)
+  const [isLoreInstructionsExpanded, setIsLoreInstructionsExpanded] = useState(savedSectionState.isLoreInstructionsExpanded)
   const [loreSimplerMode, setLoreSimplerMode] = useState(false)
   const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
   const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
+
+  useEffect(() => {
+    saveStructureTableSort(structureTableSort)
+  }, [structureTableSort])
+
+  useEffect(() => {
+    saveAdvancedPanelSectionsState({
+      isOtherRegionTypesExpanded,
+      isPluginsExpanded,
+      isVillagesExpanded,
+      isStructuresExpanded,
+      isImportExpanded,
+      isRegionSpecificExpanded,
+      isRegionDescriptionExpanded,
+      isBiomeDataExpanded,
+      isWorldBiomeDataExpanded,
+      isMinecraftDataExpanded,
+      isRegionThemeExpanded,
+      isLoreInstructionsExpanded,
+    })
+  }, [
+    isOtherRegionTypesExpanded,
+    isPluginsExpanded,
+    isVillagesExpanded,
+    isStructuresExpanded,
+    isImportExpanded,
+    isRegionSpecificExpanded,
+    isRegionDescriptionExpanded,
+    isBiomeDataExpanded,
+    isWorldBiomeDataExpanded,
+    isMinecraftDataExpanded,
+    isRegionThemeExpanded,
+    isLoreInstructionsExpanded,
+  ])
 
   const toggleRegionCategory = (key: string) => {
     setExpandedRegionCategories(prev => {
