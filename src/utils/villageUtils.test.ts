@@ -104,6 +104,23 @@ describe('generateSubregionYAML', () => {
     expect(yaml).not.toContain('max-y:')
   })
 
+  it('returns center-based cuboid YAML for desert well with y offsets', () => {
+    const subregion = {
+      id: 'dw1',
+      name: 'Sun Refuge',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.DESERT_WELL,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 97, y: 60, z: -53}')
+    expect(yaml).toContain('max: {x: 103, y: 71, z: -47}')
+  })
+
   it('uses custom village height with rounded-up half span', () => {
     const subregion = {
       id: 'v2',

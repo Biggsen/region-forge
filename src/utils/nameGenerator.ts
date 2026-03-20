@@ -461,7 +461,7 @@ const junglePyramidAncientNames = [
   'Velkar', 'Mireth', 'Thalara', 'Zeruun'
 ]
 
-function pick<T>(arr: T[]): T {
+function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
@@ -490,37 +490,130 @@ export function generateIglooName(): string {
   return `${prefix} ${suffix}`
 }
 
-const desertPyramidPrefixes = [
-  'Sand', 'Dune', 'Sun', 'Oasis', 'Dust', 'Drought', 'Mirage', 'Sphinx',
-  'Golden', 'Amber', 'Desert', 'Dunes', 'Scorch', 'Bone', 'Tomb'
-]
-const desertPyramidSuffixes = [
-  'Temple', 'Sanctum', 'Vault', 'Shrine', 'Crypt', 'Tomb', 'Rest', 'Ruin',
-  'Pyramid', 'Monument', 'Hall', 'Chamber', 'Gate', 'Oasis', 'Dune'
+type DesertPyramidPattern = (pools: DesertPyramidPools) => string
+
+interface DesertPyramidPools {
+  desertMaterial: string[]
+  adjectives: string[]
+  structures: string[]
+  abstract: string[]
+  curated: string[]
+}
+
+const desertPyramidPools: DesertPyramidPools = {
+  desertMaterial: ['Sand', 'Dune', 'Dust', 'Amber', 'Silt', 'Sun', 'Scorch', 'Ochre', 'Bone', 'Gilded'],
+  adjectives: ['Ancient', 'Buried', 'Silent', 'Forgotten', 'Sealed', 'Sunken', 'Hollow', 'Bleached', 'Veiled'],
+  structures: ['Pyramid', 'Tomb', 'Vault', 'Sanctum', 'Temple', 'Crypt', 'Sepulcher', 'Reliquary', 'Mausoleum'],
+  abstract: ['Silence', 'Heat', 'Ash', 'Dunes', 'Horizon', 'Sun', 'Dust', 'Bones', 'Time'],
+  curated: ['Amber Crypt', 'Scorch Hall', 'Dust Vault', 'Dune Sanctum', 'Bone Pyramid']
+}
+
+const desertPyramidPatterns: DesertPyramidPattern[] = [
+  (p) => `${pick(p.desertMaterial)} ${pick(p.structures)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.abstract)}`,
+  (p) => `${pick(p.desertMaterial)} ${pick(p.structures)}`
 ]
 
 export function generateDesertPyramidName(): string {
-  const prefix = desertPyramidPrefixes[Math.floor(Math.random() * desertPyramidPrefixes.length)]
-  const suffix = desertPyramidSuffixes[Math.floor(Math.random() * desertPyramidSuffixes.length)]
-  return `${prefix} ${suffix}`
+  if (Math.random() < 0.15) {
+    return pick(desertPyramidPools.curated)
+  }
+
+  const pattern = pick(desertPyramidPatterns)
+  return pattern(desertPyramidPools)
 }
 
-const desertWellPrefixes = ['Oasis', 'Dune', 'Sand', 'Dry', 'Mirage', 'Sun', 'Dust', 'Drought', 'Shade', 'Cistern']
-const desertWellSuffixes = ['Well', 'Spring', 'Cistern', 'Pool', 'Respite', 'Haven', 'Rest', 'Refuge']
+export function generateDesertPyramidNames(count: number): string[] {
+  const results = new Set<string>()
+
+  while (results.size < count) {
+    results.add(generateDesertPyramidName())
+  }
+
+  return Array.from(results)
+}
+
+// --- Desert well name generator (spec: tasks/desert-well-name-generator.ts) ---
+
+const desertWellWordPools = {
+  heat: [
+    'Sun', 'Dune', 'Sand', 'Ember', 'Scorch', 'Sirocco', 'Dust', 'Arid', 'Blaze', 'Noon', 'Drift', 'Grit'
+  ],
+  relief: [
+    'Rest', 'Refuge', 'Respite', 'Haven', 'Shelter', 'Pause', 'Mercy', 'Relief', 'Sanctuary'
+  ],
+  structures: ['Well', 'Cistern', 'Basin', 'Spring', 'Reservoir', 'Hollow'],
+  adjectives: [
+    'Quiet', 'Hidden', 'Last', 'Fading', 'Still', 'Deep', 'Shaded', 'Silent', 'Forgotten', 'Waiting', 'Cool'
+  ],
+  abstract: [
+    'Silence', 'Heat', 'Thirst', 'Mirage', 'Horizon', 'Dust', 'Shade', 'Stillness', 'Drywind', 'Noon'
+  ]
+} as const
+
+const desertWellPatterns = [
+  '{heat} {relief}',
+  '{heat} {structure}',
+  '{adjective} {structure}',
+  '{structure} of {abstract}',
+  '{relief} of the {heat}'
+] as const
+
+function fillDesertWellPattern(pattern: string): string {
+  return pattern
+    .replace('{heat}', pick(desertWellWordPools.heat))
+    .replace('{relief}', pick(desertWellWordPools.relief))
+    .replace('{structure}', pick(desertWellWordPools.structures))
+    .replace('{adjective}', pick(desertWellWordPools.adjectives))
+    .replace('{abstract}', pick(desertWellWordPools.abstract))
+}
 
 export function generateDesertWellName(): string {
-  const prefix = desertWellPrefixes[Math.floor(Math.random() * desertWellPrefixes.length)]
-  const suffix = desertWellSuffixes[Math.floor(Math.random() * desertWellSuffixes.length)]
-  return `${prefix} ${suffix}`
+  return fillDesertWellPattern(pick(desertWellPatterns))
 }
 
-const pillagerOutpostPrefixes = ['Raid', 'Watch', 'Banner', 'Crossbow', 'Outpost', 'Bastion', 'Watchtower', 'Ravager', 'Pillage']
-const pillagerOutpostSuffixes = ['Tower', 'Camp', 'Watch', 'Hold', 'Post', 'Keep', 'Spire', 'Redoubt']
+type PillagerOutpostPattern = (pools: PillagerOutpostPools) => string
+
+interface PillagerOutpostPools {
+  faction: string[]
+  adjectives: string[]
+  structures: string[]
+  materials: string[]
+  abstract: string[]
+  curated: string[]
+}
+
+const pillagerOutpostPools: PillagerOutpostPools = {
+  faction: ['Pillager', 'Raider', 'Marauder', 'Outlaw', 'Blackguard'],
+  adjectives: ['Rough', 'Grim', 'Stark', 'Iron', 'Brutal', 'Cold', 'Bleak', 'Broken', 'Worn', 'Harsh'],
+  structures: ['Outpost', 'Watchtower', 'Tower', 'Camp', 'Hold', 'Encampment', 'Post', 'Stockade', 'Fort'],
+  materials: ['Iron', 'Timber', 'Spike', 'Bone', 'Ash', 'Blackwood'],
+  abstract: ['Watch', 'Control', 'Dominion', 'Reach', 'Frontier', 'Guard', 'Territory', 'Line'],
+  curated: ['Raider Outpost', 'Grim Watchtower', 'Iron Stockade', 'Marauder Camp', 'Blackguard Hold']
+}
+
+const pillagerOutpostPatterns: PillagerOutpostPattern[] = [
+  (p) => `${pick(p.faction)} ${pick(p.structures)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.abstract)}`,
+  (p) => `${pick(p.materials)} ${pick(p.structures)}`
+]
 
 export function generatePillagerOutpostName(): string {
-  const prefix = pillagerOutpostPrefixes[Math.floor(Math.random() * pillagerOutpostPrefixes.length)]
-  const suffix = pillagerOutpostSuffixes[Math.floor(Math.random() * pillagerOutpostSuffixes.length)]
-  return `${prefix} ${suffix}`
+  if (Math.random() < 0.15) {
+    return pick(pillagerOutpostPools.curated)
+  }
+  const pattern = pick(pillagerOutpostPatterns)
+  return pattern(pillagerOutpostPools)
+}
+
+export function generatePillagerOutpostNames(count: number): string[] {
+  const results = new Set<string>()
+  while (results.size < count) {
+    results.add(generatePillagerOutpostName())
+  }
+  return Array.from(results)
 }
 
 const ancientCityPrefixes = ['Deep', 'Echo', 'Hollow', 'Sculk', 'Warden', 'Vault', 'Abandoned', 'Sunken', 'Silent', 'Forgotten']

@@ -14,6 +14,35 @@ export function getJunglePyramidCuboid(x: number, z: number, topY: number): { mi
   }
 }
 
+/** Cuboid bounds for desert pyramid (x, z = NW corner; y = structure Y from CSV). */
+export function getDesertPyramidCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  // Structure footprint is 21x21 inclusive from NW corner. Expand by 2 blocks on each side to get 25x25.
+  return {
+    minX: x - 2,
+    maxX: x + 22,
+    minZ: z - 2,
+    maxZ: z + 22,
+    minY: y - 25,
+    maxY: y + 5
+  }
+}
+
+/**
+ * Cuboid bounds for pillager outpost (x, z, y = structure position from CSV / locator).
+ * East–west: ±25 from locator x (51 blocks inclusive). Z unchanged.
+ * Vertical span: y−6 … y+12.
+ */
+export function getPillagerOutpostCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  return {
+    minX: x - 25,
+    maxX: x + 25,
+    minZ: z - 32,
+    maxZ: z + 18,
+    minY: y - 6,
+    maxY: y + 12
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -176,6 +205,9 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isVillage = subregion.type === 'village'
   const isStructure = subregion.type === 'structure'
   const isJunglePyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.JUNGLE_PYRAMID
+  const isDesertPyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_PYRAMID
+  const isPillagerOutpost = isStructure && subregion.structureType === STRUCTURE_TYPES.PILLAGER_OUTPOST
+  const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -197,8 +229,32 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxX = cuboid.maxX
     minZ = cuboid.minZ
     maxZ = cuboid.maxZ
-    minY = cuboid.minY
-    maxY = cuboid.maxY
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isDesertPyramid && subregion.y !== undefined) {
+    const cuboid = getDesertPyramidCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isPillagerOutpost && subregion.y !== undefined) {
+    const cuboid = getPillagerOutpostCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isDesertWell && subregion.y !== undefined) {
+    // Desert wells: CSV coordinates are the center of the structure.
+    minX = subregion.x - 3
+    maxX = subregion.x + 3
+    minZ = subregion.z - 3
+    maxZ = subregion.z + 3
+    minY = subregion.y - 10
+    maxY = subregion.y + 1
   } else if (isVillage && subregion.y !== undefined) {
     // Villages: use village Y to size the WorldGuard cuboid.
     // Auto behavior: min = y-35, max = y+45.
