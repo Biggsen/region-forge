@@ -30,7 +30,7 @@ export function getDesertPyramidCuboid(x: number, z: number, y: number): { minX:
 /**
  * Cuboid bounds for pillager outpost (x, z, y = structure position from CSV / locator).
  * East–west: ±25 from locator x (51 blocks inclusive). Z unchanged.
- * Vertical span: y−6 … y+12.
+ * Vertical span: y−6 … y+25.
  */
 export function getPillagerOutpostCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
   return {
@@ -39,7 +39,7 @@ export function getPillagerOutpostCuboid(x: number, z: number, y: number): { min
     minZ: z - 32,
     maxZ: z + 18,
     minY: y - 6,
-    maxY: y + 12
+    maxY: y + 25
   }
 }
 
