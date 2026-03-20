@@ -347,7 +347,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
               subregion = {
                 ...subregion,
                 id: existingVillage.id,
-                name: existingVillage.name
+                name: existingVillage.name,
+                ...(existingVillage.height !== undefined ? { height: existingVillage.height } : {})
               }
             }
             existingVillageCursorByRegion.set(parentRegion.id, cursor + 1)
@@ -505,6 +506,21 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
             subregions: (region.subregions || []).map(sub =>
               sub.id === subregionId && sub.type === 'village'
                 ? { ...sub, y }
+                : sub
+            )
+          }
+        : region
+    ))
+  }, [])
+
+  const updateVillageSubregionHeight = useCallback((regionId: string, subregionId: string, height: number | undefined) => {
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub =>
+              sub.id === subregionId && sub.type === 'village'
+                ? { ...sub, height }
                 : sub
             )
           }
@@ -710,6 +726,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     updateSubregionName,
     updateStructureSubregionY,
     updateVillageSubregionY,
+    updateVillageSubregionHeight,
     regenerateVillageNames,
     setCustomCenterPoint,
     warpRegion,

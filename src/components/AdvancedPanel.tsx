@@ -29,6 +29,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
 }
 
 type YEditState = { regionId: string; subregionId: string; value: string } | null
+type HeightEditState = { regionId: string; subregionId: string; value: string } | null
 
 const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isOtherRegionTypesExpanded: false,
@@ -51,6 +52,7 @@ type SubregionListItem = {
   name: string
   x: number
   y?: number
+  height?: number
   z: number
   regionName?: string
 }
@@ -60,6 +62,10 @@ function SubregionListRow({
   editingY,
   setEditingY,
   updateY,
+  editingHeight,
+  setEditingHeight,
+  updateHeight,
+  showVillageHeight,
   onDelete,
   deleteLabel,
   onCopyTp
@@ -68,6 +74,10 @@ function SubregionListRow({
   editingY: YEditState
   setEditingY: React.Dispatch<React.SetStateAction<YEditState>>
   updateY: (regionId: string, subregionId: string, y: number | undefined) => void
+  editingHeight?: HeightEditState
+  setEditingHeight?: React.Dispatch<React.SetStateAction<HeightEditState>>
+  updateHeight?: (regionId: string, subregionId: string, height: number | undefined) => void
+  showVillageHeight?: boolean
   onDelete: (item: SubregionListItem) => void
   deleteLabel: string
   onCopyTp: (item: SubregionListItem) => void
@@ -80,6 +90,16 @@ function SubregionListRow({
       updateY(editingY.regionId, editingY.subregionId, v === '' ? undefined : n)
     }
     setEditingY(null)
+  }
+
+  const saveHeight = () => {
+    if (!editingHeight || !setEditingHeight || !updateHeight) return
+    const v = editingHeight.value.trim()
+    const n = v === '' ? null : parseInt(v, 10)
+    if (v === '' || (n !== null && !Number.isNaN(n) && n > 0)) {
+      updateHeight(editingHeight.regionId, editingHeight.subregionId, v === '' ? undefined : (n ?? undefined))
+    }
+    setEditingHeight(null)
   }
 
   return (
@@ -137,6 +157,42 @@ function SubregionListRow({
           </button>
         )}
         <span>, {item.z}</span>
+        {showVillageHeight && (
+          <>
+            <span className="ml-2">Height:</span>
+            {editingHeight?.subregionId === item.subregionId && setEditingHeight ? (
+              <input
+                type="text"
+                inputMode="numeric"
+                className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
+                style={{ width: `${Math.max(4, (editingHeight.value.length || 0) + 1)}ch` }}
+                placeholder="auto"
+                autoFocus
+                value={editingHeight.value}
+                onChange={e => setEditingHeight(prev => (prev ? { ...prev, value: e.target.value } : null))}
+                onBlur={saveHeight}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') saveHeight()
+                }}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingHeight?.({
+                    regionId: item.regionId,
+                    subregionId: item.subregionId,
+                    value: String(item.height ?? '')
+                  })
+                }
+                className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[4ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
+                title="Set village export height"
+              >
+                {item.height != null ? item.height : 'auto'}
+              </button>
+            )}
+          </>
+        )}
       </div>
       {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
     </li>
@@ -182,6 +238,7 @@ export function AdvancedPanel() {
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
   const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
+  const [editingVillageHeight, setEditingVillageHeight] = useState<HeightEditState>(null)
 
   useEffect(() => {
     saveStructureTableSort(structureTableSort)
@@ -1022,6 +1079,7 @@ export function AdvancedPanel() {
                             x: s.x,
                             z: s.z,
                             y: s.y,
+                            height: s.height,
                             regionName: region.name
                           }))
                       )
@@ -1039,6 +1097,10 @@ export function AdvancedPanel() {
                                   editingY={editingVillageY}
                                   setEditingY={setEditingVillageY}
                                   updateY={regions.updateVillageSubregionY}
+                                  editingHeight={editingVillageHeight}
+                                  setEditingHeight={setEditingVillageHeight}
+                                  updateHeight={regions.updateVillageSubregionHeight}
+                                  showVillageHeight
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
                                     const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`

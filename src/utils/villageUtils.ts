@@ -201,13 +201,20 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = cuboid.maxY
   } else if (isVillage && subregion.y !== undefined) {
     // Villages: use village Y to size the WorldGuard cuboid.
-    // Requested behavior: min = y-20, max = y+30.
+    // Auto behavior: min = y-35, max = y+45.
+    // Custom height behavior: min/max use ceil(height/2) on both sides.
     minX = subregion.x - subregion.radius
     maxX = subregion.x + subregion.radius
     minZ = subregion.z - subregion.radius
     maxZ = subregion.z + subregion.radius
-    minY = subregion.y - 20
-    maxY = subregion.y + 30
+    if (subregion.height !== undefined) {
+      const halfHeight = Math.ceil(subregion.height / 2)
+      minY = subregion.y - halfHeight
+      maxY = subregion.y + halfHeight
+    } else {
+      minY = subregion.y - 35
+      maxY = subregion.y + 45
+    }
   } else {
     // Fallback (no structure Y for non-jungle structures; no village Y from legacy CSVs).
     minY = worldMinY

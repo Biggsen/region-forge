@@ -42,6 +42,8 @@ export type Subregion = {
   structureType?: StructureType
   /** Optional Y coordinate (structures need it for some YAML; villages/teleport). */
   y?: number
+  /** Optional vertical span for village export cuboid; undefined uses auto defaults. */
+  height?: number
   details?: string
   parentRegionId?: string
 }
