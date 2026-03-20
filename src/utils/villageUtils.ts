@@ -2,6 +2,33 @@ import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
 import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName } from './nameGenerator'
 
+/** Locator Y used for ancient city imports; CSV y column is ignored. */
+export const ANCIENT_CITY_IMPORT_Y = -32
+
+/** Horizontal radius from locator (x, z) for ancient city regions.yml cuboid. */
+export const ANCIENT_CITY_EXPORT_XZ_RADIUS = 36
+
+/** Vertical offsets from locator y (measured: bottom y−53, top y−19 when locator y = −32). */
+export const ANCIENT_CITY_EXPORT_MIN_Y_BELOW = 21
+export const ANCIENT_CITY_EXPORT_MAX_Y_ABOVE = 13
+
+/** Cuboid bounds for ancient city (x, z = locator; y = structure/locator Y). */
+export function getAncientCityCuboid(
+  x: number,
+  z: number,
+  y: number
+): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const r = ANCIENT_CITY_EXPORT_XZ_RADIUS
+  return {
+    minX: x - r,
+    maxX: x + r,
+    minZ: z - r,
+    maxZ: z + r,
+    minY: y - ANCIENT_CITY_EXPORT_MIN_Y_BELOW,
+    maxY: y + ANCIENT_CITY_EXPORT_MAX_Y_ABOVE
+  }
+}
+
 /** Cuboid bounds for jungle pyramid (x, z = origin, topY = top of pyramid). */
 export function getJunglePyramidCuboid(x: number, z: number, topY: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
   return {
@@ -40,6 +67,18 @@ export function getPillagerOutpostCuboid(x: number, z: number, y: number): { min
     maxZ: z + 18,
     minY: y - 6,
     maxY: y + 25
+  }
+}
+
+/** Cuboid bounds for igloo (x, z, y = locator). West −2, east +8, north 0, south +12; down −36, up +12. */
+export function getIglooCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  return {
+    minX: x - 2,
+    maxX: x + 8,
+    minZ: z,
+    maxZ: z + 12,
+    minY: y - 36,
+    maxY: y + 12
   }
 }
 
@@ -184,12 +223,13 @@ export function createStructureSubregion(
       counter++
     }
   }
+  const y = structureType === STRUCTURE_TYPES.ANCIENT_CITY ? ANCIENT_CITY_IMPORT_Y : row.y
   return {
     id: `structure_${structureType}_${index}`,
     name: generatedName,
     x: row.x,
     z: row.z,
-    ...(row.y !== undefined ? { y: row.y } : {}),
+    ...(y !== undefined ? { y } : {}),
     radius: 64,
     type: 'structure',
     structureType,
@@ -207,6 +247,8 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isJunglePyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.JUNGLE_PYRAMID
   const isDesertPyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_PYRAMID
   const isPillagerOutpost = isStructure && subregion.structureType === STRUCTURE_TYPES.PILLAGER_OUTPOST
+  const isAncientCity = isStructure && subregion.structureType === STRUCTURE_TYPES.ANCIENT_CITY
+  const isIgloo = isStructure && subregion.structureType === STRUCTURE_TYPES.IGLOO
   const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
 
   if (isStructure && subregion.y === undefined) {
@@ -241,6 +283,22 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isPillagerOutpost && subregion.y !== undefined) {
     const cuboid = getPillagerOutpostCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isAncientCity && subregion.y !== undefined) {
+    const cuboid = getAncientCityCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isIgloo && subregion.y !== undefined) {
+    const cuboid = getIglooCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ

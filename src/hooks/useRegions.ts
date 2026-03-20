@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Region, ChallengeLevel, StructureType } from '../types'
+import { Region, ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { DEFAULT_EDIT_MODE, editModeForMove, editModeForSplit } from '../utils/editModeUtils'
 import { useRegionHighlight } from './useRegionHighlight'
 import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -415,10 +415,14 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
           results.added++
         } else {
           results.orphaned++
+          const orphanY =
+            structureType === STRUCTURE_TYPES.ANCIENT_CITY
+              ? ANCIENT_CITY_IMPORT_Y
+              : row.y
           results.orphanedVillages.push({
             x: row.x,
             z: row.z,
-            ...(row.y !== undefined ? { y: row.y } : {}),
+            ...(orphanY !== undefined ? { y: orphanY } : {}),
             details: row.details,
             type: structureType
           })

@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, generateSubregionYAML, parseVillageCSV } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
+
+describe('getIglooCuboid', () => {
+  it('uses locator offsets: west −2, east +8, north 0, south +12, down −36, up +12', () => {
+    const r = getIglooCuboid(100, -50, 64)
+    expect(r).toEqual({
+      minX: 98,
+      maxX: 108,
+      minZ: -50,
+      maxZ: -38,
+      minY: 28,
+      maxY: 76
+    })
+  })
+})
 
 describe('getJunglePyramidCuboid', () => {
   it('computes bounds from x, z, topY', () => {
@@ -46,6 +60,18 @@ seed;structure;x;y;z;details
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({ x: 100, z: 200, type: 'village', details: 'plains_meeting_point_1' })
     expect(rows[0].y).toBeUndefined()
+  })
+})
+
+describe('createStructureSubregion', () => {
+  it('uses fixed Y for ancient city imports; ignores CSV y', () => {
+    const sub = createStructureSubregion(
+      { x: 100, z: 200, y: 99, details: 'deep_dark', type: 'ancient_city' },
+      0,
+      STRUCTURE_TYPES.ANCIENT_CITY
+    )
+    expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
+    expect(sub.y).toBe(-32)
   })
 })
 
@@ -102,6 +128,40 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 164, y: 111, z: 14}')
     expect(yaml).not.toContain('min-y:')
     expect(yaml).not.toContain('max-y:')
+  })
+
+  it('returns cuboid YAML for ancient city with XZ radius 36 from locator', () => {
+    const subregion = {
+      id: 'ac1',
+      name: 'Deep Echo',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.ANCIENT_CITY,
+      y: -32
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 64, y: -53, z: -86}')
+    expect(yaml).toContain('max: {x: 136, y: -19, z: -14}')
+  })
+
+  it('returns cuboid YAML for igloo from locator offsets', () => {
+    const subregion = {
+      id: 'ig1',
+      name: 'Frost Igloo',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.IGLOO,
+      y: 64
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 98, y: 28, z: -50}')
+    expect(yaml).toContain('max: {x: 108, y: 76, z: -38}')
   })
 
   it('returns center-based cuboid YAML for desert well with y offsets', () => {

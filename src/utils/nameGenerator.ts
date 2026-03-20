@@ -475,19 +475,66 @@ export function generateJunglePyramidName(): string {
   return pick(patterns)()
 }
 
-const iglooPrefixes = [
-  'Frost', 'Ice', 'Snow', 'Glacier', 'Drift', 'Blizzard', 'Polar', 'Arctic',
-  'White', 'Crystal', 'Frozen', 'Shiver', 'North', 'Cold', 'Hearth'
-]
-const iglooSuffixes = [
-  'Rest', 'Hollow', 'Den', 'Lodge', 'Shelter', 'Refuge', 'Haven', 'Nook',
-  'Peak', 'Vale', 'Ridge', 'Cave', 'Dome', 'Hall', 'Chamber'
+type IglooPattern = (pools: IglooPools) => string
+
+interface IglooPools {
+  snow: string[]
+  wind: string[]
+  structures: string[]
+  adjectives: string[]
+  abstract: string[]
+  terrain: string[]
+  weirdCompounds: string[]
+  weirdPhrases: string[]
+  names: string[]
+  curated: string[]
+}
+
+const iglooPools: IglooPools = {
+  snow: ['Snow', 'Frost', 'Drift', 'Ice', 'Rime', 'Hoarfrost', 'Tundra', 'White', 'Pale'],
+  wind: ['Gale', 'Wind', 'Gust', 'Veil', 'Sweep', 'Curl', 'Shear', 'Whisper'],
+  structures: ['Igloo', 'Shelter', 'Dome', 'Hut', 'Hollow', 'Nest', 'Cell', 'Den', 'Form'],
+  adjectives: ['Still', 'Quiet', 'Frozen', 'Bare', 'Distant', 'Lonely', 'Windworn', 'Half-Buried'],
+  abstract: ['Silence', 'Cold', 'White', 'Storm', 'Night', 'Horizon', 'Frost', 'Drift'],
+  terrain: ['Driftwall', 'Snowbank', 'Icefold', 'Frostline', 'Windbreak'],
+  weirdCompounds: ['Driftskin', 'Snowveil', 'Icequiet', 'Frosthush', 'Windhollow'],
+  weirdPhrases: ['Under White', 'Before the Storm', 'In Stillness', 'At the Drift', 'Beyond Frost'],
+  names: ['Eira', 'Niko', 'Svala', 'Tor', 'Anja', 'Ivar', 'Runa', 'Kato', 'Eno', 'Lysa'],
+  curated: [
+    'Driftskin Igloo',
+    'Snowveil Shelter',
+    'Icequiet Dome',
+    "Eira's Igloo",
+    'Shelter Before the Storm'
+  ]
+}
+
+const iglooPatterns: IglooPattern[] = [
+  (p) => `${pick(p.snow)} ${pick(p.structures)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.abstract)}`,
+  (p) => `${pick(p.wind)} ${pick(p.structures)}`,
+  (p) => `${pick(p.terrain)} ${pick(p.structures)}`,
+  (p) => `${pick(p.weirdCompounds)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} ${pick(p.weirdPhrases)}`,
+  (p) => `${pick(p.names)}'s ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.names)}`
 ]
 
 export function generateIglooName(): string {
-  const prefix = iglooPrefixes[Math.floor(Math.random() * iglooPrefixes.length)]
-  const suffix = iglooSuffixes[Math.floor(Math.random() * iglooSuffixes.length)]
-  return `${prefix} ${suffix}`
+  if (Math.random() < 0.2) {
+    return pick(iglooPools.curated)
+  }
+  const pattern = pick(iglooPatterns)
+  return pattern(iglooPools)
+}
+
+export function generateIglooNames(count: number): string[] {
+  const results = new Set<string>()
+  while (results.size < count) {
+    results.add(generateIglooName())
+  }
+  return Array.from(results)
 }
 
 type DesertPyramidPattern = (pools: DesertPyramidPools) => string
@@ -616,13 +663,74 @@ export function generatePillagerOutpostNames(count: number): string[] {
   return Array.from(results)
 }
 
-const ancientCityPrefixes = ['Deep', 'Echo', 'Hollow', 'Sculk', 'Warden', 'Vault', 'Abandoned', 'Sunken', 'Silent', 'Forgotten']
-const ancientCitySuffixes = ['City', 'Ruins', 'Halls', 'Sanctum', 'Nexus', 'Depths', 'Citadel', 'Remnant']
+type AncientCityPattern = (pools: AncientCityPools) => string
+
+interface AncientCityPools {
+  sculk: string[]
+  adjectives: string[]
+  structures: string[]
+  abstract: string[]
+  weirdCompounds: string[]
+  weirdAbstract: string[]
+  fragments: string[]
+  curated: string[]
+}
+
+const ancientCityPools: AncientCityPools = {
+  sculk: ['Sculk', 'Echo', 'Pulse', 'Vein', 'Warden', 'Sensor', 'Resonance', 'Signal'],
+  adjectives: ['Ancient', 'Buried', 'Silent', 'Sunken', 'Hollow', 'Forgotten', 'Sealed', 'Still'],
+  structures: ['Vault', 'Nexus', 'Conduit', 'Archive', 'Sanctum', 'Lattice', 'Core', 'Chamber'],
+  abstract: ['Depths', 'Silence', 'Echoes', 'Pulse', 'Void', 'Below', 'Resonance', 'Stillness'],
+  weirdCompounds: [
+    'Echofold',
+    'Sculkline',
+    'Pulsewell',
+    'Veinmesh',
+    'Resonant Core',
+    'Signal Lattice',
+    'Warden Node'
+  ],
+  weirdAbstract: [
+    'Below Silence',
+    'Under Echo',
+    'The Still Below',
+    'Deep Signal',
+    'The Listening Dark',
+    'Substrate'
+  ],
+  fragments: ['Prime', 'Zero', 'Null', 'Inner', 'Outer'],
+  curated: [
+    'Echofold Nexus',
+    'Sculkline Vault',
+    'Pulsewell Conduit',
+    'Signal Lattice Core',
+    'Warden Node Chamber'
+  ]
+}
+
+const ancientCityPatterns: AncientCityPattern[] = [
+  (p) => `${pick(p.sculk)} ${pick(p.structures)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.abstract)}`,
+  (p) => `${pick(p.weirdCompounds)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} ${pick(p.weirdAbstract)}`,
+  (p) => `${pick(p.fragments)} ${pick(p.structures)}`
+]
 
 export function generateAncientCityName(): string {
-  const prefix = ancientCityPrefixes[Math.floor(Math.random() * ancientCityPrefixes.length)]
-  const suffix = ancientCitySuffixes[Math.floor(Math.random() * ancientCitySuffixes.length)]
-  return `${prefix} ${suffix}`
+  if (Math.random() < 0.2) {
+    return pick(ancientCityPools.curated)
+  }
+  const pattern = pick(ancientCityPatterns)
+  return pattern(ancientCityPools)
+}
+
+export function generateAncientCityNames(count: number): string[] {
+  const results = new Set<string>()
+  while (results.size < count) {
+    results.add(generateAncientCityName())
+  }
+  return Array.from(results)
 }
 
 const trailRuinsPrefixes = ['Old', 'Lost', 'Overgrown', 'Broken', 'Ancient', 'Mossy', 'Weathered', 'Hidden', 'Faded', 'Crumbling']
