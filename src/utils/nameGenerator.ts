@@ -465,6 +465,18 @@ function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
+/** Two different entries from the same pool (no "Cache Cache"). Falls back if the pool has only one item. */
+function pickTwoDistinct(arr: readonly string[]): [string, string] {
+  if (arr.length < 2) {
+    const only = arr[0] ?? ''
+    return [only, only]
+  }
+  const first = pick(arr)
+  const rest = arr.filter((x) => x !== first)
+  const second = rest.length > 0 ? pick(rest) : first
+  return [first, second]
+}
+
 export function generateJunglePyramidName(): string {
   const patterns = [
     () => `The ${pick(junglePyramidAdjectives)} ${pick(junglePyramidRuins)}`,
@@ -733,13 +745,79 @@ export function generateAncientCityNames(count: number): string[] {
   return Array.from(results)
 }
 
-const trailRuinsPrefixes = ['Old', 'Lost', 'Overgrown', 'Broken', 'Ancient', 'Mossy', 'Weathered', 'Hidden', 'Faded', 'Crumbling']
-const trailRuinsSuffixes = ['Trail', 'Path', 'Site', 'Remnants', 'Dig', 'Ruin', 'Relic', 'Find']
+type TrailRuinsPattern = (pools: TrailRuinsPools) => string
+
+interface TrailRuinsPools {
+  archaeology: string[]
+  time: string[]
+  nature: string[]
+  trail: string[]
+  interpretation: string[]
+  weirdCompounds: string[]
+  weirdPhrases: string[]
+  names: string[]
+  curated: string[]
+}
+
+const trailRuinsPools: TrailRuinsPools = {
+  archaeology: [
+    'Shard', 'Fragment', 'Relic', 'Remnant',
+    'Layer', 'Strata', 'Cache', 'Site', 'Find'
+  ],
+  time: ['Ancient', 'Weathered', 'Faded', 'Buried', 'Lost', 'Worn', 'Fallow', 'Settled'],
+  nature: ['Moss', 'Root', 'Fern', 'Overgrowth', 'Soil', 'Clay', 'Vine'],
+  trail: ['Trail', 'Path', 'Route', 'Crossing', 'Track', 'Passage'],
+  interpretation: ['Marker', 'Signal', 'Camp', 'Hearth', 'Shrine', 'Boundary', 'Rest'],
+  weirdCompounds: ['Splitlayer', 'Dustmark', 'Trailskin', 'Rootsignal', 'Clayecho', 'Pathfold'],
+  weirdPhrases: [
+    'Under the Path',
+    'Before the Crossing',
+    'Along the Old Route',
+    'Beneath the Trail'
+  ],
+  names: ['Edda', 'Torren', 'Mirel', 'Karo', 'Sven', 'Lysa', 'Bren', 'Ira'],
+  curated: [
+    'Moss Shard Site',
+    'Buried Relic Cache',
+    'Faded Trail Marker',
+    'Rootbound Fragment',
+    'Lost Passage Remnant'
+  ]
+}
+
+const trailRuinsPatterns: TrailRuinsPattern[] = [
+  (p) => {
+    const [a, b] = pickTwoDistinct(p.archaeology)
+    return `${pick(p.nature)} ${a} ${b}`
+  },
+  (p) => {
+    const [a, b] = pickTwoDistinct(p.archaeology)
+    return `${pick(p.time)} ${a} ${b}`
+  },
+  (p) => `${pick(p.time)} ${pick(p.trail)} ${pick(p.interpretation)}`,
+  (p) => `${pick(p.archaeology)} of the ${pick(p.trail)}`,
+  (p) => `${pick(p.nature)} ${pick(p.archaeology)}`,
+  (p) => `${pick(p.weirdCompounds)} ${pick(p.archaeology)}`,
+  (p) => `${pick(p.archaeology)} ${pick(p.weirdPhrases)}`,
+  (p) => `${pick(p.time)} ${pick(p.interpretation)} ${pick(p.archaeology)}`,
+  (p) => `${pick(p.names)}'s ${pick(p.archaeology)}`,
+  (p) => `${pick(p.archaeology)} of ${pick(p.names)}`
+]
 
 export function generateTrailRuinsName(): string {
-  const prefix = trailRuinsPrefixes[Math.floor(Math.random() * trailRuinsPrefixes.length)]
-  const suffix = trailRuinsSuffixes[Math.floor(Math.random() * trailRuinsSuffixes.length)]
-  return `${prefix} ${suffix}`
+  if (Math.random() < 0.2) {
+    return pick(trailRuinsPools.curated)
+  }
+  const pattern = pick(trailRuinsPatterns)
+  return pattern(trailRuinsPools)
+}
+
+export function generateTrailRuinsNames(count: number): string[] {
+  const results = new Set<string>()
+  while (results.size < count) {
+    results.add(generateTrailRuinsName())
+  }
+  return Array.from(results)
 }
 
 // --- Buried Treasure name generator (spec: tasks/buried_treasure_name_generator_spec.md) ---

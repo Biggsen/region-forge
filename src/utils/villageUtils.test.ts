@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -12,6 +12,20 @@ describe('getIglooCuboid', () => {
       maxZ: -38,
       minY: 28,
       maxY: 76
+    })
+  })
+})
+
+describe('getTrailRuinsCuboid', () => {
+  it('uses XZ ±6 from locator and y−6 … y+2', () => {
+    const r = getTrailRuinsCuboid(100, -50, 83)
+    expect(r).toEqual({
+      minX: 94,
+      maxX: 106,
+      minZ: -56,
+      maxZ: -44,
+      minY: 77,
+      maxY: 85
     })
   })
 })
@@ -162,6 +176,23 @@ describe('generateSubregionYAML', () => {
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('min: {x: 98, y: 28, z: -50}')
     expect(yaml).toContain('max: {x: 108, y: 76, z: -38}')
+  })
+
+  it('returns cuboid YAML for trail ruins with XZ radius 6 and tight Y', () => {
+    const subregion = {
+      id: 'tr1',
+      name: 'Moss Shard Site',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.TRAIL_RUINS,
+      y: 83
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 94, y: 77, z: -56}')
+    expect(yaml).toContain('max: {x: 106, y: 85, z: -44}')
   })
 
   it('returns center-based cuboid YAML for desert well with y offsets', () => {

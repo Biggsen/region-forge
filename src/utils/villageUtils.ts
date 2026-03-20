@@ -82,6 +82,22 @@ export function getIglooCuboid(x: number, z: number, y: number): { minX: number;
   }
 }
 
+/** Horizontal radius from locator (x, z) for trail ruins — small surface “discoverable” footprint. */
+export const TRAIL_RUINS_EXPORT_XZ_RADIUS = 6
+
+/** Cuboid bounds for trail ruins (x, z, y = locator). XZ ±6; vertical y−6 … y+2. */
+export function getTrailRuinsCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const r = TRAIL_RUINS_EXPORT_XZ_RADIUS
+  return {
+    minX: x - r,
+    maxX: x + r,
+    minZ: z - r,
+    maxZ: z + r,
+    minY: y - 6,
+    maxY: y + 2
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -249,6 +265,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isPillagerOutpost = isStructure && subregion.structureType === STRUCTURE_TYPES.PILLAGER_OUTPOST
   const isAncientCity = isStructure && subregion.structureType === STRUCTURE_TYPES.ANCIENT_CITY
   const isIgloo = isStructure && subregion.structureType === STRUCTURE_TYPES.IGLOO
+  const isTrailRuins = isStructure && subregion.structureType === STRUCTURE_TYPES.TRAIL_RUINS
   const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
 
   if (isStructure && subregion.y === undefined) {
@@ -299,6 +316,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isIgloo && subregion.y !== undefined) {
     const cuboid = getIglooCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isTrailRuins && subregion.y !== undefined) {
+    const cuboid = getTrailRuinsCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ
