@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -12,6 +12,20 @@ describe('getIglooCuboid', () => {
       maxZ: -38,
       minY: 28,
       maxY: 76
+    })
+  })
+})
+
+describe('getBuriedTreasureCuboid', () => {
+  it('uses 3x3x3 with ±1 radius on each axis from chest block', () => {
+    const r = getBuriedTreasureCuboid(100, -50, 70)
+    expect(r).toEqual({
+      minX: 99,
+      maxX: 101,
+      minZ: -51,
+      maxZ: -49,
+      minY: 69,
+      maxY: 71
     })
   })
 })
@@ -210,6 +224,23 @@ describe('generateSubregionYAML', () => {
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('min: {x: 97, y: 60, z: -53}')
     expect(yaml).toContain('max: {x: 103, y: 71, z: -47}')
+  })
+
+  it('returns 3x3x3 cuboid YAML for buried treasure (coords = chest block)', () => {
+    const subregion = {
+      id: 'bt1',
+      name: 'Old Salt Hoard',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.BURIED_TREASURE,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('min: {x: 99, y: 69, z: -51}')
+    expect(yaml).toContain('max: {x: 101, y: 71, z: -49}')
   })
 
   it('uses custom village height with rounded-up half span', () => {

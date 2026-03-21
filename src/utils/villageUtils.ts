@@ -98,6 +98,24 @@ export function getTrailRuinsCuboid(x: number, z: number, y: number): { minX: nu
   }
 }
 
+/**
+ * Buried treasure regions.yml cuboid. CSV (x, y, z) is the chest block; 3×3×3 with ±1 radius on each axis.
+ */
+export function getBuriedTreasureCuboid(
+  x: number,
+  z: number,
+  y: number
+): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  return {
+    minX: x - 1,
+    maxX: x + 1,
+    minZ: z - 1,
+    maxZ: z + 1,
+    minY: y - 1,
+    maxY: y + 1
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -267,6 +285,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isIgloo = isStructure && subregion.structureType === STRUCTURE_TYPES.IGLOO
   const isTrailRuins = isStructure && subregion.structureType === STRUCTURE_TYPES.TRAIL_RUINS
   const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
+  const isBuriedTreasure = isStructure && subregion.structureType === STRUCTURE_TYPES.BURIED_TREASURE
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -338,6 +357,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxZ = subregion.z + 3
     minY = subregion.y - 10
     maxY = subregion.y + 1
+  } else if (isBuriedTreasure && subregion.y !== undefined) {
+    const cuboid = getBuriedTreasureCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isVillage && subregion.y !== undefined) {
     // Villages: use village Y to size the WorldGuard cuboid.
     // Auto behavior: min = y-35, max = y+45.
