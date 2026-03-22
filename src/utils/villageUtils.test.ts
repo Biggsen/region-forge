@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -103,6 +103,12 @@ describe('createStructureSubregion', () => {
   })
 })
 
+describe('nameToRegionId', () => {
+  it('strips apostrophes and uses snake_case', () => {
+    expect(nameToRegionId("Calder's Hoard")).toBe('calders_hoard')
+  })
+})
+
 describe('generateSubregionYAML', () => {
   it('returns null for any structure without y', () => {
     expect(generateSubregionYAML({
@@ -134,6 +140,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  temple_of_doom:')
     expect(yaml).toContain('min: {x: 98, y: 73, z: -52}')
     expect(yaml).toContain('max: {x: 116, y: 89, z: -34}')
     expect(yaml).not.toContain('min-y:')
@@ -152,6 +159,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  bradford:')
     expect(yaml).toContain('min: {x: 36, y: 31, z: -114}')
     expect(yaml).toContain('max: {x: 164, y: 111, z: 14}')
     expect(yaml).not.toContain('min-y:')
@@ -171,6 +179,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  deep_echo:')
     expect(yaml).toContain('min: {x: 64, y: -53, z: -86}')
     expect(yaml).toContain('max: {x: 136, y: -19, z: -14}')
   })
@@ -188,6 +197,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  frost_igloo:')
     expect(yaml).toContain('min: {x: 98, y: 28, z: -50}')
     expect(yaml).toContain('max: {x: 108, y: 76, z: -38}')
   })
@@ -205,6 +215,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  moss_shard_site:')
     expect(yaml).toContain('min: {x: 94, y: 77, z: -56}')
     expect(yaml).toContain('max: {x: 106, y: 85, z: -44}')
   })
@@ -222,6 +233,7 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  sun_refuge:')
     expect(yaml).toContain('min: {x: 97, y: 60, z: -53}')
     expect(yaml).toContain('max: {x: 103, y: 71, z: -47}')
   })
@@ -239,7 +251,26 @@ describe('generateSubregionYAML', () => {
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  old_salt_hoard:')
     expect(yaml).toContain('min: {x: 99, y: 69, z: -51}')
+    expect(yaml).toContain('max: {x: 101, y: 71, z: -49}')
+  })
+
+  it('drops apostrophes in YAML region key for buried treasure', () => {
+    const subregion = {
+      id: 'bt2',
+      name: "Calder's Hoard",
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.BURIED_TREASURE,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, "O'Brien Vale")
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  calders_hoard:')
+    expect(yaml).toContain('parent: obrien_vale')
     expect(yaml).toContain('max: {x: 101, y: 71, z: -49}')
   })
 

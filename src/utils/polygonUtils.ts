@@ -1,5 +1,5 @@
 import { Region, ChallengeLevel } from '../types'
-import { generateSubregionYAML } from './villageUtils'
+import { generateSubregionYAML, nameToRegionId } from './villageUtils'
 
 // Map challenge levels to their color codes and descriptions
 function getChallengeLevelColor(challengeLevel: ChallengeLevel): string {
@@ -85,8 +85,7 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
     flags = `{passthrough: allow}`
   }
 
-  // Convert region name to lowercase with underscores (same format for all world types)
-  const regionNameForYAML = region.name.toLowerCase().replace(/\s+/g, '_')
+  const regionNameForYAML = nameToRegionId(region.name)
 
   // Use world height setting instead of region's minY/maxY
   const minY = useModernWorldHeight ? -64 : 0
@@ -105,7 +104,7 @@ ${points}`
   // Add heart_of_[region] subregion only for regions with a set heart, if enabled
   if (includeHeartRegions && region.centerPoint != null) {
     const regionCenter = region.centerPoint
-    const heartRegionName = `heart_of_${region.name.toLowerCase().replace(/\s+/g, '_')}`
+    const heartRegionName = `heart_of_${nameToRegionId(region.name)}`
     const heartSize = 7 // 7x7 size as requested
     
     let heartFlags: string

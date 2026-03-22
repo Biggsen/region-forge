@@ -2,6 +2,7 @@ import { Region, MapState } from '../types'
 import { getEffectiveMapImage } from './mapStateUtils'
 import { scanBiomes } from './biomeScanner'
 import { generateRegionYAML } from './polygonUtils'
+import { nameToRegionId, yamlSubregionRegionId } from './villageUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
 import yaml from 'js-yaml'
 
@@ -250,7 +251,7 @@ function migrateChallengLevel(level?: string): string | undefined {
 }
 
 function toRegionId(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, '_')
+  return nameToRegionId(name)
 }
 
 function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether' | 'end'): string {
@@ -369,7 +370,7 @@ export function exportRegionsMetaYAML(
         }
         if (sub.type === 'structure' && includeStructures) {
           metaRegions.push({
-            id: toRegionId(sub.name),
+            id: yamlSubregionRegionId(sub),
             world: dim,
             kind: 'structure',
             discover: { method: 'on_enter', recipeId: getRecipeId('region', dim) }

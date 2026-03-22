@@ -272,9 +272,19 @@ export function createStructureSubregion(
   }
 }
 
+/** Lowercase snake_case id for regions.yml / meta; strips apostrophes for safe YAML keys and WG commands. */
+export function nameToRegionId(name: string): string {
+  return name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_')
+}
+
+/** WorldGuard region key for subregions in regions.yml (normalized display name only; no structure-type prefix). */
+export function yamlSubregionRegionId(subregion: Subregion): string {
+  return nameToRegionId(subregion.name)
+}
+
 export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string | null {
-  const subregionName = subregion.name.toLowerCase().replace(/\s+/g, '_')
-  const parentRegionNameForYAML = parentRegionName.toLowerCase().replace(/\s+/g, '_')
+  const subregionName = yamlSubregionRegionId(subregion)
+  const parentRegionNameForYAML = nameToRegionId(parentRegionName)
   
   const isVillage = subregion.type === 'village'
   const isStructure = subregion.type === 'structure'
