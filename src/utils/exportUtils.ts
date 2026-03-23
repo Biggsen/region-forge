@@ -1,4 +1,4 @@
-import { Region, MapState } from '../types'
+import { Region, MapState, StructureType, STRUCTURE_TYPES } from '../types'
 import { getEffectiveMapImage } from './mapStateUtils'
 import { scanBiomes } from './biomeScanner'
 import { generateRegionYAML } from './polygonUtils'
@@ -254,17 +254,25 @@ function toRegionId(name: string): string {
   return nameToRegionId(name)
 }
 
-function getRecipeId(kind: 'system' | 'region' | 'village' | 'heart', world: 'overworld' | 'nether' | 'end'): string {
-  if (kind === 'system') return 'none'
-  if (world === 'nether') {
-    if (kind === 'region') return 'nether_region'
-    if (kind === 'heart') return 'nether_heart'
+/** Label + AA counter (no `Custom.` prefix) per regions-meta §7.1 — keys match `STRUCTURE_TYPES` values. */
+const STRUCTURE_FAMILY_META: Record<StructureType, { label: string; counter: string }> = {
+  [STRUCTURE_TYPES.ANCIENT_CITY]: { label: 'Ancient Cities', counter: 'ancient_cities_found' },
+  [STRUCTURE_TYPES.BURIED_TREASURE]: { label: 'Buried Treasures', counter: 'buried_treasures_found' },
+  [STRUCTURE_TYPES.DESERT_PYRAMID]: { label: 'Desert Pyramids', counter: 'desert_pyramids_found' },
+  [STRUCTURE_TYPES.DESERT_WELL]: { label: 'Desert Wells', counter: 'desert_wells_found' },
+  [STRUCTURE_TYPES.IGLOO]: { label: 'Igloos', counter: 'igloos_found' },
+  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { label: 'Jungle Temples', counter: 'jungle_temples_found' },
+  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { label: 'Pillager Outposts', counter: 'pillager_outposts_found' },
+  [STRUCTURE_TYPES.TRAIL_RUINS]: { label: 'Trail Ruins', counter: 'trail_ruins_found' },
+}
+
+function pickStructureFamilies(usedTypes: Set<StructureType>): Record<string, { label: string; counter: string }> {
+  const out: Record<string, { label: string; counter: string }> = {}
+  for (const t of [...usedTypes].sort()) {
+    const meta = STRUCTURE_FAMILY_META[t]
+    if (meta) out[t] = { label: meta.label, counter: meta.counter }
   }
-  if (world === 'end') {
-    if (kind === 'region') return 'end_region'
-    if (kind === 'heart') return 'end_heart'
-  }
-  return kind
+  return out
 }
 
 function convertDescriptionToLiteralBlock(yamlStr: string): string {
@@ -317,27 +325,41 @@ export function exportRegionsMetaYAML(
   const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image ?? null
   const originOffset = mapState?.originOffset ?? null
 
-  const metaRegions: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[]; description?: string }[] = []
+  type MetaDiscover = { method: string }
+  type MetaRegionRow = {
+    id: string
+    world: string
+    kind: string
+    discover: MetaDiscover
+    structureType?: string
+    biomes?: { biome: string; percentage: number }[]
+    category?: string
+    items?: { id: string; name: string }[]
+    theme?: { a: string; b: string }[]
+    description?: string
+  }
+
+  const metaRegions: MetaRegionRow[] = []
+  const usedStructureTypes = new Set<StructureType>()
 
   if (hasSpawnRegion) {
     metaRegions.push({
       id: 'spawn',
       world: dim,
       kind: 'system',
-      discover: { method: 'disabled', recipeId: 'none' }
+      discover: { method: 'disabled' },
     })
   }
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    let regionEntry: { id: string; world: string; kind: string; discover: { method: string; recipeId: string }; biomes?: { biome: string; percentage: number }[]; category?: string; items?: { id: string; name: string }[]; theme?: { a: string; b: string }[]; description?: string } = {
+    let regionEntry: MetaRegionRow = {
       id: mainId,
       world: dim,
       kind: 'region',
       discover: {
         method: region.hasSpawn === true ? 'first_join' : 'on_enter',
-        recipeId: getRecipeId('region', dim)
-      }
+      },
     }
     if (region.description) regionEntry.description = region.description
     if (region.minecraftCategory) regionEntry.category = region.minecraftCategory
@@ -355,7 +377,7 @@ export function exportRegionsMetaYAML(
         id: `heart_of_${mainId}`,
         world: dim,
         kind: 'heart',
-        discover: { method: 'on_enter', recipeId: getRecipeId('heart', dim) }
+        discover: { method: 'on_enter' },
       })
     }
     if ((includeVillages || includeStructures) && dim !== 'nether' && region.subregions) {
@@ -365,15 +387,17 @@ export function exportRegionsMetaYAML(
             id: toRegionId(sub.name),
             world: dim,
             kind: 'village',
-            discover: { method: 'on_enter', recipeId: getRecipeId('village', dim) }
+            discover: { method: 'on_enter' },
           })
         }
-        if (sub.type === 'structure' && includeStructures) {
+        if (sub.type === 'structure' && includeStructures && sub.structureType) {
+          usedStructureTypes.add(sub.structureType)
           metaRegions.push({
             id: yamlSubregionRegionId(sub),
             world: dim,
             kind: 'structure',
-            discover: { method: 'on_enter', recipeId: getRecipeId('region', dim) }
+            structureType: sub.structureType,
+            discover: { method: 'on_enter' },
           })
         }
       }
@@ -388,7 +412,11 @@ export function exportRegionsMetaYAML(
   const root: Record<string, unknown> = {
     format: 1,
     world: dim,
-    regions: metaRegions
+    regions: metaRegions,
+  }
+
+  if (usedStructureTypes.size > 0) {
+    root.structureFamilies = pickStructureFamilies(usedStructureTypes)
   }
 
   if (dim === 'overworld' && hasSpawnCoords) {
