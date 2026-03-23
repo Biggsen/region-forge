@@ -149,7 +149,7 @@ ${points}`
     priority: 10`
   }
 
-  // Add subregions when includeVillages (villages) or includeStructures (structures) is true (structures without required data e.g. jungle pyramid without y are skipped)
+  // Add subregions when includeVillages (villages) or includeStructures (structures) is true (structures without required data e.g. jungle temple without y are skipped)
   if ((includeVillages || includeStructures) && region.subregions && region.subregions.length > 0) {
     const subregionBlocks = region.subregions
       .filter(sub => (sub.type === 'village' && includeVillages) || (sub.type === 'structure' && includeStructures))

@@ -39,6 +39,23 @@ export type AdvancedPanelSectionsState = {
   isLoreInstructionsExpanded: boolean
 }
 
+/** Pre–Phase-1 `structureType` string; normalize to `STRUCTURE_TYPES.JUNGLE_TEMPLE` on load. */
+const LEGACY_JUNGLE_PYRAMID_STRUCTURE_TYPE = 'jungle_pyramid'
+
+export function migrateRegionsForLegacyStructureIds(regions: Region[]): Region[] {
+  return regions.map(region => ({
+    ...region,
+    subregions: region.subregions?.map(sub => {
+      if (sub.type !== 'structure') return sub
+      const st = sub.structureType as string | undefined
+      if (st === LEGACY_JUNGLE_PYRAMID_STRUCTURE_TYPE) {
+        return { ...sub, structureType: STRUCTURE_TYPES.JUNGLE_TEMPLE }
+      }
+      return sub
+    }),
+  }))
+}
+
 const STORAGE_KEYS = {
   MAP_STATE: 'mc-region-maker-map-state',
   REGIONS: 'mc-region-maker-regions',
@@ -161,7 +178,7 @@ export function loadRegions(): Region[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.REGIONS)
     const regions = saved ? JSON.parse(saved) : []
-    return regions
+    return migrateRegionsForLegacyStructureIds(regions as Region[])
   } catch (error) {
     console.error('Failed to load regions:', error)
     return []
@@ -324,10 +341,23 @@ export function loadHighlightMode(defaultMode: HighlightMode): HighlightMode {
       }
     }
 
+    const legacyVis = (parsed.visibleStructureTypes as Record<string, unknown> | undefined)?.[
+      LEGACY_JUNGLE_PYRAMID_STRUCTURE_TYPE
+    ]
+    if (
+      typeof legacyVis === 'boolean' &&
+      visibleStructureTypes[STRUCTURE_TYPES.JUNGLE_TEMPLE] === undefined
+    ) {
+      visibleStructureTypes[STRUCTURE_TYPES.JUNGLE_TEMPLE] = legacyVis
+    }
+
+    const rawHighlight = parsed.highlightedStructureType as string | null | undefined
     const highlightedStructureType =
-      parsed.highlightedStructureType && structureTypes.includes(parsed.highlightedStructureType)
-        ? parsed.highlightedStructureType
-        : null
+      rawHighlight === LEGACY_JUNGLE_PYRAMID_STRUCTURE_TYPE
+        ? STRUCTURE_TYPES.JUNGLE_TEMPLE
+        : rawHighlight && structureTypes.includes(rawHighlight as StructureType)
+          ? (rawHighlight as StructureType)
+          : null
 
     return {
       ...defaultMode,

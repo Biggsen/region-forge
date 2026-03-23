@@ -116,7 +116,7 @@ describe('generateSubregionYAML', () => {
       name: 'Temple of Doom',
       x: 100, z: -50, radius: 64,
       type: 'structure',
-      structureType: STRUCTURE_TYPES.JUNGLE_PYRAMID
+      structureType: STRUCTURE_TYPES.JUNGLE_TEMPLE
     }, 'MyRegion')).toBeNull()
     expect(generateSubregionYAML({
       id: 's2',
@@ -127,7 +127,7 @@ describe('generateSubregionYAML', () => {
     }, 'MyRegion')).toBeNull()
   })
 
-  it('returns cuboid YAML for jungle pyramid with y', () => {
+  it('returns cuboid YAML for jungle temple with y', () => {
     const subregion = {
       id: 's1',
       name: 'Temple of Doom',
@@ -135,7 +135,7 @@ describe('generateSubregionYAML', () => {
       z: -50,
       radius: 64,
       type: 'structure' as const,
-      structureType: STRUCTURE_TYPES.JUNGLE_PYRAMID,
+      structureType: STRUCTURE_TYPES.JUNGLE_TEMPLE,
       y: 80
     }
     const yaml = generateSubregionYAML(subregion, 'MyRegion')

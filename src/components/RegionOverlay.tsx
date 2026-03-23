@@ -29,7 +29,7 @@ function wrapBiomeLabel(text: string): string[] {
 }
 
 const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fillUnselected: string }> = {
-  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { fillSelected: 'rgba(255, 180, 50, 1)', fillUnselected: 'rgba(255, 180, 50, 0.85)' },
+  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { fillSelected: 'rgba(255, 180, 50, 1)', fillUnselected: 'rgba(255, 180, 50, 0.85)' },
   [STRUCTURE_TYPES.IGLOO]: { fillSelected: 'rgba(180, 220, 255, 1)', fillUnselected: 'rgba(180, 220, 255, 0.85)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { fillSelected: 'rgba(230, 190, 130, 1)', fillUnselected: 'rgba(230, 190, 130, 0.85)' },
   [STRUCTURE_TYPES.DESERT_WELL]: { fillSelected: 'rgba(210, 180, 140, 1)', fillUnselected: 'rgba(210, 180, 140, 0.85)' },

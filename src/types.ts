@@ -1,7 +1,7 @@
 export type ChallengeLevel = 'easy' | 'normal' | 'hard' | 'severe' | 'deadly'
 
 export const STRUCTURE_TYPES = {
-  JUNGLE_PYRAMID: 'jungle_pyramid',
+  JUNGLE_TEMPLE: 'jungle_temple',
   IGLOO: 'igloo',
   DESERT_PYRAMID: 'desert_pyramid',
   DESERT_WELL: 'desert_well',

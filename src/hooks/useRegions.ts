@@ -5,7 +5,7 @@ import { useRegionHighlight } from './useRegionHighlight'
 import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
-import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion } from '../utils/persistenceUtils'
+import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
 import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
@@ -143,7 +143,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
   }, [regions])
 
   const replaceRegions = useCallback((newRegions: Region[]) => {
-    setRegions(newRegions)
+    setRegions(migrateRegionsForLegacyStructureIds(newRegions))
   }, [])
 
   const startEditMode = useCallback((regionId: string) => {

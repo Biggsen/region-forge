@@ -18,7 +18,7 @@ import { RegionDescriptionModal } from './RegionDescriptionModal'
 import { DeleteSubregionModal } from './DeleteSubregionModal'
 
 const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel: string; buttonLabel: string }> = {
-  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: { countLabel: 'Jungle Pyramid', pluralLabel: 'jungle pyramids', buttonLabel: 'Import Jungle Pyramids (CSV)' },
+  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { countLabel: 'Jungle Temple', pluralLabel: 'jungle temples', buttonLabel: 'Import Jungle Temples (CSV)' },
   [STRUCTURE_TYPES.IGLOO]: { countLabel: 'Igloo', pluralLabel: 'igloos', buttonLabel: 'Import Igloos (CSV)' },
   [STRUCTURE_TYPES.DESERT_PYRAMID]: { countLabel: 'Desert Pyramid', pluralLabel: 'desert pyramids', buttonLabel: 'Import Desert Pyramids (CSV)' },
   [STRUCTURE_TYPES.DESERT_WELL]: { countLabel: 'Desert Well', pluralLabel: 'desert wells', buttonLabel: 'Import Desert Wells (CSV)' },

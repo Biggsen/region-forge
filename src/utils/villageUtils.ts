@@ -29,7 +29,7 @@ export function getAncientCityCuboid(
   }
 }
 
-/** Cuboid bounds for jungle pyramid (x, z = origin, topY = top of pyramid). */
+/** Cuboid bounds for jungle temple (x, z = origin, topY = top of structure). */
 export function getJunglePyramidCuboid(x: number, z: number, topY: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
   return {
     minX: x - 2,
@@ -117,7 +117,7 @@ export function getBuriedTreasureCuboid(
 }
 
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
-  [STRUCTURE_TYPES.JUNGLE_PYRAMID]: generateJunglePyramidName,
+  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
   [STRUCTURE_TYPES.DESERT_PYRAMID]: generateDesertPyramidName,
   [STRUCTURE_TYPES.DESERT_WELL]: generateDesertWellName,
@@ -288,7 +288,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   
   const isVillage = subregion.type === 'village'
   const isStructure = subregion.type === 'structure'
-  const isJunglePyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.JUNGLE_PYRAMID
+  const isJungleTemple = isStructure && subregion.structureType === STRUCTURE_TYPES.JUNGLE_TEMPLE
   const isDesertPyramid = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_PYRAMID
   const isPillagerOutpost = isStructure && subregion.structureType === STRUCTURE_TYPES.PILLAGER_OUTPOST
   const isAncientCity = isStructure && subregion.structureType === STRUCTURE_TYPES.ANCIENT_CITY
@@ -311,7 +311,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const worldMinY = useModernWorldHeight ? -64 : 0
   const worldMaxY = useModernWorldHeight ? 320 : 255
 
-  if (isJunglePyramid && subregion.y !== undefined) {
+  if (isJungleTemple && subregion.y !== undefined) {
     const cuboid = getJunglePyramidCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
