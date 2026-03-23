@@ -5,6 +5,8 @@
 **Implementation Date**: January 2026  
 **Validation**: Verified working with mc-plugin-manager
 
+**Superseded for export shape:** `discover.recipeId` omission, `kind: structure` rows (`structureType`, no `recipeId`), and root `structureFamilies` are specified in `tasks/regions-meta-structure-and-discover-export-spec.md` and `reference/regions-meta-schema.md` (changelog 1.7+). This document remains the historical record of the initial regions-meta feature.
+
 ## Overview
 
 This specification defines the **regions-meta export** feature for Region Forge. The export produces a `regions-meta.yml` file conforming to the schema consumed by **mc-plugin-manager** (mcpm). Region Forge currently exports only `regions.yml` (WorldGuard) and several plugin-specific YAMLs in Advanced (Achievements, Event Conditions, LevelledMobs). The region-meta export is the bridge for mcpm: it carries discovery metadata, onboarding, spawn center, and LevelledMobs bands that `regions.yml` does not. Eventually, plugin export logic in Advanced will move to mcpm; region-meta will remain Region Forge’s output for mcpm.

@@ -1,8 +1,8 @@
 # Regions-meta: structure export + discover (`recipeId`) alignment
 
-## Status: 📋 Planned
+## Status: ✅ Complete (Phases 1–3)
 
-**Schema reference:** `reference/regions-meta-schema.md` (format `1`, changelog 1.7+)
+**Schema reference:** `reference/regions-meta-schema.md` (format `1`, changelog 1.9+)
 
 **Primary implementation:** `src/utils/exportUtils.ts` — `exportRegionsMetaYAML`
 
@@ -14,9 +14,9 @@
 
 Mc-plugin-manager treats **`discover.recipeId` as optional**: it derives the stored recipe id from `kind` + `world` when the field is absent. Region Forge should **stop emitting `recipeId`** on all regions-meta entries.
 
-The reference schema requires **`kind: structure`** rows to carry **`structureType`**, and the export should include root **`structureFamilies`** whenever any structure region is present. Today Forge exports structures with `kind: structure` and `discover.method: on_enter` but **does not** set `structureType`, **does not** emit `structureFamilies`, and incorrectly sets **`discover.recipeId`** to the main-region recipe (`getRecipeId('region', dim)`) instead of omitting it (PM expects derived `none` for structures).
+The reference schema requires **`kind: structure`** rows to carry **`structureType`**, root **`structureFamilies`** for used types, and **`discover` without `recipeId`** in new Forge exports (mc-plugin-manager derives stored values).
 
-Work is **phased** so internal ids match the schema **before** export emits them, then YAML matches PM, then docs match the shipped shape.
+Work was **phased**: internal ids (`jungle_temple`), export YAML, then reference docs aligned with the shipped shape.
 
 ---
 
@@ -74,8 +74,8 @@ All other `STRUCTURE_TYPES` values already match the schema (`ancient_city`, `bu
 
 ### Phase 1 verification
 
-- [ ] Existing saved maps load; jungle POI visibility and highlights behave correctly.
-- [ ] No remaining `jungle_pyramid` / `JUNGLE_PYRAMID` in runtime paths that affect export or stored subregions (tests + grep).
+- [x] Existing saved maps load; jungle POI visibility and highlights behave correctly.
+- [x] No remaining `jungle_pyramid` / `JUNGLE_PYRAMID` in runtime paths that affect export or stored subregions (tests + grep).
 
 ---
 
@@ -139,11 +139,11 @@ Stable **`label`** and **`counter`** (AA key without `Custom.` prefix). Default 
 
 ### Phase 2 verification
 
-- [ ] Export with structures: every structure line has **`structureType`** present in **`structureFamilies`**.
-- [ ] No `recipeId` under any `discover` block.
-- [ ] Spawn: `kind: system`, `discover.method: disabled`, no `recipeId`.
-- [ ] First-join region: `discover.method: first_join`, no `recipeId`.
-- [ ] Mc-plugin-manager imports without errors; structure counts / AA counters match expectations.
+- [x] Export with structures: every structure line has **`structureType`** present in **`structureFamilies`**.
+- [x] No `recipeId` under any `discover` block.
+- [x] Spawn: `kind: system`, `discover.method: disabled`, no `recipeId`.
+- [x] First-join region: `discover.method: first_join`, no `recipeId`.
+- [x] Mc-plugin-manager imports without errors; structure counts / AA counters match expectations.
 
 ---
 
@@ -162,15 +162,15 @@ Stable **`label`** and **`counter`** (AA key without `Custom.` prefix). Default 
 
 ### Phase 3 verification
 
-- [ ] Reference full / minimal examples match exported shape (no `recipeId`).
+- [x] Reference full / minimal examples match exported shape (no `recipeId`).
 
 ---
 
 ## Full verification checklist (rollup)
 
-- [ ] **Phase 1:** Saved maps load; jungle structures use `jungle_temple`; grep clean for old ids where it matters.
-- [ ] **Phase 2:** `structureType` / `structureFamilies` consistent; no `recipeId`; PM import OK.
-- [ ] **Phase 3:** Schema examples match Forge.
+- [x] **Phase 1:** Saved maps load; jungle structures use `jungle_temple`; grep clean for old ids where it matters.
+- [x] **Phase 2:** `structureType` / `structureFamilies` consistent; no `recipeId`; PM import OK.
+- [x] **Phase 3:** Schema examples match Forge.
 
 ---
 
@@ -181,3 +181,4 @@ Stable **`label`** and **`counter`** (AA key without `Custom.` prefix). Default 
 | 2026-03-23 | Initial spec: structure `structureType` + `structureFamilies`, omit `recipeId` everywhere, jungle key alignment. |
 | 2026-03-23 | Decision: refactor `jungle_pyramid` → `jungle_temple` in code and persisted ids; no export-only mapping. |
 | 2026-03-23 | Restructured into **Phase 1** (jungle id + persistence), **Phase 2** (export YAML), **Phase 3** (reference docs). |
+| 2026-03-24 | Phase 3: `reference/regions-meta-schema.md` §3.4 note, §10 example, §12 notes, changelog 1.9; supersession note on completed region-meta spec. |
