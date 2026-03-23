@@ -416,8 +416,7 @@ regions:
 | 1.6    | Region Forge exports optional `y` in `spawnCenter` and `onboarding.teleport` (manual value; default 0). |
 | 1.7    | Added `kind: structure`, per-region `structureType`, and root `structureFamilies` (`label`, `counter`). Structure POIs do not count toward main exploration metrics; TAB/AA denominators are derived by counting regions per `structureType` in mc-plugin-manager. `discover.recipeId` is optional; omit in new Region Forge exports (mc-plugin-manager derives when absent). |
 | 1.8    | §3.4 `disabled`: clarified that omitting `recipeId` is the preferred new-export shape; explicit `none` remains valid for legacy files. |
-| 1.9    | §10 full example and §12 validation notes aligned with shipped Region Forge export: no `recipeId` in `discover`; `structureFamilies` lists only types referenced in the example. §3.4: note that Forge omits `recipeId` for all kinds. |
-| 1.9    | §7.1: document that unknown keys on each structure family object are ignored (aligns with §3.1). |
+| 1.9    | §7.1: document that unknown keys on each structure family object are ignored (aligns with §3.1). §10 full example and §12 validation notes aligned with shipped Region Forge export: no `recipeId` in `discover`; `structureFamilies` lists only types referenced in the example. §3.4: note that Forge omits `recipeId` for all kinds. |
 
 ---
 
