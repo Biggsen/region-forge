@@ -19,7 +19,7 @@ import { getSpawnExportData } from '../utils/spawnUtils'
 import { ImportConfirmationModal } from './ImportConfirmationModal'
 
 function MainAppContent() {
-  const { regions, mapState, worldName, spawn, seedInfo, dimension, toast } = useAppContext()
+  const { regions, mapState, worldName, spawn, seedInfo, dimension, toast, regionForgeYaml } = useAppContext()
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>(loadActiveTab())
   const [showImportModal, setShowImportModal] = useState(false)
@@ -34,7 +34,10 @@ function MainAppContent() {
     dimension
   )
 
-  const { fileInputRef, handleFileImport } = useProjectImport({ markAsSaved })
+  const { fileInputRef, handleFileImport } = useProjectImport({
+    markAsSaved,
+    setRegionForgeYamlGenerationFromImport: regionForgeYaml.setRegionForgeYamlGenerationFromImport,
+  })
 
   const showAdvancedTab = useAdvancedFeatures()
   const tabs = [
@@ -56,12 +59,13 @@ function MainAppContent() {
       regions.regions,
       mapState.mapState,
       worldName.worldName,
+      toast.showToast,
+      regionForgeYaml.regionForgeYamlGeneration,
       spawnData,
       dimension,
       seedInfo.seedInfo.seed,
       imageDetails?.worldSize,
-      imageDetails?.imageSize,
-      toast.showToast
+      imageDetails?.imageSize
     )
     markAsSaved()
   }

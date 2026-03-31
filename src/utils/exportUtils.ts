@@ -2,13 +2,15 @@ import { Region, MapState, StructureType, STRUCTURE_TYPES } from '../types'
 import { getEffectiveMapImage } from './mapStateUtils'
 import { scanBiomes } from './biomeScanner'
 import { generateRegionYAML } from './polygonUtils'
-import { nameToRegionId, yamlSubregionRegionId } from './villageUtils'
+import { generateSubregionYAML, nameToRegionId, yamlSubregionRegionId } from './villageUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
 import yaml from 'js-yaml'
 
 
 export interface MapExportData {
   version: string
+  /** Increments on each regions.yml export; persisted in project JSON. */
+  regionForgeYamlGeneration?: number
   worldName: string
   seed?: string
   dimension?: string
@@ -27,7 +29,8 @@ export interface MapExportData {
   exportSettings?: ExportSettings
 }
 
-const CURRENT_VERSION = '1.0.0'
+/** Map project JSON `version` and regions.yml `app-version` header. */
+export const REGION_FORGE_APP_VERSION = '1.0.0'
 
 
 // Export complete map with embedded image data
@@ -35,12 +38,13 @@ export async function exportCompleteMap(
   regions: Region[], 
   mapState: MapState, 
   worldName: string, 
+  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
+  regionForgeYamlGeneration: number = 0,
   spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null, 
   dimension?: 'overworld' | 'nether' | 'end', 
   seed?: string, 
   worldSize?: number, 
-  imageSize?: { width: number; height: number },
-  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
+  imageSize?: { width: number; height: number }
 ): Promise<void> {
   const effectiveImage = getEffectiveMapImage(mapState)
   if (!effectiveImage) {
@@ -86,7 +90,8 @@ export async function exportCompleteMap(
     const dateStr = new Date().toISOString().split('T')[0]
 
     const exportData: MapExportData = {
-      version: CURRENT_VERSION,
+      version: REGION_FORGE_APP_VERSION,
+      regionForgeYamlGeneration,
       worldName,
       seed,
       dimension,
@@ -143,9 +148,102 @@ function exportFilenamePrefix(worldName: string, dimension: 'overworld' | 'nethe
   return `${worldNameSlug}-${dimensionSlug}-${date}`
 }
 
+function sanitizeRegionForgeField(s: string): string {
+  return s.replace(/[\n\r;]/g, ' ').trim()
+}
+
+function getRegionsYmlExportStats(
+  regions: Region[],
+  includeVillages: boolean,
+  includeStructures: boolean,
+  includeHeartRegions: boolean,
+  includeSpawnRegion: boolean,
+  spawnCoordinates: { x: number; z: number; y?: number; radius?: number } | null | undefined,
+  effectiveDimension: 'overworld' | 'nether' | 'end',
+  useModernWorldHeight: boolean,
+  useGreetingsAndFarewells: boolean,
+  greetingSize: 'large' | 'small' | 'chat'
+): {
+  regionCount: number
+  villageCount: number
+  structureCount: number
+  heartCount: number
+  spawn: boolean
+} {
+  const enabledRegions = regions.filter((region) => !region.disabled)
+  const spawnIncluded = !!(
+    includeSpawnRegion &&
+    spawnCoordinates?.radius &&
+    effectiveDimension === 'overworld'
+  )
+
+  let villageCount = 0
+  let structureCount = 0
+  for (const region of enabledRegions) {
+    if (!region.subregions?.length || (!includeVillages && !includeStructures)) continue
+    for (const sub of region.subregions) {
+      const wantVillage = sub.type === 'village' && includeVillages
+      const wantStructure = sub.type === 'structure' && includeStructures
+      if (!wantVillage && !wantStructure) continue
+      const block = generateSubregionYAML(
+        sub,
+        region.name,
+        effectiveDimension,
+        useModernWorldHeight,
+        useGreetingsAndFarewells,
+        greetingSize
+      )
+      if (block === null) continue
+      if (sub.type === 'village') villageCount++
+      else structureCount++
+    }
+  }
+
+  const heartCount = includeHeartRegions
+    ? enabledRegions.filter((r) => r.centerPoint != null).length
+    : 0
+
+  return {
+    regionCount: enabledRegions.length,
+    villageCount,
+    structureCount,
+    heartCount,
+    spawn: spawnIncluded,
+  }
+}
+
+function buildRegionForgeYamlPreamble(
+  generatorVersion: number,
+  worldName: string,
+  effectiveDimension: 'overworld' | 'nether' | 'end',
+  stats: ReturnType<typeof getRegionsYmlExportStats>
+): string {
+  const gen = String(generatorVersion).padStart(3, '0')
+  const at = new Date().toISOString()
+  const buildId = `rf-${Date.now()}`
+  const proj = sanitizeRegionForgeField(worldName)
+  const line1 =
+    `# region-forge: generator-version=${gen}; generated-at=${at}; app-version=${REGION_FORGE_APP_VERSION}; ` +
+    `project=${proj}; dimension=${effectiveDimension}; plugin=worldguard; export-type=regions-yml; build-id=${buildId}`
+  const { regionCount, villageCount, structureCount, heartCount, spawn } = stats
+  const line2 =
+    `# region-forge: regions=${regionCount}; villages=${villageCount}; structures=${structureCount}; ` +
+    `hearts=${heartCount}; spawn=${spawn}`
+  return `${line1}\n${line2}\n`
+}
+
+export type RegionsYmlRegionForgeOptions = {
+  bumpGeneration: () => number
+}
+
+export type ExportRegionsYAMLOptions = {
+  regionForge?: RegionsYmlRegionForgeOptions
+}
+
 // Export all regions to YAML file in WorldGuard format
 export function exportRegionsYAML(
   regions: Region[], 
+  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   includeVillages: boolean = true,
   includeStructures: boolean = true,
   includeHeartRegions: boolean = true,
@@ -157,7 +255,7 @@ export function exportRegionsYAML(
   useGreetingsAndFarewells: boolean = false,
   greetingSize: 'large' | 'small' | 'chat' = 'large',
   includeChallengeLevelSubheading: boolean = false,
-  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
+  options?: ExportRegionsYAMLOptions
 ): void {
   const effectiveDimension = dimension || 'overworld'
   
@@ -169,7 +267,27 @@ export function exportRegionsYAML(
     return
   }
 
-  let yamlContent = 'regions:\n'
+  const stats = getRegionsYmlExportStats(
+    regions,
+    includeVillages,
+    includeStructures,
+    includeHeartRegions,
+    includeSpawnRegion,
+    spawnCoordinates,
+    effectiveDimension,
+    useModernWorldHeight,
+    useGreetingsAndFarewells,
+    greetingSize
+  )
+
+  let preamble = ''
+  const regionForge = options?.regionForge
+  if (regionForge) {
+    const generatorVersion = regionForge.bumpGeneration()
+    preamble = buildRegionForgeYamlPreamble(generatorVersion, worldName, effectiveDimension, stats)
+  }
+
+  let yamlContent = preamble + 'regions:\n'
   
   // Add spawn region if requested and coordinates exist (only for overworld)
   if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension === 'overworld') {

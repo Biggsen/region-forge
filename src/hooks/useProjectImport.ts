@@ -7,9 +7,13 @@ import { getValidDimension } from '../utils/dimensionUtils'
 
 export interface UseProjectImportOptions {
   markAsSaved: () => void
+  setRegionForgeYamlGenerationFromImport: (value: number) => void
 }
 
-export function useProjectImport({ markAsSaved }: UseProjectImportOptions) {
+export function useProjectImport({
+  markAsSaved,
+  setRegionForgeYamlGenerationFromImport,
+}: UseProjectImportOptions) {
   const { regions, mapState, worldName, spawn, seedInfo, toast } = useAppContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -89,6 +93,8 @@ export function useProjectImport({ markAsSaved }: UseProjectImportOptions) {
       regions.setSelectedRegionId(null)
       worldName.updateWorldName(importData.worldName || 'world')
 
+      setRegionForgeYamlGenerationFromImport(importData.regionForgeYamlGeneration ?? 0)
+
       if (importData.spawnCoordinates) {
         spawn.setSpawnCoordinates(importData.spawnCoordinates)
         if (importData.spawnCoordinates.radius) {
@@ -137,7 +143,7 @@ export function useProjectImport({ markAsSaved }: UseProjectImportOptions) {
       toast.showToast('Failed to load project file. Please make sure it\'s a valid project file.', 'error')
       console.error('Import error:', error)
     }
-  }, [regions, mapState, worldName, spawn, seedInfo, toast, markAsSaved])
+  }, [regions, mapState, worldName, spawn, seedInfo, toast, markAsSaved, setRegionForgeYamlGenerationFromImport])
 
   return { fileInputRef, handleFileImport }
 }

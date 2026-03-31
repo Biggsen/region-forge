@@ -8,7 +8,7 @@ import { BaseModal } from './BaseModal'
 import { Button } from './Button'
 
 export function ExportPanel() {
-  const { regions, spawn, worldName, dimension, toast, mapState } = useAppContext()
+  const { regions, spawn, worldName, dimension, toast, mapState, regionForgeYaml } = useAppContext()
   const [includeVillages, setIncludeVillages] = useState(false)
   const [includeStructures, setIncludeStructures] = useState(true)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
@@ -87,7 +87,22 @@ export function ExportPanel() {
     const spawnData = getSpawnExportData(spawn.spawnState)
     // Force spawn region to false for nether and end since they don't have spawn
     const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
-    exportRegionsYAML(regions.regions, includeVillages, includeStructures, includeHeartRegions, finalIncludeSpawnRegion, spawnData, dimension, worldName.worldName, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading, toast.showToast)
+    exportRegionsYAML(
+      regions.regions,
+      toast.showToast,
+      includeVillages,
+      includeStructures,
+      includeHeartRegions,
+      finalIncludeSpawnRegion,
+      spawnData,
+      dimension,
+      worldName.worldName,
+      useModernWorldHeight,
+      useGreetingsAndFarewells,
+      greetingSize,
+      includeChallengeLevelSubheading,
+      { regionForge: { bumpGeneration: regionForgeYaml.bumpRegionForgeYamlGeneration } }
+    )
   }
 
   const handleExportRegionsMeta = () => {
