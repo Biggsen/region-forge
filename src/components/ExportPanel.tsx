@@ -17,6 +17,7 @@ export function ExportPanel() {
   const [useGreetingsAndFarewells, setUseGreetingsAndFarewells] = useState(false)
   const [greetingSize, setGreetingSize] = useState<'large' | 'small' | 'chat'>('large')
   const [includeChallengeLevelSubheading, setIncludeChallengeLevelSubheading] = useState(false)
+  const [excludeDescriptionsFromRegionsMeta, setExcludeDescriptionsFromRegionsMeta] = useState(false)
   const [viewingImage, setViewingImage] = useState<{ type: 'greeting' | 'farewell', size: 'large' | 'small' | 'chat' } | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -31,6 +32,7 @@ export function ExportPanel() {
     setUseGreetingsAndFarewells(saved.useGreetingsAndFarewells)
     setGreetingSize(saved.greetingSize)
     setIncludeChallengeLevelSubheading(saved.includeChallengeLevelSubheading)
+    setExcludeDescriptionsFromRegionsMeta(saved.excludeDescriptionsFromRegionsMeta ?? false)
   }, [])
 
   useEffect(() => {
@@ -68,7 +70,8 @@ export function ExportPanel() {
         useModernWorldHeight,
         useGreetingsAndFarewells,
         greetingSize,
-        includeChallengeLevelSubheading
+        includeChallengeLevelSubheading,
+        excludeDescriptionsFromRegionsMeta
       })
     }
   }, [
@@ -80,7 +83,8 @@ export function ExportPanel() {
     useModernWorldHeight,
     useGreetingsAndFarewells,
     greetingSize,
-    includeChallengeLevelSubheading
+    includeChallengeLevelSubheading,
+    excludeDescriptionsFromRegionsMeta
   ])
 
   const handleExportYAML = () => {
@@ -117,7 +121,8 @@ export function ExportPanel() {
       includeHeartRegions,
       finalIncludeSpawnRegion,
       toast.showToast,
-      mapState.mapState
+      mapState.mapState,
+      excludeDescriptionsFromRegionsMeta
     )
   }
 
@@ -387,10 +392,28 @@ export function ExportPanel() {
           </Button>
 
           {showAdvanced && (
-            <div className="border-t border-gunmetal pt-4 mt-4">
-              <p className="text-gray-400 text-sm mb-2">
+            <div className="border-t border-gunmetal pt-4 mt-4 space-y-4">
+              <p className="text-gray-400 text-sm">
                 For mc-plugin-manager: discovery metadata, onboarding, spawn center, and LevelledMobs bands.
               </p>
+              <div>
+                <h4 className="text-md font-medium text-white mb-2">Export Options</h4>
+                <div className="flex items-start">
+                  <input
+                    type="checkbox"
+                    id="excludeDescriptionsFromRegionsMeta"
+                    checked={excludeDescriptionsFromRegionsMeta}
+                    onChange={(e) => setExcludeDescriptionsFromRegionsMeta(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2 shrink-0"
+                  />
+                  <label htmlFor="excludeDescriptionsFromRegionsMeta" className="ml-2 text-white">
+                    Exclude Descriptions
+                  </label>
+                </div>
+                <p className="text-gray-400 text-xs mt-1 ml-6">
+                  Omit the <code className="text-gray-300 bg-gray-700 px-1 rounded">description</code> field from every region in regions-meta.yml (e.g. draft or partial lore you do not want imported yet).
+                </p>
+              </div>
               <Button
                 onClick={handleExportRegionsMeta}
                 disabled={!hasAnythingForRegionsMeta}

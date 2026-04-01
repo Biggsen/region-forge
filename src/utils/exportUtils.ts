@@ -431,7 +431,8 @@ export function exportRegionsMetaYAML(
   includeHeartRegions: boolean,
   includeSpawnRegion: boolean,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  mapState?: MapState | null
+  mapState?: MapState | null,
+  excludeDescriptions?: boolean
 ): void {
   const dim = dimension
   const hasSpawnCoords = !!spawnState.coordinates
@@ -480,7 +481,7 @@ export function exportRegionsMetaYAML(
         method: isWater ? 'passive' : region.hasSpawn === true ? 'first_join' : 'on_enter',
       },
     }
-    if (region.description) regionEntry.description = region.description
+    if (region.description && !excludeDescriptions) regionEntry.description = region.description
     if (region.minecraftCategory) regionEntry.category = region.minecraftCategory
     if (region.minecraftItems && region.minecraftItems.length > 0) regionEntry.items = region.minecraftItems
     if (region.regionTheme && region.regionTheme.length > 0) regionEntry.theme = region.regionTheme

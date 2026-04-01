@@ -129,7 +129,11 @@ export function useProjectImport({
 
       if (importData.exportSettings) {
         const { randomMobSpawn: _rm, ...sanitized } = importData.exportSettings as ExportSettings & { randomMobSpawn?: boolean }
-        saveExportSettings(sanitized as ExportSettings)
+        const s = sanitized as Partial<ExportSettings>
+        saveExportSettings({
+          ...(sanitized as ExportSettings),
+          excludeDescriptionsFromRegionsMeta: s.excludeDescriptionsFromRegionsMeta ?? false
+        })
         window.dispatchEvent(new Event('exportSettingsUpdated'))
       }
 

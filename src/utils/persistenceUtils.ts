@@ -17,6 +17,8 @@ export interface ExportSettings {
   useGreetingsAndFarewells: boolean
   greetingSize: 'large' | 'small' | 'chat'
   includeChallengeLevelSubheading: boolean
+  /** When true, regions-meta.yml omits all `description` fields. */
+  excludeDescriptionsFromRegionsMeta: boolean
 }
 
 export type StructureTableSort = {
@@ -311,6 +313,9 @@ export function loadExportSettings(): ExportSettings | null {
     const parsed = JSON.parse(saved) as Partial<ExportSettings>
     if (parsed.includeStructures === undefined) {
       parsed.includeStructures = true
+    }
+    if (parsed.excludeDescriptionsFromRegionsMeta === undefined) {
+      parsed.excludeDescriptionsFromRegionsMeta = false
     }
     return parsed as ExportSettings
   } catch (error) {

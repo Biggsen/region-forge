@@ -1,8 +1,24 @@
 import { Region, ChallengeLevel } from '../types'
 import { generateSubregionYAML, nameToRegionId } from './villageUtils'
 
-// Map challenge levels to their color codes and descriptions
-function getChallengeLevelColor(challengeLevel: ChallengeLevel): string {
+// Map challenge levels to their color codes and descriptions (WorldGuard greeting sublines)
+function getChallengeLevelColor(challengeLevel: ChallengeLevel, isWater?: boolean): string {
+  if (isWater) {
+    switch (challengeLevel) {
+      case 'easy':
+        return '§aQuiet waters — the surface lies undisturbed'
+      case 'normal':
+        return '§eOpen waters — faint movements ripple below'
+      case 'hard':
+        return '§6Deep waters — something watches from beneath'
+      case 'severe':
+        return '§cDark waters — the depths stir with intent'
+      case 'deadly':
+        return '§4Abyssal waters — the deep is ready to take you'
+      default:
+        return '§aQuiet waters — the surface lies undisturbed'
+    }
+  }
   switch (challengeLevel) {
     case 'easy':
       return '§aA safe haven from stronger mobs'
@@ -32,24 +48,31 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
   
   // Generate flags based on region type
   let flags: string
+  const isWaterRegion = region.isWater === true
   if (useGreetingsAndFarewells) {
     if (greetingSize === 'chat') {
       // Chat format uses greeting: and farewell: with single-line values
       // Challenge text only in greeting, never in farewell. Use YAML \n escape so the value
       // stays on one line in the source; replace(/\n/g, '\n  ') then won't add spaces into the string.
-      let greetingMsg = `§2Entering §7${region.name}`
-      const farewellMsg = `§6Leaving §7${region.name}`
+      let greetingMsg = isWaterRegion
+        ? `§2Crossing §7${region.name}`
+        : `§2Entering §7${region.name}`
       if (isMainRegion && region.challengeLevel && includeChallengeLevelSubheading) {
-        greetingMsg += '\\n' + getChallengeLevelColor(region.challengeLevel)
+        greetingMsg += '\\n' + getChallengeLevelColor(region.challengeLevel, isWaterRegion)
       }
       const hasChallenge = isMainRegion && region.challengeLevel && includeChallengeLevelSubheading
       const greetingStr = hasChallenge ? `"${greetingMsg.replace(/"/g, '\\"')}"` : greetingMsg
-      flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow`
+      if (isWaterRegion) {
+        flags = `    greeting: ${greetingStr}\n    passthrough: allow`
+      } else {
+        const farewellMsg = `§6Leaving §7${region.name}`
+        flags = `    greeting: ${greetingStr}\n    farewell: ${farewellMsg}\n    passthrough: allow`
+      }
     } else if (isMainRegion && region.challengeLevel) {
       // Main regions with challenge levels get the new multi-line format
       // Large: challenge on greeting-title line 2 when option on. Small: greeting-title for title; greeting: (chat) for challenge when option on. Never in farewell/farewell-title.
       const challengeColor = (includeChallengeLevelSubheading && greetingSize === 'large')
-        ? getChallengeLevelColor(region.challengeLevel)
+        ? getChallengeLevelColor(region.challengeLevel, isWaterRegion)
         : '§f'
       
       // Build greeting and farewell lines based on greeting size
@@ -60,25 +83,46 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
       
       if (greetingSize === 'large') {
         // Large: greeting text on first line, challenge color on second
-        greetingLine1 = `§f${greetingText} ${region.name}`
-        greetingLine2 = challengeColor
-        farewellLine1 = `§fLeaving ${region.name}`
-        farewellLine2 = `§f`
+        if (isWaterRegion) {
+          greetingLine1 = `§fCrossing ${region.name}`
+          greetingLine2 = challengeColor
+          farewellLine1 = ''
+          farewellLine2 = ''
+        } else {
+          greetingLine1 = `§f${greetingText} ${region.name}`
+          greetingLine2 = challengeColor
+          farewellLine1 = `§fLeaving ${region.name}`
+          farewellLine2 = `§f`
+        }
       } else {
         // Small: §f on first line, greeting text on second line; challenge goes in greeting: (chat) when option on
-        greetingLine1 = `§f`
-        greetingLine2 = `§f${greetingText} ${region.name}`
-        farewellLine1 = `§f`
-        farewellLine2 = `§fLeaving ${region.name}`
+        if (isWaterRegion) {
+          greetingLine1 = `§f`
+          greetingLine2 = `§fCrossing ${region.name}`
+          farewellLine1 = ''
+          farewellLine2 = ''
+        } else {
+          greetingLine1 = `§f`
+          greetingLine2 = `§f${greetingText} ${region.name}`
+          farewellLine1 = `§f`
+          farewellLine2 = `§fLeaving ${region.name}`
+        }
       }
     
       const smallGreetingChat = (includeChallengeLevelSubheading && greetingSize === 'small')
-        ? `\n    greeting: ${getChallengeLevelColor(region.challengeLevel)}`
+        ? `\n    greeting: ${getChallengeLevelColor(region.challengeLevel, isWaterRegion)}`
         : ''
-      flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}\n    passthrough: allow`
+      const farewellBlock = isWaterRegion
+        ? ''
+        : `\n    farewell-title: |-\n      ${farewellLine1}\n      ${farewellLine2}`
+      flags = `    greeting-title: |-\n      ${greetingLine1}\n      ${greetingLine2}${smallGreetingChat}${farewellBlock}\n    passthrough: allow`
     } else {
       // Other regions (spawn, hearts, villages) keep the old format (unless chat is selected)
-      flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow}`
+      if (isWaterRegion && isMainRegion) {
+        flags = `{greeting-title: Crossing ${region.name}, passthrough: allow}`
+      } else {
+        flags = `{greeting-title: ${greetingText} ${region.name}, farewell-title: Leaving ${region.name}., passthrough: allow}`
+      }
     }
   } else {
     // No greetings/farewells - only passthrough flag
@@ -87,9 +131,9 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
 
   const regionNameForYAML = nameToRegionId(region.name)
 
-  // Use world height setting instead of region's minY/maxY
-  const minY = useModernWorldHeight ? -64 : 0
-  const maxY = useModernWorldHeight ? 320 : 255
+  // Water regions: fixed sea-level band for regions.yml. Land uses world height setting.
+  const minY = isWaterRegion ? 35 : useModernWorldHeight ? -64 : 0
+  const maxY = isWaterRegion ? 75 : useModernWorldHeight ? 320 : 255
 
   let yaml = `  ${regionNameForYAML}:
     type: poly2d
