@@ -19,7 +19,8 @@ export function useRegionDrawing({ onAddRegion, onExitEditMode }: UseRegionDrawi
       points: [],
       centerPoint: null,
       challengeLevel: 'easy',
-      hasSpawn: false
+      hasSpawn: false,
+      isWater: false
     })
     onExitEditMode()
   }, [onExitEditMode])
@@ -41,7 +42,8 @@ export function useRegionDrawing({ onAddRegion, onExitEditMode }: UseRegionDrawi
       points,
       centerPoint: drawingRegion.centerPoint ?? null,
       challengeLevel: drawingRegion.challengeLevel ?? 'easy',
-      hasSpawn: drawingRegion.hasSpawn ?? false
+      hasSpawn: drawingRegion.hasSpawn ?? false,
+      isWater: drawingRegion.isWater ?? false
     })
     if (success) setDrawingRegion(null)
     return success

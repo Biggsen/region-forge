@@ -471,12 +471,13 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
+    const isWater = region.isWater === true
     let regionEntry: MetaRegionRow = {
       id: mainId,
       world: dim,
-      kind: 'region',
+      kind: isWater ? 'water' : 'region',
       discover: {
-        method: region.hasSpawn === true ? 'first_join' : 'on_enter',
+        method: isWater ? 'passive' : region.hasSpawn === true ? 'first_join' : 'on_enter',
       },
     }
     if (region.description) regionEntry.description = region.description
@@ -546,9 +547,10 @@ export function exportRegionsMetaYAML(
     }
   }
 
-  const hasSpawnRegionWithHasSpawn = dim === 'overworld' && hasSpawnCoords && enabledRegions.some(r => r.hasSpawn === true)
+  const spawnStartRegion = enabledRegions.find(r => r.hasSpawn === true && r.isWater !== true)
+  const hasSpawnRegionWithHasSpawn = dim === 'overworld' && hasSpawnCoords && !!spawnStartRegion
   if (hasSpawnRegionWithHasSpawn) {
-    const startRegion = enabledRegions.find(r => r.hasSpawn === true)!
+    const startRegion = spawnStartRegion!
     root.onboarding = {
       startRegionId: toRegionId(startRegion.name),
       teleport: {

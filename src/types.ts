@@ -25,6 +25,8 @@ export type Region = {
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel
   hasSpawn?: boolean
+  /** When true, regions-meta exports as kind: water with discover.method: passive. */
+  isWater?: boolean
   disabled?: boolean
   minecraftCategory?: string
   minecraftItems?: { id: string; name: string }[]

@@ -250,7 +250,7 @@ export function RegionPanel() {
                 max="100"
                 value={Math.round(regionFillOpacity.regionFillOpacity * 100)}
                 onChange={(e) => regionFillOpacity.setRegionFillOpacity(parseInt(e.target.value, 10) / 100)}
-                className="flex-1 h-2 bg-gunmetal rounded-lg appearance-none cursor-pointer accent-lapis-lazuli"
+                className="flex-1 h-2 bg-gunmetal rounded-lg appearance-none cursor-pointer accent-viridian"
               />
               <span className="text-gray-400 text-sm w-10 tabular-nums">
                 {Math.round(regionFillOpacity.regionFillOpacity * 100)}%

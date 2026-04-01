@@ -39,6 +39,12 @@ const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fill
   [STRUCTURE_TYPES.BURIED_TREASURE]: { fillSelected: 'rgba(255, 215, 0, 1)', fillUnselected: 'rgba(255, 215, 0, 0.85)' },
 }
 
+/** Map fill for `region.isWater` (ocean / sea / lake). */
+const WATER_REGION_FILL = { base: '30, 125, 185', hover: '70, 170, 230', selected: '35, 130, 185' } as const
+
+const REGION_LABEL_FONT_LAND = '14px "Source Sans 3", sans-serif'
+const REGION_LABEL_FONT_WATER = '11px "Source Sans 3", sans-serif'
+
 const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: string }> = {
   easy: { fill: 'rgba(34, 139, 34, 0.7)', stroke: 'rgba(34, 139, 34, 0.9)' }, // Forest Green
   normal: { fill: 'rgba(255, 140, 0, 0.7)', stroke: 'rgba(255, 140, 0, 0.9)' }, // Dark Orange
@@ -180,15 +186,16 @@ export function RegionOverlay({
           : null
         const centerX = labelPos?.x ?? canvasPoints.reduce((sum, p) => sum + p.x, 0) / canvasPoints.length
         const centerY = labelPos?.y ?? canvasPoints.reduce((sum, p) => sum + p.y, 0) / canvasPoints.length
-        ctx.font = '14px "Source Sans 3", sans-serif'
+        const isWater = region.isWater === true
+        ctx.font = isWater ? REGION_LABEL_FONT_WATER : REGION_LABEL_FONT_LAND
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
-        ctx.shadowBlur = 10
+        ctx.shadowBlur = isWater ? 7 : 10
         ctx.shadowOffsetX = 0
         ctx.shadowOffsetY = 2
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)'
-        ctx.lineWidth = 2
+        ctx.lineWidth = isWater ? 1.5 : 2
         ctx.strokeText(region.name, centerX, centerY)
         ctx.fillStyle = 'white'
         ctx.fillText(region.name, centerX, centerY)
@@ -278,20 +285,26 @@ export function RegionOverlay({
       if (isMoving) {
         fillColor = `rgba(255, 165, 0, ${fillOpacity})` // Orange for moving regions
       } else if (isSelected) {
-        fillColor = `rgba(0, 255, 0, ${fillOpacity})`
+        fillColor = region.isWater
+          ? `rgba(${WATER_REGION_FILL.selected}, ${fillOpacity})`
+          : `rgba(0, 255, 0, ${fillOpacity})`
       } else if (isDrawing) {
         fillColor = `rgba(255, 255, 0, ${fillOpacity})`
       } else if (isHighlighted) {
         fillColor = `rgba(255, 255, 0, ${fillOpacity})`
       } else if (isHovered) {
-        fillColor = `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered regions
+        fillColor = region.isWater
+          ? `rgba(${WATER_REGION_FILL.hover}, ${fillOpacity})`
+          : `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered land regions
+      } else if (region.isWater) {
+        fillColor = `rgba(${WATER_REGION_FILL.base}, ${fillOpacity})`
       } else if (showChallengeLevels && !isDisabled) {
         const challengeLevel = region.challengeLevel || 'easy'
         const base = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
         const match = base.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
         fillColor = match ? `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${fillOpacity})` : base
       } else {
-        fillColor = `rgba(0, 100, 255, ${fillOpacity})`
+        fillColor = `rgba(38, 115, 75, ${fillOpacity})` // mid-dark green (default land region fill)
       }
       ctx.fillStyle = fillColor
 
@@ -358,15 +371,19 @@ export function RegionOverlay({
         }
         
         // Draw point
-        ctx.fillStyle = isSelected 
-          ? 'rgba(0, 255, 0, 1)' 
-          : isDrawing 
+        ctx.fillStyle = isSelected
+          ? region.isWater
+            ? 'rgba(50, 155, 215, 1)'
+            : 'rgba(0, 255, 0, 1)'
+          : isDrawing
             ? 'rgba(255, 255, 0, 1)'
             : isEditing
               ? 'rgba(255, 100, 0, 1)'
               : isHighlighted
                 ? 'rgba(255, 255, 0, 1)'
-                : 'rgba(0, 100, 255, 1)'
+                : region.isWater
+                  ? 'rgba(45, 140, 200, 1)'
+                  : 'rgba(48, 130, 88, 1)' // default land vertex
         
         ctx.beginPath()
         ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
@@ -413,16 +430,17 @@ export function RegionOverlay({
         : null
       const centerX = labelPos?.x ?? canvasPoints.reduce((sum, p) => sum + p.x, 0) / canvasPoints.length
       const centerY = labelPos?.y ?? canvasPoints.reduce((sum, p) => sum + p.y, 0) / canvasPoints.length
-      
-      ctx.font = '14px "Source Sans 3", sans-serif'
+
+      const isWater = region.isWater === true
+      ctx.font = isWater ? REGION_LABEL_FONT_WATER : REGION_LABEL_FONT_LAND
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
-      ctx.shadowBlur = 10
+      ctx.shadowBlur = isWater ? 7 : 10
       ctx.shadowOffsetX = 0
       ctx.shadowOffsetY = 2
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)'
-      ctx.lineWidth = 2
+      ctx.lineWidth = isWater ? 1.5 : 2
       ctx.strokeText(region.name, centerX, centerY)
       ctx.fillStyle = 'white'
       ctx.fillText(region.name, centerX, centerY)

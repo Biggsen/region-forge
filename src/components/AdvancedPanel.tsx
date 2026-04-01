@@ -7,7 +7,7 @@ import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
@@ -33,6 +33,7 @@ type HeightEditState = { regionId: string; subregionId: string; value: string } 
 
 const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isOtherRegionTypesExpanded: false,
+  isWaterExpanded: false,
   isPluginsExpanded: false,
   isVillagesExpanded: false,
   isStructuresExpanded: false,
@@ -220,6 +221,7 @@ export function AdvancedPanel() {
     []
   )
   const [isOtherRegionTypesExpanded, setIsOtherRegionTypesExpanded] = useState(savedSectionState.isOtherRegionTypesExpanded)
+  const [isWaterExpanded, setIsWaterExpanded] = useState(savedSectionState.isWaterExpanded)
   const [isPluginsExpanded, setIsPluginsExpanded] = useState(savedSectionState.isPluginsExpanded)
   const [isVillagesExpanded, setIsVillagesExpanded] = useState(savedSectionState.isVillagesExpanded)
   const [isStructuresExpanded, setIsStructuresExpanded] = useState(savedSectionState.isStructuresExpanded)
@@ -247,6 +249,7 @@ export function AdvancedPanel() {
   useEffect(() => {
     saveAdvancedPanelSectionsState({
       isOtherRegionTypesExpanded,
+      isWaterExpanded,
       isPluginsExpanded,
       isVillagesExpanded,
       isStructuresExpanded,
@@ -261,6 +264,7 @@ export function AdvancedPanel() {
     })
   }, [
     isOtherRegionTypesExpanded,
+    isWaterExpanded,
     isPluginsExpanded,
     isVillagesExpanded,
     isStructuresExpanded,
@@ -641,8 +645,10 @@ export function AdvancedPanel() {
                                   regions.updateRegion(region.id, { hasSpawn: false })
                                 }
                               })
+                              regions.updateRegion(regionId, { hasSpawn: true, isWater: false })
+                            } else {
+                              regions.updateRegion(regionId, { hasSpawn: false })
                             }
-                            regions.updateRegion(regionId, { hasSpawn: e.target.checked })
                           }}
                           className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
                         />
@@ -684,6 +690,57 @@ export function AdvancedPanel() {
             )}
           </div>
         )}
+
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsWaterExpanded(!isWaterExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <Droplets className="w-4 h-4" />
+              Water
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isWaterExpanded ? 'rotate-90' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isWaterExpanded && (
+            <div className="space-y-3 ml-4">
+              <p className="text-xs text-gray-400">
+                Exports as <code className="text-gray-300">kind: water</code> with{' '}
+                <code className="text-gray-300">discover.method: passive</code>. WorldGuard and LevelledMobs bands still apply; no main discovery flow in mc-plugin-manager.
+              </p>
+              {regions.selectedRegionId ? (
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={regions.regions.find(r => r.id === regions.selectedRegionId)?.isWater || false}
+                    onChange={(e) => {
+                      const regionId = regions.selectedRegionId!
+                      if (e.target.checked) {
+                        regions.updateRegion(regionId, { isWater: true, hasSpawn: false })
+                      } else {
+                        regions.updateRegion(regionId, { isWater: false })
+                      }
+                    }}
+                    className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
+                  />
+                  <span className="text-sm text-gray-300">Set as water region</span>
+                </label>
+              ) : (
+                <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">Select a region to mark it as water</div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Plugins */}
         <div>

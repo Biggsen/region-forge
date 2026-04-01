@@ -26,6 +26,7 @@ export type StructureTableSort = {
 
 export type AdvancedPanelSectionsState = {
   isOtherRegionTypesExpanded: boolean
+  isWaterExpanded: boolean
   isPluginsExpanded: boolean
   isVillagesExpanded: boolean
   isStructuresExpanded: boolean
@@ -408,6 +409,7 @@ export function loadAdvancedPanelSectionsState(defaultState: AdvancedPanelSectio
     const parsed = JSON.parse(saved) as Partial<AdvancedPanelSectionsState>
     return {
       isOtherRegionTypesExpanded: typeof parsed.isOtherRegionTypesExpanded === 'boolean' ? parsed.isOtherRegionTypesExpanded : defaultState.isOtherRegionTypesExpanded,
+      isWaterExpanded: typeof parsed.isWaterExpanded === 'boolean' ? parsed.isWaterExpanded : defaultState.isWaterExpanded,
       isPluginsExpanded: typeof parsed.isPluginsExpanded === 'boolean' ? parsed.isPluginsExpanded : defaultState.isPluginsExpanded,
       isVillagesExpanded: typeof parsed.isVillagesExpanded === 'boolean' ? parsed.isVillagesExpanded : defaultState.isVillagesExpanded,
       isStructuresExpanded: typeof parsed.isStructuresExpanded === 'boolean' ? parsed.isStructuresExpanded : defaultState.isStructuresExpanded,
