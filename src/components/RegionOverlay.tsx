@@ -53,6 +53,31 @@ const CHALLENGE_LEVEL_COLORS: Record<ChallengeLevel, { fill: string; stroke: str
   deadly: { fill: 'rgba(80, 0, 0, 0.7)', stroke: 'rgba(80, 0, 0, 0.9)' } // Very Dark Red
 }
 
+/** Muted blue to lerp toward for water + LevelledMobs fill (subtle cool shift). */
+const WATER_LM_TINT_REF = { r: 58, g: 108, b: 158 } as const
+const WATER_LM_TINT_STRENGTH = 0.4
+
+function levelledMobsFillRgba(region: Region, fillOpacity: number): string {
+  const challengeLevel = region.challengeLevel || 'easy'
+  const base = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
+  const match = base.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (!match) return base
+  let r = parseInt(match[1], 10)
+  let g = parseInt(match[2], 10)
+  let b = parseInt(match[3], 10)
+  if (region.isWater === true) {
+    const t = WATER_LM_TINT_STRENGTH
+    const { r: br, g: bg, b: bb } = WATER_LM_TINT_REF
+    r = Math.round(r * (1 - t) + br * t)
+    g = Math.round(g * (1 - t) + bg * t)
+    b = Math.round(b * (1 - t) + bb * t)
+    r = Math.max(0, Math.min(255, r))
+    g = Math.max(0, Math.min(255, g))
+    b = Math.max(0, Math.min(255, b))
+  }
+  return `rgba(${r}, ${g}, ${b}, ${fillOpacity})`
+}
+
 interface RegionOverlayProps {
   canvas: HTMLCanvasElement | null
   mapState: MapState
@@ -293,16 +318,17 @@ export function RegionOverlay({
       } else if (isHighlighted) {
         fillColor = `rgba(255, 255, 0, ${fillOpacity})`
       } else if (isHovered) {
-        fillColor = region.isWater
-          ? `rgba(${WATER_REGION_FILL.hover}, ${fillOpacity})`
-          : `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered land regions
+        if (showChallengeLevels && !isDisabled) {
+          fillColor = levelledMobsFillRgba(region, fillOpacity)
+        } else if (region.isWater) {
+          fillColor = `rgba(${WATER_REGION_FILL.hover}, ${fillOpacity})`
+        } else {
+          fillColor = `rgba(0, 255, 255, ${fillOpacity})` // Cyan highlight for hovered land regions
+        }
+      } else if (showChallengeLevels && !isDisabled) {
+        fillColor = levelledMobsFillRgba(region, fillOpacity)
       } else if (region.isWater) {
         fillColor = `rgba(${WATER_REGION_FILL.base}, ${fillOpacity})`
-      } else if (showChallengeLevels && !isDisabled) {
-        const challengeLevel = region.challengeLevel || 'easy'
-        const base = CHALLENGE_LEVEL_COLORS[challengeLevel].fill
-        const match = base.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-        fillColor = match ? `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${fillOpacity})` : base
       } else {
         fillColor = `rgba(38, 115, 75, ${fillOpacity})` // mid-dark green (default land region fill)
       }
