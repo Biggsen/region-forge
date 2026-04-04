@@ -32,6 +32,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
 }
 
 type YEditState = { regionId: string; subregionId: string; value: string } | null
+type XZEditState = YEditState
 type HeightEditState = { regionId: string; subregionId: string; value: string } | null
 
 const DEFAULT_ADVANCED_PANEL_SECTIONS = {
@@ -66,6 +67,12 @@ function SubregionListRow({
   editingY,
   setEditingY,
   updateY,
+  editingX,
+  setEditingX,
+  updateX,
+  editingZ,
+  setEditingZ,
+  updateZ,
   editingHeight,
   setEditingHeight,
   updateHeight,
@@ -78,6 +85,12 @@ function SubregionListRow({
   editingY: YEditState
   setEditingY: React.Dispatch<React.SetStateAction<YEditState>>
   updateY: (regionId: string, subregionId: string, y: number | undefined) => void
+  editingX?: XZEditState
+  setEditingX?: React.Dispatch<React.SetStateAction<XZEditState>>
+  updateX?: (regionId: string, subregionId: string, x: number) => void
+  editingZ?: XZEditState
+  setEditingZ?: React.Dispatch<React.SetStateAction<XZEditState>>
+  updateZ?: (regionId: string, subregionId: string, z: number) => void
   editingHeight?: HeightEditState
   setEditingHeight?: React.Dispatch<React.SetStateAction<HeightEditState>>
   updateHeight?: (regionId: string, subregionId: string, height: number | undefined) => void
@@ -94,6 +107,26 @@ function SubregionListRow({
       updateY(editingY.regionId, editingY.subregionId, v === '' ? undefined : n)
     }
     setEditingY(null)
+  }
+
+  const saveX = () => {
+    if (!editingX || !setEditingX || !updateX) return
+    const v = editingX.value.trim()
+    const n = parseInt(v, 10)
+    if (v !== '' && !Number.isNaN(n)) {
+      updateX(editingX.regionId, editingX.subregionId, n)
+    }
+    setEditingX(null)
+  }
+
+  const saveZ = () => {
+    if (!editingZ || !setEditingZ || !updateZ) return
+    const v = editingZ.value.trim()
+    const n = parseInt(v, 10)
+    if (v !== '' && !Number.isNaN(n)) {
+      updateZ(editingZ.regionId, editingZ.subregionId, n)
+    }
+    setEditingZ(null)
   }
 
   const saveHeight = () => {
@@ -128,7 +161,42 @@ function SubregionListRow({
         </button>
       </div>
       <div className="flex flex-wrap items-center gap-x-1 text-gray-400">
-        <span>{item.x},</span>
+        {updateX && setEditingX ? (
+          editingX?.subregionId === item.subregionId ? (
+            <input
+              type="text"
+              inputMode="numeric"
+              className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
+              style={{ width: `${Math.max(2, (editingX.value.length || 0) + 1)}ch` }}
+              placeholder="x"
+              autoFocus
+              value={editingX.value}
+              onChange={e => setEditingX(prev => (prev ? { ...prev, value: e.target.value } : null))}
+              onBlur={saveX}
+              onKeyDown={e => {
+                if (e.key === 'Enter') saveX()
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                setEditingX({
+                  regionId: item.regionId,
+                  subregionId: item.subregionId,
+                  value: String(item.x)
+                })
+              }
+              className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
+              title="Set X coordinate"
+            >
+              {item.x}
+            </button>
+          )
+        ) : (
+          <span>{item.x}</span>
+        )}
+        <span>,</span>
         {editingY?.subregionId === item.subregionId ? (
           <input
             type="text"
@@ -160,7 +228,42 @@ function SubregionListRow({
             {item.y != null ? item.y : '\u00a0'}
           </button>
         )}
-        <span>, {item.z}</span>
+        <span>,</span>
+        {updateZ && setEditingZ ? (
+          editingZ?.subregionId === item.subregionId ? (
+            <input
+              type="text"
+              inputMode="numeric"
+              className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
+              style={{ width: `${Math.max(2, (editingZ.value.length || 0) + 1)}ch` }}
+              placeholder="z"
+              autoFocus
+              value={editingZ.value}
+              onChange={e => setEditingZ(prev => (prev ? { ...prev, value: e.target.value } : null))}
+              onBlur={saveZ}
+              onKeyDown={e => {
+                if (e.key === 'Enter') saveZ()
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                setEditingZ({
+                  regionId: item.regionId,
+                  subregionId: item.subregionId,
+                  value: String(item.z)
+                })
+              }
+              className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
+              title="Set Z coordinate"
+            >
+              {item.z}
+            </button>
+          )
+        ) : (
+          <span>{item.z}</span>
+        )}
         {showVillageHeight && (
           <>
             <span className="ml-2">Height:</span>
@@ -250,6 +353,8 @@ export function AdvancedPanel() {
   const [expandedRegionCategories, setExpandedRegionCategories] = useState<Set<string>>(new Set())
   const [expandedWorldCategories, setExpandedWorldCategories] = useState<Set<string>>(new Set())
   const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
+  const [editingStructureX, setEditingStructureX] = useState<XZEditState>(null)
+  const [editingStructureZ, setEditingStructureZ] = useState<XZEditState>(null)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
   const [editingVillageHeight, setEditingVillageHeight] = useState<HeightEditState>(null)
 
@@ -1552,6 +1657,12 @@ export function AdvancedPanel() {
                                   editingY={editingStructureY}
                                   setEditingY={setEditingStructureY}
                                   updateY={regions.updateStructureSubregionY}
+                                  editingX={editingStructureX}
+                                  setEditingX={setEditingStructureX}
+                                  updateX={regions.updateStructureSubregionX}
+                                  editingZ={editingStructureZ}
+                                  setEditingZ={setEditingStructureZ}
+                                  updateZ={regions.updateStructureSubregionZ}
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
                                     const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`

@@ -539,6 +539,36 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     ))
   }, [])
 
+  const updateStructureSubregionX = useCallback((regionId: string, subregionId: string, x: number) => {
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub =>
+              sub.id === subregionId && sub.type === 'structure'
+                ? { ...sub, x }
+                : sub
+            )
+          }
+        : region
+    ))
+  }, [])
+
+  const updateStructureSubregionZ = useCallback((regionId: string, subregionId: string, z: number) => {
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub =>
+              sub.id === subregionId && sub.type === 'structure'
+                ? { ...sub, z }
+                : sub
+            )
+          }
+        : region
+    ))
+  }, [])
+
   const updateVillageSubregionY = useCallback((regionId: string, subregionId: string, y: number | undefined) => {
     setRegions(prev => prev.map(region =>
       region.id === regionId
@@ -767,6 +797,8 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     removeSubregionFromRegion,
     updateSubregionName,
     updateStructureSubregionY,
+    updateStructureSubregionX,
+    updateStructureSubregionZ,
     updateVillageSubregionY,
     updateVillageSubregionHeight,
     regenerateVillageNames,
