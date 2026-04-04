@@ -295,6 +295,18 @@ export function createStructureSubregion(
   }
 }
 
+/** Same numeric suffix rule as {@link createStructureSubregion} when a generated name still collides. */
+function uniqueSubregionDisplayNameAmong(base: string, existingNames: Set<string>): string {
+  if (!existingNames.has(base)) return base
+  let counter = 1
+  while (counter < 1000) {
+    const candidate = `${base} ${counter}`
+    if (!existingNames.has(candidate)) return candidate
+    counter++
+  }
+  return base
+}
+
 /** Single manual structure: same as CSV row via {@link createStructureSubregion}, with explicit id and optional display name. */
 export function buildManualStructureSubregion(options: {
   structureType: StructureType
@@ -314,10 +326,14 @@ export function buildManualStructureSubregion(options: {
     type: options.structureType,
   }
   const sub = createStructureSubregion(row, 0, options.structureType, options.parentRegionId, options.existingNames)
+  const name =
+    options.name?.trim()
+      ? uniqueSubregionDisplayNameAmong(options.name.trim(), options.existingNames)
+      : sub.name
   return {
     ...sub,
     id: options.subregionId,
-    ...(options.name?.trim() ? { name: options.name.trim() } : {}),
+    name,
   }
 }
 

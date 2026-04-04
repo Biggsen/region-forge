@@ -137,6 +137,20 @@ describe('buildManualStructureSubregion', () => {
     expect(sub.name).toBe('Custom Igloo Name')
   })
 
+  it('suffixes manual name when it collides with an existing subregion name', () => {
+    const sub = buildManualStructureSubregion({
+      structureType: STRUCTURE_TYPES.WOODLAND_MANSION,
+      x: 1,
+      z: 2,
+      y: 64,
+      parentRegionId: 'r1',
+      existingNames: new Set(['Blackbriar Hall', 'Blackbriar Hall 1']),
+      subregionId: 'structure_woodland_mansion_x',
+      name: 'Blackbriar Hall',
+    })
+    expect(sub.name).toBe('Blackbriar Hall 2')
+  })
+
   it('uses ancient city fixed Y like createStructureSubregion', () => {
     const sub = buildManualStructureSubregion({
       structureType: STRUCTURE_TYPES.ANCIENT_CITY,
