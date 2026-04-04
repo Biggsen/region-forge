@@ -238,6 +238,24 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 103, y: 71, z: -47}')
   })
 
+  it('returns cuboid YAML for woodland mansion (NW corner x,z,y; padded ~79×58 footprint)', () => {
+    const subregion = {
+      id: 'wm1',
+      name: 'Blackbriar Hall',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.WOODLAND_MANSION,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  blackbriar_hall:')
+    expect(yaml).toContain('min: {x: 98, y: 58, z: -52}')
+    expect(yaml).toContain('max: {x: 180, y: 118, z: 9}')
+  })
+
   it('returns 3x3x3 cuboid YAML for buried treasure (coords = chest block)', () => {
     const subregion = {
       id: 'bt1',

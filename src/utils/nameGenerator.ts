@@ -820,6 +820,53 @@ export function generateTrailRuinsNames(count: number): string[] {
   return Array.from(results)
 }
 
+// --- Woodland mansion (stately / gloomy manor names) ---
+
+type WoodlandMansionPattern = (pools: WoodlandMansionPools) => string
+
+interface WoodlandMansionPools {
+  adjectives: string[]
+  woods: string[]
+  estates: string[]
+  moods: string[]
+  weirdCompounds: string[]
+  curated: string[]
+}
+
+const woodlandMansionPools: WoodlandMansionPools = {
+  adjectives: [
+    'Blackened', 'Crooked', 'Drear', 'Forgotten', 'Gloaming', 'Hollow', 'Mossbound', 'Shattered', 'Silent', 'Weeping',
+    'Widow', 'Witch', 'Bramble', 'Rootbound', 'Fogbound'
+  ],
+  woods: ['Oak', 'Birch', 'Elder', 'Thicket', 'Grove', 'Canopy', 'Wildwood', 'Mirk', 'Hollow', 'Fen'],
+  estates: ['Manor', 'Hall', 'House', 'Estate', 'Keep', 'Hearth', 'Seat', 'Chateau', 'Court', 'Tower'],
+  moods: ['of Still Air', 'of Long Shadows', 'at Dusk', 'in the Deep Wood', 'Beyond the Path', 'Under Moss'],
+  weirdCompounds: ['Thornwick', 'Blackbriar', 'Duskmarch', 'Hollowmere', 'Gloomcroft', 'Mossharrow', 'Ravenfold'],
+  curated: [
+    'Blackbriar Hall',
+    'Hollowmere Manor',
+    'The Gloaming Seat',
+    'Mossharrow Estate',
+    'Duskmarch Keep'
+  ]
+}
+
+const woodlandMansionPatterns: WoodlandMansionPattern[] = [
+  (p) => `${pick(p.adjectives)} ${pick(p.woods)} ${pick(p.estates)}`,
+  (p) => `The ${pick(p.adjectives)} ${pick(p.estates)}`,
+  (p) => `${pick(p.weirdCompounds)} ${pick(p.estates)}`,
+  (p) => `${pick(p.estates)} ${pick(p.moods)}`,
+  (p) => `${pick(p.woods)} ${pick(p.estates)} ${pick(p.moods)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.weirdCompounds)}`
+]
+
+export function generateWoodlandMansionName(): string {
+  if (Math.random() < 0.18) {
+    return pick(woodlandMansionPools.curated)
+  }
+  return pick(woodlandMansionPatterns)(woodlandMansionPools)
+}
+
 // --- Buried Treasure name generator (spec: tasks/buried_treasure_name_generator_spec.md) ---
 
 const BURIED_TREASURE_OBJECTS = [

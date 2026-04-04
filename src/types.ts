@@ -9,6 +9,7 @@ export const STRUCTURE_TYPES = {
   ANCIENT_CITY: 'ancient_city',
   TRAIL_RUINS: 'trail_ruins',
   BURIED_TREASURE: 'buried_treasure',
+  WOODLAND_MANSION: 'woodland_mansion',
 } as const
 
 export type StructureType = typeof STRUCTURE_TYPES[keyof typeof STRUCTURE_TYPES]
