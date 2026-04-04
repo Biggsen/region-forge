@@ -117,24 +117,25 @@ export function getBuriedTreasureCuboid(
 }
 
 /**
- * Woodland mansion cuboid: CSV x,z,y = NW corner at floor level (Java `/locate structure` convention).
- * Footprint ~79×58 blocks per wiki, plus 2-block margin like desert pyramids; Y spans foundation and roof.
+ * Woodland mansion cuboid for regions.yml: CSV x,z are the structure center; y is floor/reference height.
+ * Footprint 84×66 (X×Z), inclusive; Y from y−34 through y+3.
  */
 export function getWoodlandMansionCuboid(
   x: number,
   z: number,
   y: number
 ): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
-  const pad = 2
-  const widthX = 79
-  const widthZ = 58
+  const widthX = 84
+  const widthZ = 66
+  const halfX = Math.floor(widthX / 2)
+  const halfZ = Math.floor(widthZ / 2)
   return {
-    minX: x - pad,
-    maxX: x + (widthX - 1) + pad,
-    minZ: z - pad,
-    maxZ: z + (widthZ - 1) + pad,
-    minY: y - 12,
-    maxY: y + 48
+    minX: x - halfX,
+    maxX: x + (widthX - 1) - halfX,
+    minZ: z - halfZ,
+    maxZ: z + (widthZ - 1) - halfZ,
+    minY: y - 34,
+    maxY: y + 3
   }
 }
 
