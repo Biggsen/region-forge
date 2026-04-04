@@ -300,7 +300,7 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 103, y: 71, z: -47}')
   })
 
-  it('returns cuboid YAML for woodland mansion (NW corner x,z,y; padded ~79×58 footprint)', () => {
+  it('returns cuboid YAML for woodland mansion (center x,z; 84×66 XZ; y−34..y+3)', () => {
     const subregion = {
       id: 'wm1',
       name: 'Blackbriar Hall',
@@ -314,8 +314,8 @@ describe('generateSubregionYAML', () => {
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('  blackbriar_hall:')
-    expect(yaml).toContain('min: {x: 98, y: 58, z: -52}')
-    expect(yaml).toContain('max: {x: 180, y: 118, z: 9}')
+    expect(yaml).toContain('min: {x: 58, y: 36, z: -83}')
+    expect(yaml).toContain('max: {x: 141, y: 73, z: -18}')
   })
 
   it('returns 3x3x3 cuboid YAML for buried treasure (coords = chest block)', () => {
