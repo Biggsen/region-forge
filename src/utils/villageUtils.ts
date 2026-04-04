@@ -295,6 +295,48 @@ export function createStructureSubregion(
   }
 }
 
+/** Same numeric suffix rule as {@link createStructureSubregion} when a generated name still collides. */
+function uniqueSubregionDisplayNameAmong(base: string, existingNames: Set<string>): string {
+  if (!existingNames.has(base)) return base
+  let counter = 1
+  while (counter < 1000) {
+    const candidate = `${base} ${counter}`
+    if (!existingNames.has(candidate)) return candidate
+    counter++
+  }
+  return base
+}
+
+/** Single manual structure: same as CSV row via {@link createStructureSubregion}, with explicit id and optional display name. */
+export function buildManualStructureSubregion(options: {
+  structureType: StructureType
+  x: number
+  z: number
+  y: number
+  parentRegionId: string
+  existingNames: Set<string>
+  subregionId: string
+  name?: string
+}): Subregion {
+  const row: VillageData = {
+    x: options.x,
+    z: options.z,
+    y: options.y,
+    details: '',
+    type: options.structureType,
+  }
+  const sub = createStructureSubregion(row, 0, options.structureType, options.parentRegionId, options.existingNames)
+  const name =
+    options.name?.trim()
+      ? uniqueSubregionDisplayNameAmong(options.name.trim(), options.existingNames)
+      : sub.name
+  return {
+    ...sub,
+    id: options.subregionId,
+    name,
+  }
+}
+
 /** Lowercase snake_case id for regions.yml / meta; strips apostrophes for safe YAML keys and WG commands. */
 export function nameToRegionId(name: string): string {
   return name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_')

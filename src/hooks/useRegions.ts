@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -437,6 +437,42 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     }
   }, [regions])
 
+  const addManualStructureSubregion = useCallback(
+    (
+      regionId: string,
+      payload: {
+        structureType: StructureType
+        x: number
+        z: number
+        y: number
+        name?: string
+      }
+    ): boolean => {
+      let added = false
+      setRegions(prev => {
+        const region = prev.find(r => r.id === regionId)
+        if (!region) return prev
+        added = true
+        const existingNames = new Set(prev.flatMap(r => (r.subregions || []).map(s => s.name)))
+        const sub = buildManualStructureSubregion({
+          structureType: payload.structureType,
+          x: payload.x,
+          z: payload.z,
+          y: payload.y,
+          parentRegionId: regionId,
+          existingNames,
+          subregionId: `structure_${payload.structureType}_${generateId()}`,
+          name: payload.name,
+        })
+        return prev.map(r =>
+          r.id === regionId ? { ...r, subregions: [...(r.subregions || []), sub] } : r
+        )
+      })
+      return added
+    },
+    []
+  )
+
   const removeSubregionFromRegion = useCallback((regionId: string, subregionId: string) => {
     setRegions(prev => prev.map(region => 
       region.id === regionId 
@@ -727,6 +763,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     toggleShowNames,
     importVillagesFromCSV,
     importStructuresFromCSV,
+    addManualStructureSubregion,
     removeSubregionFromRegion,
     updateSubregionName,
     updateStructureSubregionY,
