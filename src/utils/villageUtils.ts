@@ -2,6 +2,11 @@ import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
 import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName } from './nameGenerator'
 
+/*
+ * Structure CSV x/z/y are not one shared rule: each structure type maps columns differently (locator, a corner,
+ * horizontal center, chest block, etc.). Each cuboid helper’s doc comment states what its arguments represent.
+ */
+
 /** Locator Y used for ancient city imports; CSV y column is ignored. */
 export const ANCIENT_CITY_IMPORT_Y = -32
 
@@ -41,9 +46,9 @@ export function getJunglePyramidCuboid(x: number, z: number, topY: number): { mi
   }
 }
 
-/** Cuboid bounds for desert pyramid (x, z = NW corner; y = structure Y from CSV). */
+/** Cuboid bounds for desert pyramid only: x, z = that structure’s NW corner; y = structure Y from CSV. */
 export function getDesertPyramidCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
-  // Structure footprint is 21x21 inclusive from NW corner. Expand by 2 blocks on each side to get 25x25.
+  // Footprint 21×21 inclusive from that NW corner; pad 2 blocks each side → 25×25.
   return {
     minX: x - 2,
     maxX: x + 22,
