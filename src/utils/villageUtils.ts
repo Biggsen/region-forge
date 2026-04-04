@@ -1,6 +1,6 @@
 import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName } from './nameGenerator'
 
 /** Locator Y used for ancient city imports; CSV y column is ignored. */
 export const ANCIENT_CITY_IMPORT_Y = -32
@@ -116,6 +116,28 @@ export function getBuriedTreasureCuboid(
   }
 }
 
+/**
+ * Woodland mansion cuboid: CSV x,z,y = NW corner at floor level (Java `/locate structure` convention).
+ * Footprint ~79×58 blocks per wiki, plus 2-block margin like desert pyramids; Y spans foundation and roof.
+ */
+export function getWoodlandMansionCuboid(
+  x: number,
+  z: number,
+  y: number
+): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const pad = 2
+  const widthX = 79
+  const widthZ = 58
+  return {
+    minX: x - pad,
+    maxX: x + (widthX - 1) + pad,
+    minZ: z - pad,
+    maxZ: z + (widthZ - 1) + pad,
+    minY: y - 12,
+    maxY: y + 48
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -125,6 +147,7 @@ const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.ANCIENT_CITY]: generateAncientCityName,
   [STRUCTURE_TYPES.TRAIL_RUINS]: generateTrailRuinsName,
   [STRUCTURE_TYPES.BURIED_TREASURE]: generateBuriedTreasureName,
+  [STRUCTURE_TYPES.WOODLAND_MANSION]: generateWoodlandMansionName,
 }
 
 export interface VillageData {
@@ -296,6 +319,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isTrailRuins = isStructure && subregion.structureType === STRUCTURE_TYPES.TRAIL_RUINS
   const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
   const isBuriedTreasure = isStructure && subregion.structureType === STRUCTURE_TYPES.BURIED_TREASURE
+  const isWoodlandMansion = isStructure && subregion.structureType === STRUCTURE_TYPES.WOODLAND_MANSION
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -369,6 +393,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = subregion.y + 1
   } else if (isBuriedTreasure && subregion.y !== undefined) {
     const cuboid = getBuriedTreasureCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isWoodlandMansion && subregion.y !== undefined) {
+    const cuboid = getWoodlandMansionCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ
