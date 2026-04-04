@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -100,6 +100,54 @@ describe('createStructureSubregion', () => {
     )
     expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
     expect(sub.y).toBe(-32)
+  })
+})
+
+describe('buildManualStructureSubregion', () => {
+  it('uses explicit id and createStructureSubregion for coords and type', () => {
+    const sub = buildManualStructureSubregion({
+      structureType: STRUCTURE_TYPES.DESERT_PYRAMID,
+      x: 10,
+      z: 20,
+      y: 64,
+      parentRegionId: 'region-a',
+      existingNames: new Set(),
+      subregionId: 'structure_desert_pyramid_customid123',
+    })
+    expect(sub.id).toBe('structure_desert_pyramid_customid123')
+    expect(sub.x).toBe(10)
+    expect(sub.z).toBe(20)
+    expect(sub.y).toBe(64)
+    expect(sub.structureType).toBe(STRUCTURE_TYPES.DESERT_PYRAMID)
+    expect(sub.parentRegionId).toBe('region-a')
+    expect(sub.type).toBe('structure')
+  })
+
+  it('overrides name when provided', () => {
+    const sub = buildManualStructureSubregion({
+      structureType: STRUCTURE_TYPES.IGLOO,
+      x: 0,
+      z: 0,
+      y: 70,
+      parentRegionId: 'r1',
+      existingNames: new Set(),
+      subregionId: 'structure_igloo_x',
+      name: 'Custom Igloo Name',
+    })
+    expect(sub.name).toBe('Custom Igloo Name')
+  })
+
+  it('uses ancient city fixed Y like createStructureSubregion', () => {
+    const sub = buildManualStructureSubregion({
+      structureType: STRUCTURE_TYPES.ANCIENT_CITY,
+      x: 0,
+      z: 0,
+      y: 100,
+      parentRegionId: 'r1',
+      existingNames: new Set(),
+      subregionId: 'structure_ancient_city_x',
+    })
+    expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
   })
 })
 

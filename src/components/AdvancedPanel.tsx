@@ -11,11 +11,13 @@ import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home,
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
+import { findParentRegion } from '../utils/villageUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 import { DeleteSubregionModal } from './DeleteSubregionModal'
+import { BaseModal } from './BaseModal'
 
 const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel: string; buttonLabel: string }> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { countLabel: 'Jungle Temple', pluralLabel: 'jungle temples', buttonLabel: 'Import Jungle Temples (CSV)' },
@@ -217,6 +219,14 @@ export function AdvancedPanel() {
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  const [manualStructureModalOpen, setManualStructureModalOpen] = useState(false)
+  const [manualStructureForm, setManualStructureForm] = useState({
+    structureType: (Object.values(STRUCTURE_TYPES) as StructureType[])[0],
+    x: '',
+    y: '',
+    z: '',
+    name: '',
+  })
   const savedSectionState = useMemo(
     () => loadAdvancedPanelSectionsState(DEFAULT_ADVANCED_PANEL_SECTIONS),
     []
@@ -449,6 +459,64 @@ export function AdvancedPanel() {
   }
 
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
+
+  const manualStructureParsedXZ = useMemo(() => {
+    const x = parseInt(manualStructureForm.x, 10)
+    const z = parseInt(manualStructureForm.z, 10)
+    const valid = !Number.isNaN(x) && !Number.isNaN(z)
+    return { x, z, valid }
+  }, [manualStructureForm.x, manualStructureForm.z])
+
+  const manualStructureParentRegion = useMemo(() => {
+    if (!manualStructureParsedXZ.valid) return null
+    return findParentRegion(
+      { x: manualStructureParsedXZ.x, z: manualStructureParsedXZ.z, details: '', type: '' },
+      regions.regions
+    )
+  }, [manualStructureParsedXZ, regions.regions])
+
+  const manualStructureNoContainingRegion =
+    manualStructureParsedXZ.valid && manualStructureParentRegion === null
+
+  const openManualStructureModal = () => {
+    setManualStructureForm({
+      structureType: (Object.values(STRUCTURE_TYPES) as StructureType[])[0],
+      x: '',
+      y: '',
+      z: '',
+      name: '',
+    })
+    setManualStructureModalOpen(true)
+  }
+
+  const submitManualStructure = (e: React.FormEvent) => {
+    e.preventDefault()
+    const x = parseInt(manualStructureForm.x, 10)
+    const y = parseInt(manualStructureForm.y, 10)
+    const z = parseInt(manualStructureForm.z, 10)
+    if (Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(z)) {
+      toast.showToast('Enter valid X, Y, and Z', 'error')
+      return
+    }
+    const parent = findParentRegion({ x, z, details: '', type: '' }, regions.regions)
+    if (!parent) {
+      toast.showToast('No region contains these X/Z coordinates (need a closed region over that point)', 'error')
+      return
+    }
+    const ok = regions.addManualStructureSubregion(parent.id, {
+      structureType: manualStructureForm.structureType,
+      x,
+      z,
+      y,
+      name: manualStructureForm.name.trim() || undefined,
+    })
+    if (!ok) {
+      toast.showToast('Region not found', 'error')
+      return
+    }
+    toast.showToast('Structure added', 'success')
+    setManualStructureModalOpen(false)
+  }
 
   const selectedRegion = regions.selectedRegionId
     ? regions.regions.find(r => r.id === regions.selectedRegionId) ?? null
@@ -1235,6 +1303,7 @@ export function AdvancedPanel() {
                       ))}
                     </select>
                     <button
+                      type="button"
                       onClick={() => triggerStructureFileInput(selectedStructureTypeForImport)}
                       disabled={isImportingStructures}
                       className="bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors whitespace-nowrap"
@@ -1242,7 +1311,115 @@ export function AdvancedPanel() {
                       {isImportingStructures ? 'Importing...' : 'Import (CSV)'}
                     </button>
                   </div>
+                  <p className="text-xs text-gray-500">
+                    Re-importing CSV for a structure type removes all existing markers of that type project-wide, then adds from the file. Use{' '}
+                    <span className="text-gray-400">Add structure manually</span> to append a single locator without editing the CSV.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={openManualStructureModal}
+                    disabled={availableRegions.length === 0}
+                    className="text-sm font-medium py-2 px-3 rounded-md border border-gray-600 bg-gray-700/80 text-gray-200 hover:bg-gray-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Add structure manually
+                  </button>
                 </div>
+                <BaseModal
+                  isOpen={manualStructureModalOpen}
+                  onClose={() => setManualStructureModalOpen(false)}
+                  title="Add structure manually"
+                  size="md"
+                  contentClassName="max-w-md"
+                >
+                  <form onSubmit={submitManualStructure} className="space-y-3 text-sm">
+                    <p className="text-xs text-gray-500">
+                      Parent region is chosen automatically from X and Z: the first region whose polygon contains that point (same rule as CSV import).
+                    </p>
+                    {manualStructureParentRegion && (
+                      <p className="text-sm text-gray-300">
+                        <span className="text-gray-500">Parent region:</span> {manualStructureParentRegion.name}
+                      </p>
+                    )}
+                    <div>
+                      <label className="block text-gray-300 mb-1">Structure type</label>
+                      <select
+                        value={manualStructureForm.structureType}
+                        onChange={e =>
+                          setManualStructureForm(f => ({ ...f, structureType: e.target.value as StructureType }))
+                        }
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 text-white px-3 py-2 focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+                      >
+                        {(Object.values(STRUCTURE_TYPES) as StructureType[]).map(type => (
+                          <option key={type} value={type}>
+                            {STRUCTURE_DISPLAY[type].countLabel}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-gray-300 mb-1">X</label>
+                        <input
+                          type="number"
+                          value={manualStructureForm.x}
+                          onChange={e => setManualStructureForm(f => ({ ...f, x: e.target.value }))}
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 text-white px-2 py-2 focus:ring-2 focus:ring-lapis-lazuli"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-300 mb-1">Y</label>
+                        <input
+                          type="number"
+                          value={manualStructureForm.y}
+                          onChange={e => setManualStructureForm(f => ({ ...f, y: e.target.value }))}
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 text-white px-2 py-2 focus:ring-2 focus:ring-lapis-lazuli"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-300 mb-1">Z</label>
+                        <input
+                          type="number"
+                          value={manualStructureForm.z}
+                          onChange={e => setManualStructureForm(f => ({ ...f, z: e.target.value }))}
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 text-white px-2 py-2 focus:ring-2 focus:ring-lapis-lazuli"
+                          required
+                        />
+                      </div>
+                    </div>
+                    {manualStructureNoContainingRegion && (
+                      <p className="text-amber-400/90 text-xs">
+                        These X/Z are not inside any region — fix coordinates or adjust the region boundary.
+                      </p>
+                    )}
+                    <div>
+                      <label className="block text-gray-300 mb-1">Name (optional)</label>
+                      <input
+                        type="text"
+                        value={manualStructureForm.name}
+                        onChange={e => setManualStructureForm(f => ({ ...f, name: e.target.value }))}
+                        placeholder="Auto-generated if empty"
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 text-white px-3 py-2 focus:ring-2 focus:ring-lapis-lazuli"
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setManualStructureModalOpen(false)}
+                        className="flex-1 py-2 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 py-2 rounded-md bg-viridian text-white font-medium hover:bg-viridian/80"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </form>
+                </BaseModal>
                 <input
                   ref={structureFileInputRef}
                   type="file"

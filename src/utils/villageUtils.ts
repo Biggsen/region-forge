@@ -295,6 +295,32 @@ export function createStructureSubregion(
   }
 }
 
+/** Single manual structure: same as CSV row via {@link createStructureSubregion}, with explicit id and optional display name. */
+export function buildManualStructureSubregion(options: {
+  structureType: StructureType
+  x: number
+  z: number
+  y: number
+  parentRegionId: string
+  existingNames: Set<string>
+  subregionId: string
+  name?: string
+}): Subregion {
+  const row: VillageData = {
+    x: options.x,
+    z: options.z,
+    y: options.y,
+    details: '',
+    type: options.structureType,
+  }
+  const sub = createStructureSubregion(row, 0, options.structureType, options.parentRegionId, options.existingNames)
+  return {
+    ...sub,
+    id: options.subregionId,
+    ...(options.name?.trim() ? { name: options.name.trim() } : {}),
+  }
+}
+
 /** Lowercase snake_case id for regions.yml / meta; strips apostrophes for safe YAML keys and WG commands. */
 export function nameToRegionId(name: string): string {
   return name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_')
