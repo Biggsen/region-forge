@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -437,6 +437,36 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     }
   }, [regions])
 
+  const importHeartsFromCSV = useCallback((csvContent: string) => {
+    const rows = parseRegionHeartImportRows(csvContent)
+    const results = { heartRows: rows.length, regionsUpdated: 0, orphaned: 0 }
+    if (rows.length === 0) {
+      return results
+    }
+    const regionsSnapshot = regions
+    const updates = new Map<string, { x: number; z: number; y?: number }>()
+    for (const row of rows) {
+      const parent = findParentRegion(row, regionsSnapshot)
+      if (!parent) {
+        results.orphaned++
+        continue
+      }
+      const cp: { x: number; z: number; y?: number } = { x: row.x, z: row.z }
+      if (row.y !== undefined && !Number.isNaN(row.y)) {
+        cp.y = row.y
+      }
+      updates.set(parent.id, cp)
+    }
+    results.regionsUpdated = updates.size
+    setRegions(prev =>
+      prev.map(r => {
+        const cp = updates.get(r.id)
+        return cp ? { ...r, centerPoint: cp } : r
+      })
+    )
+    return results
+  }, [regions])
+
   const addManualStructureSubregion = useCallback(
     (
       regionId: string,
@@ -648,10 +678,55 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     })
   }, [])
 
-  const setCustomCenterPoint = useCallback((regionId: string, centerPoint: { x: number; z: number } | null) => {
-    setRegions(prev => prev.map(region => 
-      region.id === regionId ? { ...region, centerPoint } : region
-    ))
+  const setCustomCenterPoint = useCallback((regionId: string, centerPoint: { x: number; z: number; y?: number } | null) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId) return region
+        if (centerPoint === null) return { ...region, centerPoint: null }
+        const prevHeart = region.centerPoint
+        const next: { x: number; z: number; y?: number } = {
+          x: centerPoint.x,
+          z: centerPoint.z
+        }
+        if (centerPoint.y !== undefined) {
+          next.y = centerPoint.y
+        } else if (prevHeart?.y !== undefined) {
+          next.y = prevHeart.y
+        }
+        return { ...region, centerPoint: next }
+      })
+    )
+  }, [])
+
+  const updateRegionHeartX = useCallback((regionId: string, _subregionId: string, x: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.centerPoint
+          ? { ...region, centerPoint: { ...region.centerPoint, x } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionHeartZ = useCallback((regionId: string, _subregionId: string, z: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.centerPoint
+          ? { ...region, centerPoint: { ...region.centerPoint, z } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionHeartY = useCallback((regionId: string, _subregionId: string, y: number | undefined) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId || !region.centerPoint) return region
+        const { y: _drop, ...rest } = region.centerPoint
+        const centerPoint = y === undefined ? rest : { ...rest, y }
+        return { ...region, centerPoint }
+      })
+    )
   }, [])
 
   // Split region functions
@@ -793,6 +868,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     toggleShowNames,
     importVillagesFromCSV,
     importStructuresFromCSV,
+    importHeartsFromCSV,
     addManualStructureSubregion,
     removeSubregionFromRegion,
     updateSubregionName,
@@ -803,6 +879,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     updateVillageSubregionHeight,
     regenerateVillageNames,
     setCustomCenterPoint,
+    updateRegionHeartX,
+    updateRegionHeartY,
+    updateRegionHeartZ,
     warpRegion,
     resizeRegion,
     doubleRegionVertices,

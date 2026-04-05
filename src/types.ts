@@ -22,7 +22,7 @@ export type Region = {
   points: { x: number; z: number }[]
   originalPoints?: { x: number; z: number }[]
   scaleFactor?: number
-  centerPoint?: { x: number; z: number } | null
+  centerPoint?: { x: number; z: number; y?: number } | null
   labelPosition?: { x: number; z: number } | null
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel
