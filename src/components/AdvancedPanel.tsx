@@ -900,56 +900,58 @@ export function AdvancedPanel() {
           </div>
         )}
 
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsWaterExpanded(!isWaterExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span className="flex items-center gap-2">
-              <Droplets className="w-4 h-4" />
-              Water
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isWaterExpanded ? 'rotate-90' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {seedInfo.seedInfo.dimension !== 'nether' && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setIsWaterExpanded(!isWaterExpanded)}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isWaterExpanded && (
-            <div className="space-y-3 ml-4">
-              <p className="text-xs text-gray-400">
-                Exports as <code className="text-gray-300">kind: water</code> with{' '}
-                <code className="text-gray-300">discover.method: passive</code>. WorldGuard and LevelledMobs bands still apply; no main discovery flow in mc-plugin-manager.
-              </p>
-              {regions.selectedRegionId ? (
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={regions.regions.find(r => r.id === regions.selectedRegionId)?.isWater || false}
-                    onChange={(e) => {
-                      const regionId = regions.selectedRegionId!
-                      if (e.target.checked) {
-                        regions.updateRegion(regionId, { isWater: true, hasSpawn: false })
-                      } else {
-                        regions.updateRegion(regionId, { isWater: false })
-                      }
-                    }}
-                    className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
-                  />
-                  <span className="text-sm text-gray-300">Set as water region</span>
-                </label>
-              ) : (
-                <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">Select a region to mark it as water</div>
-              )}
-            </div>
-          )}
-        </div>
+              <span className="flex items-center gap-2">
+                <Droplets className="w-4 h-4" />
+                Water
+              </span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isWaterExpanded ? 'rotate-90' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            {isWaterExpanded && (
+              <div className="space-y-3 ml-4">
+                <p className="text-xs text-gray-400">
+                  Exports as <code className="text-gray-300">kind: water</code> with{' '}
+                  <code className="text-gray-300">discover.method: passive</code>. WorldGuard and LevelledMobs bands still apply; no main discovery flow in mc-plugin-manager.
+                </p>
+                {regions.selectedRegionId ? (
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={regions.regions.find(r => r.id === regions.selectedRegionId)?.isWater || false}
+                      onChange={(e) => {
+                        const regionId = regions.selectedRegionId!
+                        if (e.target.checked) {
+                          regions.updateRegion(regionId, { isWater: true, hasSpawn: false })
+                        } else {
+                          regions.updateRegion(regionId, { isWater: false })
+                        }
+                      }}
+                      className="w-4 h-4 text-lapis-lazuli bg-gray-700 border-gunmetal rounded focus:ring-lapis-lazuli focus:ring-2"
+                    />
+                    <span className="text-sm text-gray-300">Set as water region</span>
+                  </label>
+                ) : (
+                  <div className="text-sm text-gray-400 p-3 bg-eerie-back/50 rounded-md">Select a region to mark it as water</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Plugins */}
         <div>
