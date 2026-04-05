@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, parseRegionHeartImportRows } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -88,6 +88,81 @@ seed;structure;x;y;z;details
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({ x: 100, z: 200, type: 'village', details: 'plains_meeting_point_1' })
     expect(rows[0].y).toBeUndefined()
+  })
+})
+
+describe('buildRegionHeartsVillageFormatCSV', () => {
+  const triangle = [
+    { x: 0, z: 0 },
+    { x: 10, z: 0 },
+    { x: 5, z: 10 }
+  ]
+
+  it('returns null when no hearts', () => {
+    expect(buildRegionHeartsVillageFormatCSV([], '1')).toBeNull()
+    expect(
+      buildRegionHeartsVillageFormatCSV(
+        [{ id: 'a', name: 'R', points: triangle, centerPoint: null }],
+        '1'
+      )
+    ).toBeNull()
+  })
+
+  it('matches Teledosi-style layout and round-trips through parseVillageCSV', () => {
+    const regions = [
+      { id: '1', name: 'Mossbound', points: triangle, centerPoint: { x: -3136.2, z: -1440.8 } },
+      { id: '2', name: 'Alpha Peak', points: triangle, centerPoint: { x: 100, z: -200 } }
+    ]
+    const csv = buildRegionHeartsVillageFormatCSV(regions, '1203994305')!
+    const lines = csv.split('\n')
+    expect(lines[0]).toBe('Sep=;')
+    expect(lines[1]).toMatch(/^#X1;-?\d+$/)
+    expect(lines[2]).toMatch(/^#Z1;-?\d+$/)
+    expect(lines[3]).toMatch(/^#X2;-?\d+$/)
+    expect(lines[4]).toMatch(/^#Z2;-?\d+$/)
+    expect(lines[5]).toBe('seed;structure;x;z;details')
+    expect(csv).toContain(`1203994305;${REGION_HEART_CSV_STRUCTURE};100;-200;Alpha Peak`)
+    expect(csv).toContain(`1203994305;${REGION_HEART_CSV_STRUCTURE};-3136;-1441;Mossbound`)
+    const parsed = parseVillageCSV(csv)
+    expect(parsed).toHaveLength(2)
+    expect(parsed.every(r => r.type === REGION_HEART_CSV_STRUCTURE)).toBe(true)
+  })
+
+  it('uses 0 as seed when unset', () => {
+    const csv = buildRegionHeartsVillageFormatCSV(
+      [{ id: '1', name: 'Only', points: triangle, centerPoint: { x: 0, z: 0 } }],
+      undefined
+    )!
+    expect(csv).toContain('0;region_heart;0;0;Only')
+  })
+})
+
+describe('parseRegionHeartImportRows', () => {
+  it('keeps only region_heart rows with x;y;z', () => {
+    const csv = `Sep=;
+seed;structure;x;y;z;details
+1;village;1;64;3;a
+1203994305;region_heart;-1234;69;1915;Aureas
+`
+    const rows = parseRegionHeartImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      x: -1234,
+      y: 69,
+      z: 1915,
+      type: 'region_heart',
+      details: 'Aureas'
+    })
+  })
+
+  it('is case-insensitive on structure column', () => {
+    const csv = `seed;structure;x;z;details
+1;Region_Heart;10;20;ignored
+`
+    const rows = parseRegionHeartImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0].x).toBe(10)
+    expect(rows[0].z).toBe(20)
   })
 })
 

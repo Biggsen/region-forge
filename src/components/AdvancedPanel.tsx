@@ -7,11 +7,11 @@ import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, MapPin, Pencil, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
+import { Trash2, Heart, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
-import { findParentRegion } from '../utils/villageUtils'
+import { findParentRegion, buildRegionHeartsVillageFormatCSV } from '../utils/villageUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -80,7 +80,9 @@ function SubregionListRow({
   showVillageHeight,
   onDelete,
   deleteLabel,
-  onCopyTp
+  onCopyTp,
+  listItemRef,
+  listItemClassName
 }: {
   item: SubregionListItem
   editingY: YEditState
@@ -99,6 +101,8 @@ function SubregionListRow({
   onDelete: (item: SubregionListItem) => void
   deleteLabel: string
   onCopyTp: (item: SubregionListItem) => void
+  listItemRef?: React.Ref<HTMLLIElement>
+  listItemClassName?: string
 }) {
   const saveY = () => {
     if (!editingY) return
@@ -141,7 +145,10 @@ function SubregionListRow({
   }
 
   return (
-    <li className="flex flex-col gap-y-0.5">
+    <li
+      ref={listItemRef}
+      className={`flex flex-col gap-y-0.5${listItemClassName ? ` ${listItemClassName}` : ''}`}
+    >
       <div className="flex items-start gap-x-2">
         <span className="text-white font-medium flex-1 min-w-0">{item.name}</span>
         <button
@@ -311,6 +318,8 @@ export function AdvancedPanel() {
   const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility, customMarkers } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const structureFileInputRef = useRef<HTMLInputElement>(null)
+  const heartCsvFileInputRef = useRef<HTMLInputElement>(null)
+  const heartListItemRefs = useRef<Partial<Record<string, HTMLLIElement | null>>>({})
   const pendingStructureTypeRef = useRef<StructureType | null>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -322,6 +331,8 @@ export function AdvancedPanel() {
   const [isImporting, setIsImporting] = useState(false)
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
+  const [isImportingHearts, setIsImportingHearts] = useState(false)
+  const [heartImportError, setHeartImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [manualStructureModalOpen, setManualStructureModalOpen] = useState(false)
   const [manualStructureForm, setManualStructureForm] = useState({
@@ -356,6 +367,10 @@ export function AdvancedPanel() {
   const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
   const [editingStructureX, setEditingStructureX] = useState<XZEditState>(null)
   const [editingStructureZ, setEditingStructureZ] = useState<XZEditState>(null)
+  const [editingHeartY, setEditingHeartY] = useState<YEditState>(null)
+  const [editingHeartX, setEditingHeartX] = useState<XZEditState>(null)
+  const [editingHeartZ, setEditingHeartZ] = useState<XZEditState>(null)
+  const [expandedRegionHeartsList, setExpandedRegionHeartsList] = useState(true)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
   const [editingVillageHeight, setEditingVillageHeight] = useState<HeightEditState>(null)
 
@@ -412,15 +427,13 @@ export function AdvancedPanel() {
     })
   }
 
-  const [customCenterX, setCustomCenterX] = useState('')
-  const [customCenterZ, setCustomCenterZ] = useState('')
-  const [showCustomCenterForm, setShowCustomCenterForm] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [pendingSubregionDelete, setPendingSubregionDelete] = useState<{
     type: 'village' | 'structure'
     item: { regionId: string; subregionId: string; name: string }
   } | null>(null)
+  const [pendingHeartDelete, setPendingHeartDelete] = useState<{ regionId: string; name: string } | null>(null)
   const [editCategory, setEditCategory] = useState('')
   const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
   const [editThemePairs, setEditThemePairs] = useState<{ a: string; b: string }[]>([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
@@ -491,6 +504,41 @@ export function AdvancedPanel() {
     }
   }
 
+  const handleHeartImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setIsImportingHearts(true)
+    setHeartImportError(null)
+    try {
+      const text = await file.text()
+      if (!text.trim()) {
+        throw new Error('File is empty or contains no valid data')
+      }
+      const result = regions.importHeartsFromCSV(text)
+      if (result.heartRows === 0) {
+        toast.showToast('No region_heart rows found in CSV', 'error')
+      } else {
+        const msg = [
+          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
+          result.orphaned > 0
+            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
+            : null
+        ]
+          .filter(Boolean)
+          .join('. ')
+        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
+      }
+      if (heartCsvFileInputRef.current) {
+        heartCsvFileInputRef.current.value = ''
+      }
+    } catch (error) {
+      console.error('Heart import error:', error)
+      setHeartImportError(error instanceof Error ? error.message : 'Failed to import hearts')
+    } finally {
+      setIsImportingHearts(false)
+    }
+  }
+
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -530,41 +578,27 @@ export function AdvancedPanel() {
     structureFileInputRef.current?.click()
   }
 
-  const handleSetCustomCenter = () => {
-    if (regions.selectedRegionId && customCenterX && customCenterZ) {
-      const x = parseInt(customCenterX)
-      const z = parseInt(customCenterZ)
-      if (!isNaN(x) && !isNaN(z)) {
-        regions.setCustomCenterPoint(regions.selectedRegionId, { x, z })
-        setCustomCenterX('')
-        setCustomCenterZ('')
-        setShowCustomCenterForm(false)
-      }
-    }
-  }
-
-  const handleRemoveCenterPoint = () => {
-    if (regions.selectedRegionId) {
-      regions.setCustomCenterPoint(regions.selectedRegionId, null)
-      toast.showToast('Region heart removed', 'success')
-    }
-  }
-
-  const handleShowCustomCenterForm = () => {
-    if (regions.selectedRegionId) {
-      const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
-      if (selectedRegion?.centerPoint) {
-        setCustomCenterX(Math.round(selectedRegion.centerPoint.x).toString())
-        setCustomCenterZ(Math.round(selectedRegion.centerPoint.z).toString())
-      } else {
-        setCustomCenterX('')
-        setCustomCenterZ('')
-      }
-      setShowCustomCenterForm(true)
-    }
-  }
-
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
+
+  useEffect(() => {
+    const id = regions.selectedRegionId
+    if (!id) return
+    const selected = regions.regions.find(r => r.id === id)
+    if (!selected?.centerPoint) return
+    setIsRegionSpecificExpanded(true)
+    setExpandedRegionHeartsList(true)
+    let innerRaf = 0
+    const outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(() => {
+        heartListItemRefs.current[id]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      })
+    })
+    return () => {
+      cancelAnimationFrame(outerRaf)
+      cancelAnimationFrame(innerRaf)
+    }
+    // Only when the selected region changes — avoids re-scrolling on unrelated region edits
+  }, [regions.selectedRegionId])
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
@@ -2135,107 +2169,167 @@ export function AdvancedPanel() {
           {isRegionSpecificExpanded && (
             <div className="ml-4 space-y-4">
               <div className="space-y-2">
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import hearts</h5>
+                  <p className="text-sm text-gray-300">
+                    Uses rows where structure is region_heart (same CSV as export). Only X, Y, and Z are applied;
+                    the details column is ignored. Each point is assigned to the region whose polygon contains it.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => heartCsvFileInputRef.current?.click()}
+                    disabled={availableRegions.length === 0 || isImportingHearts}
+                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                  >
+                    {isImportingHearts ? 'Importing…' : 'Import hearts (CSV)'}
+                  </button>
+                  <input
+                    ref={heartCsvFileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleHeartImport}
+                    className="hidden"
+                  />
+                  {heartImportError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                      {heartImportError}
+                    </div>
+                  )}
+                </div>
+
+                {(() => {
+                  const heartRegions = availableRegions
+                    .filter(r => r.centerPoint != null)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                  return (
+                    <>
+                      {heartRegions.length > 0 && (
+                        <div className="space-y-1">
+                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Placed hearts</h5>
+                          <div className="border border-gray-600 rounded-md overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedRegionHeartsList(prev => !prev)}
+                              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 hover:text-white border-0"
+                            >
+                              <span>Region hearts ({heartRegions.length})</span>
+                              <svg
+                                className={`w-4 h-4 shrink-0 transition-transform ${expandedRegionHeartsList ? 'rotate-90' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                            {expandedRegionHeartsList && (
+                              <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
+                                <ul className="space-y-1.5 text-sm">
+                                  {heartRegions.map(region => {
+                                    const cp = region.centerPoint!
+                                    const item: SubregionListItem = {
+                                      regionId: region.id,
+                                      subregionId: region.id,
+                                      name: region.name,
+                                      x: Math.round(cp.x),
+                                      z: Math.round(cp.z),
+                                      y: cp.y
+                                    }
+                                    const isSelectedHeartRow = regions.selectedRegionId === region.id
+                                    return (
+                                      <SubregionListRow
+                                        key={region.id}
+                                        item={item}
+                                        editingY={editingHeartY}
+                                        setEditingY={setEditingHeartY}
+                                        updateY={regions.updateRegionHeartY}
+                                        editingX={editingHeartX}
+                                        setEditingX={setEditingHeartX}
+                                        updateX={regions.updateRegionHeartX}
+                                        editingZ={editingHeartZ}
+                                        setEditingZ={setEditingHeartZ}
+                                        updateZ={regions.updateRegionHeartZ}
+                                        onCopyTp={target => {
+                                          const y = target.y != null ? target.y : '~'
+                                          const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                          navigator.clipboard.writeText(tpCommand)
+                                          toast.showToast('Teleport command copied', 'success')
+                                        }}
+                                        deleteLabel="Remove region heart"
+                                        onDelete={target => {
+                                          setPendingHeartDelete({ regionId: target.regionId, name: target.name })
+                                        }}
+                                        listItemRef={el => {
+                                          if (el) heartListItemRefs.current[region.id] = el
+                                          else delete heartListItemRefs.current[region.id]
+                                        }}
+                                        listItemClassName={
+                                          isSelectedHeartRow
+                                            ? 'rounded-md -mx-1 px-1 ring-2 ring-lapis-lazuli/90 bg-lapis-lazuli/15'
+                                            : undefined
+                                        }
+                                      />
+                                    )
+                                  })}
+                                </ul>
+                                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const names = heartRegions.map(r => r.name).join(', ')
+                                      navigator.clipboard.writeText(names)
+                                      toast.showToast('Names copied to clipboard', 'success')
+                                    }}
+                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                                  >
+                                    Copy names
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const csv = buildRegionHeartsVillageFormatCSV(
+                                        regions.regions,
+                                        seedInfo.seedInfo.seed
+                                      )
+                                      if (!csv) {
+                                        toast.showToast('No region hearts to export', 'error')
+                                        return
+                                      }
+                                      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+                                      const link = document.createElement('a')
+                                      const url = URL.createObjectURL(blob)
+                                      link.href = url
+                                      const slug = (worldName.worldName || 'world')
+                                        .replace(/[^a-zA-Z0-9]/g, '-')
+                                        .toLowerCase()
+                                      const date = new Date().toISOString().split('T')[0]
+                                      link.download = `${slug}-region-hearts-${date}.csv`
+                                      link.click()
+                                      URL.revokeObjectURL(url)
+                                      toast.showToast('Region hearts CSV downloaded', 'success')
+                                    }}
+                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                                  >
+                                    Export CSV
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {heartRegions.length === 0 && availableRegions.length > 0 && (
+                        <p className="text-sm text-gray-500">
+                          No region hearts yet. Select a region and use Set heart location on the map.
+                        </p>
+                      )}
+                    </>
+                  )
+                })()}
+
                 {regions.selectedRegionId ? (
                   <div className="space-y-2">
-                    {!showCustomCenterForm ? (
-                      (() => {
-                        const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
-                        const hasCenterPoint = selectedRegion?.centerPoint != null
-                        if (!hasCenterPoint) {
-                          return null
-                        }
-                        return (
-                          <>
-                            <div className="text-sm font-medium text-white">{selectedRegion!.name}</div>
-                            <div className="p-4 border border-gunmetal rounded">
-                              <div className="flex justify-between items-center">
-                              <div className="text-sm font-mono">
-                                <span className="text-gray-400">X:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.x)}</span>{' '}
-                                <span className="text-gray-400 ml-3">Z:</span> <span className="text-white inline-block w-[30px]">{Math.round(selectedRegion!.centerPoint!.z)}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <button
-                                  onClick={() => {
-                                    const tpCommand = `/tp @s ${Math.round(selectedRegion!.centerPoint!.x)} ~ ${Math.round(selectedRegion!.centerPoint!.z)}`
-                                    navigator.clipboard.writeText(tpCommand)
-                                    toast.showToast('Teleport command copied', 'success')
-                                  }}
-                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
-                                  title="Copy /tp command to clipboard"
-                                >
-                                  <ClipboardCopy className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={handleShowCustomCenterForm}
-                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
-                                  title="Edit coordinates"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={handleRemoveCenterPoint}
-                                  className="text-gray-300 text-sm p-1 rounded transition-colors hover:bg-viridian"
-                                  title="Remove region heart"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                            </div>
-                          </>
-                        )
-                      })()
-                    ) : (
-                      <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="text-gray-900" size={18} />
-                          <p className="text-gray-900 text-base">
-                            <strong>Edit heart location</strong>
-                          </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-xs text-gray-700 mb-1 font-medium">X Coordinate</label>
-                            <input
-                              type="number"
-                              value={customCenterX}
-                              onChange={(e) => setCustomCenterX(e.target.value)}
-                              placeholder="X"
-                              className="w-full bg-white text-gray-900 px-2 py-1 rounded border border-gray-300 focus:border-gray-500 focus:outline-none text-sm placeholder:text-gray-400"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-700 mb-1 font-medium">Z Coordinate</label>
-                            <input
-                              type="number"
-                              value={customCenterZ}
-                              onChange={(e) => setCustomCenterZ(e.target.value)}
-                              placeholder="Z"
-                              className="w-full bg-white text-gray-900 px-2 py-1 rounded border border-gray-300 focus:border-gray-500 focus:outline-none text-sm placeholder:text-gray-400"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex space-x-2 mt-2">
-                          <Button
-                            variant="ghost"
-                            onClick={() => setShowCustomCenterForm(false)}
-                            className="flex-1"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="primary"
-                            onClick={handleSetCustomCenter}
-                            disabled={!customCenterX || !customCenterZ}
-                            className="flex-1"
-                          >
-                            Update
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {!showCustomCenterForm && (() => {
+                    {(() => {
                       const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
                       const hasCenterPoint = selectedRegion?.centerPoint != null
                       return (
@@ -2279,7 +2373,7 @@ export function AdvancedPanel() {
                   </div>
                 ) : (
                   <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
-                    Select a region to set its heart
+                    Select a region to set its heart on the map
                   </div>
                 )}
                 {regions.regions.length > 0 && (
@@ -2352,8 +2446,27 @@ export function AdvancedPanel() {
           regions.removeSubregionFromRegion(item.regionId, item.subregionId)
           setEditingVillageY(prev => (prev?.subregionId === item.subregionId ? null : prev))
           setEditingStructureY(prev => (prev?.subregionId === item.subregionId ? null : prev))
+          setEditingStructureX(prev => (prev?.subregionId === item.subregionId ? null : prev))
+          setEditingStructureZ(prev => (prev?.subregionId === item.subregionId ? null : prev))
           toast.showToast(type === 'village' ? 'Village deleted' : 'Structure deleted', 'success')
           setPendingSubregionDelete(null)
+        }}
+      />
+
+      <DeleteSubregionModal
+        isOpen={pendingHeartDelete != null}
+        targetLabel="region heart"
+        targetName={pendingHeartDelete?.name ?? ''}
+        onCancel={() => setPendingHeartDelete(null)}
+        onConfirm={() => {
+          if (!pendingHeartDelete) return
+          const { regionId } = pendingHeartDelete
+          regions.setCustomCenterPoint(regionId, null)
+          setEditingHeartX(prev => (prev?.regionId === regionId ? null : prev))
+          setEditingHeartY(prev => (prev?.regionId === regionId ? null : prev))
+          setEditingHeartZ(prev => (prev?.regionId === regionId ? null : prev))
+          toast.showToast('Region heart removed', 'success')
+          setPendingHeartDelete(null)
         }}
       />
 
