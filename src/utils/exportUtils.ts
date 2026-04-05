@@ -474,7 +474,7 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    const isWater = region.isWater === true
+    const isWater = region.isWater === true && dim !== 'nether'
     let regionEntry: MetaRegionRow = {
       id: mainId,
       world: dim,

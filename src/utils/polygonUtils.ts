@@ -43,12 +43,13 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
                       !region.name.toLowerCase().includes('heart') && 
                       !region.name.toLowerCase().includes('village')
   
+  const dim = dimension ?? 'overworld'
   // Determine greeting text based on dimension
-  const greetingText = (dimension || 'overworld') === 'nether' ? 'You descend into' : 'Welcome to'
+  const greetingText = dim === 'nether' ? 'You descend into' : 'Welcome to'
   
   // Generate flags based on region type
   let flags: string
-  const isWaterRegion = region.isWater === true
+  const isWaterRegion = region.isWater === true && dim !== 'nether'
   if (useGreetingsAndFarewells) {
     if (greetingSize === 'chat') {
       // Chat format uses greeting: and farewell: with single-line values
