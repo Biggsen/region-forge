@@ -318,6 +318,24 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 141, y: 73, z: -18}')
   })
 
+  it('returns cuboid YAML for swamp hut (7×7 footprint from min x,z; padded XZ; y−10..y+3)', () => {
+    const subregion = {
+      id: 'sh1',
+      name: 'Mirewhisper Hut',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.SWAMP_HUT,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  mirewhisper_hut:')
+    expect(yaml).toContain('min: {x: 98, y: 60, z: -52}')
+    expect(yaml).toContain('max: {x: 108, y: 73, z: -42}')
+  })
+
   it('returns 3x3x3 cuboid YAML for buried treasure (coords = chest block)', () => {
     const subregion = {
       id: 'bt1',

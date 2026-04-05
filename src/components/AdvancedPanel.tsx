@@ -29,6 +29,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.TRAIL_RUINS]: { countLabel: 'Trail Ruins', pluralLabel: 'trail ruins', buttonLabel: 'Import Trail Ruins (CSV)' },
   [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
   [STRUCTURE_TYPES.WOODLAND_MANSION]: { countLabel: 'Woodland Mansion', pluralLabel: 'woodland mansions', buttonLabel: 'Import Woodland Mansions (CSV)' },
+  [STRUCTURE_TYPES.SWAMP_HUT]: { countLabel: 'Swamp Hut', pluralLabel: 'swamp huts', buttonLabel: 'Import Swamp Huts (CSV)' },
 }
 
 type YEditState = { regionId: string; subregionId: string; value: string } | null

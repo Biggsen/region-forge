@@ -1,6 +1,6 @@
 import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName, generateSwampHutName } from './nameGenerator'
 
 /*
  * Structure CSV x/z/y are not one shared rule: each structure type maps columns differently (locator, a corner,
@@ -144,6 +144,24 @@ export function getWoodlandMansionCuboid(
   }
 }
 
+/**
+ * Swamp hut (witch hut) cuboid for regions.yml.
+ * x, z = minimum corner of the 7×7 footprint; y = floor / reference height. Pads 2 blocks on XZ like other small structures.
+ * Vertical span: y−10 … y+3.
+ */
+export function getSwampHutCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const footprint = 7
+  const pad = 2
+  return {
+    minX: x - pad,
+    maxX: x + (footprint - 1) + pad,
+    minZ: z - pad,
+    maxZ: z + (footprint - 1) + pad,
+    minY: y - 10,
+    maxY: y + 3
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -154,6 +172,7 @@ const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.TRAIL_RUINS]: generateTrailRuinsName,
   [STRUCTURE_TYPES.BURIED_TREASURE]: generateBuriedTreasureName,
   [STRUCTURE_TYPES.WOODLAND_MANSION]: generateWoodlandMansionName,
+  [STRUCTURE_TYPES.SWAMP_HUT]: generateSwampHutName,
 }
 
 export interface VillageData {
@@ -368,6 +387,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isDesertWell = isStructure && subregion.structureType === STRUCTURE_TYPES.DESERT_WELL
   const isBuriedTreasure = isStructure && subregion.structureType === STRUCTURE_TYPES.BURIED_TREASURE
   const isWoodlandMansion = isStructure && subregion.structureType === STRUCTURE_TYPES.WOODLAND_MANSION
+  const isSwampHut = isStructure && subregion.structureType === STRUCTURE_TYPES.SWAMP_HUT
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -449,6 +469,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isWoodlandMansion && subregion.y !== undefined) {
     const cuboid = getWoodlandMansionCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isSwampHut && subregion.y !== undefined) {
+    const cuboid = getSwampHutCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ

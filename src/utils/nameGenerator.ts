@@ -820,6 +820,61 @@ export function generateTrailRuinsNames(count: number): string[] {
   return Array.from(results)
 }
 
+// --- Swamp hut (witch hut / bog shelter names) ---
+
+type SwampHutPattern = (pools: SwampHutPools) => string
+
+interface SwampHutPools {
+  bog: string[]
+  structures: string[]
+  moods: string[]
+  witchy: string[]
+  weirdCompounds: string[]
+  names: string[]
+  curated: string[]
+}
+
+const swampHutPools: SwampHutPools = {
+  bog: ['Bog', 'Fen', 'Mire', 'Morass', 'Slough', 'Marsh', 'Sump', 'Quag', 'Drip', 'Moss', 'Reed', 'Cattail'],
+  structures: ['Hut', 'Shed', 'Hovel', 'Perch', 'Roost', 'Shack', 'Cabin', 'Lair', 'Cot'],
+  moods: ['of Still Water', 'at Blackwater', 'Beyond the Reeds', 'Under Catkins', 'Where Frogs Sing', 'in the Murk'],
+  witchy: ['Cauldron', 'Hex', 'Brew', 'Charm', 'Ward', 'Grim', 'Veil', 'Tallow', 'Nightshade', 'Belladonna'],
+  weirdCompounds: ['Mirewhisper', 'Bogcroft', 'Fenwick', 'Sloughborn', 'Catkinmere', 'Toadlamp', 'Mosshollow'],
+  names: ['Hester', 'Morga', 'Ysolde', 'Thistle', 'Bram', 'Corvin', 'Nyx', 'Sable', 'Wren', 'Vex'],
+  curated: [
+    'Mirewhisper Hut',
+    'Catkinmere Cot',
+    'The Toadlamp Perch',
+    'Nightshade Hovel',
+    'Bogcroft Shed'
+  ]
+}
+
+const swampHutPatterns: SwampHutPattern[] = [
+  (p) => `${pick(p.weirdCompounds)} ${pick(p.structures)}`,
+  (p) => `${pick(p.bog)} ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} ${pick(p.moods)}`,
+  (p) => `${pick(p.witchy)} ${pick(p.structures)}`,
+  (p) => `${pick(p.names)}'s ${pick(p.structures)}`,
+  (p) => `${pick(p.structures)} of ${pick(p.names)}`,
+  (p) => `${pick(p.bog)} ${pick(p.witchy)} ${pick(p.structures)}`
+]
+
+export function generateSwampHutName(): string {
+  if (Math.random() < 0.18) {
+    return pick(swampHutPools.curated)
+  }
+  return pick(swampHutPatterns)(swampHutPools)
+}
+
+export function generateSwampHutNames(count: number): string[] {
+  const results = new Set<string>()
+  while (results.size < count) {
+    results.add(generateSwampHutName())
+  }
+  return Array.from(results)
+}
+
 // --- Woodland mansion (stately / gloomy manor names) ---
 
 type WoodlandMansionPattern = (pools: WoodlandMansionPools) => string
