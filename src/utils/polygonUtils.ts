@@ -133,8 +133,11 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
   const regionNameForYAML = nameToRegionId(region.name)
 
   // Water regions: fixed sea-level band for regions.yml. Land uses world height setting.
-  const minY = isWaterRegion ? 35 : useModernWorldHeight ? -64 : 0
-  const maxY = isWaterRegion ? 75 : useModernWorldHeight ? 320 : 255
+  // Nether main poly2d: bedrock floor to below roof (126); heart cuboids keep their own Y (see below).
+  const landMinY = useModernWorldHeight ? -64 : 0
+  const landMaxY = useModernWorldHeight ? 320 : 255
+  const minY = isWaterRegion ? 35 : dim === 'nether' ? 0 : landMinY
+  const maxY = isWaterRegion ? 75 : dim === 'nether' ? 126 : landMaxY
 
   let yaml = `  ${regionNameForYAML}:
     type: poly2d
@@ -152,10 +155,12 @@ ${points}`
     const heartRegionName = `heart_of_${nameToRegionId(region.name)}`
     const heartSize = 7 // 7x7 size as requested
     const heartY = regionCenter.y
+    const heartFallbackMinY = isWaterRegion ? 35 : landMinY
+    const heartFallbackMaxY = isWaterRegion ? 75 : landMaxY
     const heartMinY =
-      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) - 5 : minY
+      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) - 5 : heartFallbackMinY
     const heartMaxY =
-      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) + 2 : maxY
+      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) + 2 : heartFallbackMaxY
 
     let heartFlags: string
     if (useGreetingsAndFarewells) {
