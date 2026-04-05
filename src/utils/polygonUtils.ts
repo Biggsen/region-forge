@@ -150,7 +150,12 @@ ${points}`
     const regionCenter = region.centerPoint
     const heartRegionName = `heart_of_${nameToRegionId(region.name)}`
     const heartSize = 7 // 7x7 size as requested
-    
+    const heartY = regionCenter.y
+    const heartMinY =
+      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) - 5 : minY
+    const heartMaxY =
+      heartY !== undefined && !Number.isNaN(heartY) ? Math.round(heartY) + 2 : maxY
+
     let heartFlags: string
     if (useGreetingsAndFarewells) {
       if (greetingSize === 'chat') {
@@ -185,8 +190,8 @@ ${points}`
     
     yaml += `\n\n  ${heartRegionName}:
     type: cuboid
-    min: {x: ${Math.round(regionCenter.x - Math.floor(heartSize / 2))}, y: ${minY}, z: ${Math.round(regionCenter.z - Math.floor(heartSize / 2))}}
-    max: {x: ${Math.round(regionCenter.x + Math.floor(heartSize / 2))}, y: ${maxY}, z: ${Math.round(regionCenter.z + Math.floor(heartSize / 2))}}
+    min: {x: ${Math.round(regionCenter.x - Math.floor(heartSize / 2))}, y: ${heartMinY}, z: ${Math.round(regionCenter.z - Math.floor(heartSize / 2))}}
+    max: {x: ${Math.round(regionCenter.x + Math.floor(heartSize / 2))}, y: ${heartMaxY}, z: ${Math.round(regionCenter.z + Math.floor(heartSize / 2))}}
     members: {}
     owners: {}
     flags:${useGreetingsAndFarewells ? '\n' + heartFlags : ' ' + heartFlags}

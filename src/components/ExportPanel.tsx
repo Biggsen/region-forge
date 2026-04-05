@@ -340,7 +340,7 @@ export function ExportPanel() {
                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gunmetal rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <label htmlFor="includeHeartRegions" className="ml-2 text-white">
-                  Include Heart of Regions (7x7 centered subregions)
+                  Include Heart of Regions
                 </label>
               </div>
               
