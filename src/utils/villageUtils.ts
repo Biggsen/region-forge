@@ -1,6 +1,6 @@
 import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName, generateSwampHutName } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName, generateSwampHutName, generateShipwreckName } from './nameGenerator'
 
 /*
  * Structure CSV x/z/y are not one shared rule: each structure type maps columns differently (locator, a corner,
@@ -162,6 +162,35 @@ export function getSwampHutCuboid(x: number, z: number, y: number): { minX: numb
   }
 }
 
+/** West extent from locator x (inclusive). */
+export const SHIPWRECK_EXPORT_X_NEG = 15
+/** East extent from locator x (inclusive). Total width = NEG + 1 + POS = 32 (x is horizontal center). */
+export const SHIPWRECK_EXPORT_X_POS = 16
+
+/** Z length along +Z from locator (e.g. z = −240 → … −208). */
+export const SHIPWRECK_EXPORT_Z_LEN = 32
+
+/** Vertical span below / above locator y for shipwreck regions.yml. */
+export const SHIPWRECK_EXPORT_MIN_Y_BELOW = 10
+export const SHIPWRECK_EXPORT_MAX_Y_ABOVE = 10
+
+/**
+ * Shipwreck regions.yml cuboid. CSV (x, z, y) is the structure locator.
+ * X: center at x → [x − 15, x + 16] (32 wide).
+ * Z: locator at minZ → [z, z + 32] (32 long toward +Z).
+ * Y: y − 10 … y + 10.
+ */
+export function getShipwreckCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  return {
+    minX: x - SHIPWRECK_EXPORT_X_NEG,
+    maxX: x + SHIPWRECK_EXPORT_X_POS,
+    minZ: z,
+    maxZ: z + SHIPWRECK_EXPORT_Z_LEN,
+    minY: y - SHIPWRECK_EXPORT_MIN_Y_BELOW,
+    maxY: y + SHIPWRECK_EXPORT_MAX_Y_ABOVE
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -173,6 +202,7 @@ const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.BURIED_TREASURE]: generateBuriedTreasureName,
   [STRUCTURE_TYPES.WOODLAND_MANSION]: generateWoodlandMansionName,
   [STRUCTURE_TYPES.SWAMP_HUT]: generateSwampHutName,
+  [STRUCTURE_TYPES.SHIPWRECK]: generateShipwreckName,
 }
 
 export interface VillageData {
@@ -427,9 +457,18 @@ export function buildManualStructureSubregion(options: {
   }
 }
 
-/** Lowercase snake_case id for regions.yml / meta; strips apostrophes for safe YAML keys and WG commands. */
+/**
+ * Lowercase id for regions.yml / WorldGuard: only `a-z`, `0-9`, `_`, `-`.
+ * Replaces `&` with `and`, strips apostrophes, maps other non-alphanumeric runs to underscores, collapses repeats.
+ */
 export function nameToRegionId(name: string): string {
-  return name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_')
+  return name
+    .replace(/\s*&\s*/g, ' and ')
+    .toLowerCase()
+    .replace(/'/g, '')
+    .replace(/[^a-z0-9_-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
 }
 
 /** WorldGuard region key for subregions in regions.yml (normalized display name only; no structure-type prefix). */
@@ -453,6 +492,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isBuriedTreasure = isStructure && subregion.structureType === STRUCTURE_TYPES.BURIED_TREASURE
   const isWoodlandMansion = isStructure && subregion.structureType === STRUCTURE_TYPES.WOODLAND_MANSION
   const isSwampHut = isStructure && subregion.structureType === STRUCTURE_TYPES.SWAMP_HUT
+  const isShipwreck = isStructure && subregion.structureType === STRUCTURE_TYPES.SHIPWRECK
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -542,6 +582,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isSwampHut && subregion.y !== undefined) {
     const cuboid = getSwampHutCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isShipwreck && subregion.y !== undefined) {
+    const cuboid = getShipwreckCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ

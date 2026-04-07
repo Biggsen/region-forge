@@ -18,6 +18,7 @@ import { ClearDataModal } from './ClearDataModal'
 import { RegionDescriptionModal } from './RegionDescriptionModal'
 import { DeleteSubregionModal } from './DeleteSubregionModal'
 import { BaseModal } from './BaseModal'
+import { CsvImportResultsModal } from './CsvImportResultsModal'
 
 const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel: string; buttonLabel: string }> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { countLabel: 'Jungle Temple', pluralLabel: 'jungle temples', buttonLabel: 'Import Jungle Temples (CSV)' },
@@ -30,6 +31,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.BURIED_TREASURE]: { countLabel: 'Buried Treasure', pluralLabel: 'buried treasures', buttonLabel: 'Import Buried Treasure (CSV)' },
   [STRUCTURE_TYPES.WOODLAND_MANSION]: { countLabel: 'Woodland Mansion', pluralLabel: 'woodland mansions', buttonLabel: 'Import Woodland Mansions (CSV)' },
   [STRUCTURE_TYPES.SWAMP_HUT]: { countLabel: 'Swamp Hut', pluralLabel: 'swamp huts', buttonLabel: 'Import Swamp Huts (CSV)' },
+  [STRUCTURE_TYPES.SHIPWRECK]: { countLabel: 'Shipwreck', pluralLabel: 'shipwrecks', buttonLabel: 'Import Shipwrecks (CSV)' },
 }
 
 type YEditState = { regionId: string; subregionId: string; value: string } | null
@@ -427,6 +429,13 @@ export function AdvancedPanel() {
     })
   }
 
+  const [csvImportResults, setCsvImportResults] = useState<{
+    title: string
+    added: number
+    orphaned: number
+    singularLabel: string
+    pluralLabel: string
+  } | null>(null)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [pendingSubregionDelete, setPendingSubregionDelete] = useState<{
@@ -461,10 +470,13 @@ export function AdvancedPanel() {
       })
       customMarkers.addOrphanedVillageMarkers(results.orphanedVillages)
 
-      const msg = results.orphaned > 0
-        ? `${results.added} villages added to regions. ${results.orphaned} orphaned (not in any region) - shown as red dots on the map.`
-        : `${results.added} villages added to regions.`
-      alert(msg)
+      setCsvImportResults({
+        title: 'Village CSV import',
+        added: results.added,
+        orphaned: results.orphaned,
+        singularLabel: 'village',
+        pluralLabel: 'villages',
+      })
 
       // Clear the file input
       if (villageFileInputRef.current) {
@@ -490,11 +502,14 @@ export function AdvancedPanel() {
       if (!text.trim()) throw new Error('File is empty or contains no valid data')
       const results = regions.importStructuresFromCSV(text, structureType)
       customMarkers.addOrphanedVillageMarkers(results.orphanedVillages)
-      const label = STRUCTURE_DISPLAY[structureType].pluralLabel
-      const msg = results.orphaned > 0
-        ? `${results.added} ${label} added to regions. ${results.orphaned} orphaned (not in any region) - shown as red dots on the map.`
-        : `${results.added} ${label} added to regions.`
-      alert(msg)
+      const display = STRUCTURE_DISPLAY[structureType]
+      setCsvImportResults({
+        title: `${display.countLabel} CSV import`,
+        added: results.added,
+        orphaned: results.orphaned,
+        singularLabel: display.countLabel,
+        pluralLabel: display.pluralLabel,
+      })
       if (structureFileInputRef.current) structureFileInputRef.current.value = ''
     } catch (error) {
       console.error('Structure import error:', error)
@@ -1664,11 +1679,13 @@ export function AdvancedPanel() {
                   {[...(Object.values(STRUCTURE_TYPES) as StructureType[])]
                     .sort((a, b) => STRUCTURE_DISPLAY[a].countLabel.localeCompare(STRUCTURE_DISPLAY[b].countLabel))
                     .map(structureType => {
-                    const items = availableRegions.flatMap(region =>
-                      (region.subregions || [])
-                        .filter((s): s is typeof s & { structureType: StructureType } => s.type === 'structure' && s.structureType === structureType)
-                        .map(s => ({ regionId: region.id, subregionId: s.id, name: s.name, x: s.x, z: s.z, y: s.y, regionName: region.name }))
-                    )
+                    const items = availableRegions
+                      .flatMap(region =>
+                        (region.subregions || [])
+                          .filter((s): s is typeof s & { structureType: StructureType } => s.type === 'structure' && s.structureType === structureType)
+                          .map(s => ({ regionId: region.id, subregionId: s.id, name: s.name, x: s.x, z: s.z, y: s.y, regionName: region.name }))
+                      )
+                      .sort((a, b) => a.x - b.x || a.z - b.z || a.name.localeCompare(b.name))
                     if (items.length === 0) return null
                     const display = STRUCTURE_DISPLAY[structureType]
                     const isExpanded = expandedStructureAccordion === structureType
@@ -2430,6 +2447,16 @@ export function AdvancedPanel() {
           </Button>
         </div>
       </div>
+
+      <CsvImportResultsModal
+        isOpen={csvImportResults != null}
+        onClose={() => setCsvImportResults(null)}
+        title={csvImportResults?.title ?? ''}
+        added={csvImportResults?.added ?? 0}
+        orphaned={csvImportResults?.orphaned ?? 0}
+        singularLabel={csvImportResults?.singularLabel ?? ''}
+        pluralLabel={csvImportResults?.pluralLabel ?? ''}
+      />
 
       <ClearDataModal
         isOpen={showClearDataModal}
