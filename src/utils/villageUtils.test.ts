@@ -244,6 +244,14 @@ describe('nameToRegionId', () => {
   it('strips apostrophes and uses snake_case', () => {
     expect(nameToRegionId("Calder's Hoard")).toBe('calders_hoard')
   })
+
+  it('replaces ampersands with and for the id', () => {
+    expect(nameToRegionId('Sora & Briar')).toBe('sora_and_briar')
+  })
+
+  it('preserves hyphens in names', () => {
+    expect(nameToRegionId('Sea-Nymph')).toBe('sea-nymph')
+  })
 })
 
 describe('generateSubregionYAML', () => {
@@ -427,6 +435,24 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('  old_salt_hoard:')
     expect(yaml).toContain('min: {x: 99, y: 69, z: -51}')
     expect(yaml).toContain('max: {x: 101, y: 71, z: -49}')
+  })
+
+  it('returns shipwreck cuboid YAML (x centered 32 wide; z from locator to locator+32; y±10)', () => {
+    const subregion = {
+      id: 'sw1',
+      name: 'Saltgrave Wreck',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.SHIPWRECK,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  saltgrave_wreck:')
+    expect(yaml).toContain('min: {x: 85, y: 60, z: -50}')
+    expect(yaml).toContain('max: {x: 116, y: 80, z: -18}')
   })
 
   it('drops apostrophes in YAML region key for buried treasure', () => {

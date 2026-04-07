@@ -11,6 +11,7 @@ export const STRUCTURE_TYPES = {
   BURIED_TREASURE: 'buried_treasure',
   WOODLAND_MANSION: 'woodland_mansion',
   SWAMP_HUT: 'swamp_hut',
+  SHIPWRECK: 'shipwreck',
 } as const
 
 export type StructureType = typeof STRUCTURE_TYPES[keyof typeof STRUCTURE_TYPES]

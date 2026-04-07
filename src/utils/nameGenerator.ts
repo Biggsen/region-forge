@@ -1011,3 +1011,9 @@ export function generateBuriedTreasureName(): string {
   }
   return `${BURIED_TREASURE_OWNERS[0]}'s ${BURIED_TREASURE_OBJECTS[0]}`
 }
+
+export {
+  generateShipwreckShipName,
+  generateShipwreckShipNames,
+  generateShipwreckShipName as generateShipwreckName,
+} from './shipwreckShipNameGenerator'
