@@ -600,8 +600,7 @@ export function AdvancedPanel() {
     if (!id) return
     const selected = regions.regions.find(r => r.id === id)
     if (!selected?.centerPoint) return
-    setIsRegionSpecificExpanded(true)
-    setExpandedRegionHeartsList(true)
+    if (!isRegionSpecificExpanded || !expandedRegionHeartsList) return
     let innerRaf = 0
     const outerRaf = requestAnimationFrame(() => {
       innerRaf = requestAnimationFrame(() => {
@@ -612,8 +611,8 @@ export function AdvancedPanel() {
       cancelAnimationFrame(outerRaf)
       cancelAnimationFrame(innerRaf)
     }
-    // Only when the selected region changes — avoids re-scrolling on unrelated region edits
-  }, [regions.selectedRegionId])
+    // Only when the selected region changes and hearts UI is open.
+  }, [regions.selectedRegionId, isRegionSpecificExpanded, expandedRegionHeartsList])
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
