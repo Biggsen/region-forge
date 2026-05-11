@@ -1,6 +1,6 @@
 import { Subregion, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { isPointInPolygon } from './polygonUtils'
-import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName, generateSwampHutName, generateShipwreckName } from './nameGenerator'
+import { generateVillageNameByWorldType, generateJunglePyramidName, generateIglooName, generateDesertPyramidName, generateDesertWellName, generatePillagerOutpostName, generateAncientCityName, generateTrailRuinsName, generateBuriedTreasureName, generateWoodlandMansionName, generateSwampHutName, generateShipwreckName, generateOceanRuinName } from './nameGenerator'
 
 /*
  * Structure CSV x/z/y are not one shared rule: each structure type maps columns differently (locator, a corner,
@@ -191,6 +191,26 @@ export function getShipwreckCuboid(x: number, z: number, y: number): { minX: num
   }
 }
 
+/** Half-edge on X and Z for ocean ruin regions.yml cuboid (CSV = center). */
+export const OCEAN_RUIN_EXPORT_HALF_SPAN_XZ = 20
+
+/** Half-edge on Y below / above locator for ocean ruin cuboid. */
+export const OCEAN_RUIN_EXPORT_HALF_SPAN_Y = 10
+
+/** Ocean ruin WorldGuard cuboid: ±{@link OCEAN_RUIN_EXPORT_HALF_SPAN_XZ} on X/Z, ±{@link OCEAN_RUIN_EXPORT_HALF_SPAN_Y} on Y. */
+export function getOceanRuinCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const dxz = OCEAN_RUIN_EXPORT_HALF_SPAN_XZ
+  const dy = OCEAN_RUIN_EXPORT_HALF_SPAN_Y
+  return {
+    minX: x - dxz,
+    maxX: x + dxz,
+    minZ: z - dxz,
+    maxZ: z + dxz,
+    minY: y - dy,
+    maxY: y + dy
+  }
+}
+
 const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.JUNGLE_TEMPLE]: generateJunglePyramidName,
   [STRUCTURE_TYPES.IGLOO]: generateIglooName,
@@ -203,6 +223,7 @@ const STRUCTURE_NAME_GENERATORS: Record<StructureType, () => string> = {
   [STRUCTURE_TYPES.WOODLAND_MANSION]: generateWoodlandMansionName,
   [STRUCTURE_TYPES.SWAMP_HUT]: generateSwampHutName,
   [STRUCTURE_TYPES.SHIPWRECK]: generateShipwreckName,
+  [STRUCTURE_TYPES.OCEAN_RUIN]: generateOceanRuinName,
 }
 
 export interface VillageData {
@@ -493,6 +514,7 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
   const isWoodlandMansion = isStructure && subregion.structureType === STRUCTURE_TYPES.WOODLAND_MANSION
   const isSwampHut = isStructure && subregion.structureType === STRUCTURE_TYPES.SWAMP_HUT
   const isShipwreck = isStructure && subregion.structureType === STRUCTURE_TYPES.SHIPWRECK
+  const isOceanRuin = isStructure && subregion.structureType === STRUCTURE_TYPES.OCEAN_RUIN
 
   if (isStructure && subregion.y === undefined) {
     return null
@@ -590,6 +612,14 @@ export function generateSubregionYAML(subregion: Subregion, parentRegionName: st
     maxY = Math.min(worldMaxY, cuboid.maxY)
   } else if (isShipwreck && subregion.y !== undefined) {
     const cuboid = getShipwreckCuboid(subregion.x, subregion.z, subregion.y)
+    minX = cuboid.minX
+    maxX = cuboid.maxX
+    minZ = cuboid.minZ
+    maxZ = cuboid.maxZ
+    minY = Math.max(worldMinY, cuboid.minY)
+    maxY = Math.min(worldMaxY, cuboid.maxY)
+  } else if (isOceanRuin && subregion.y !== undefined) {
+    const cuboid = getOceanRuinCuboid(subregion.x, subregion.z, subregion.y)
     minX = cuboid.minX
     maxX = cuboid.maxX
     minZ = cuboid.minZ

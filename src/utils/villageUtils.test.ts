@@ -455,6 +455,24 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 116, y: 80, z: -18}')
   })
 
+  it('returns ocean ruin cuboid YAML (locator center; ±20 xz, ±10 y)', () => {
+    const subregion = {
+      id: 'or1',
+      name: 'Foam Hall Vault',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.OCEAN_RUIN,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  foam_hall_vault:')
+    expect(yaml).toContain('min: {x: 80, y: 60, z: -70}')
+    expect(yaml).toContain('max: {x: 120, y: 80, z: -30}')
+  })
+
   it('drops apostrophes in YAML region key for buried treasure', () => {
     const subregion = {
       id: 'bt2',
