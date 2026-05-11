@@ -160,6 +160,21 @@ export async function loadMapState(): Promise<MapState | null> {
       if (!parsed.image && parsed.terrainImage) parsed.image = parsed.terrainImage
     }
 
+    // Dual-layer saves still store `image` as a URL string alongside terrain/biome strings.
+    // The branch above skips loading `image` when `terrainSrc` exists, but `parsed.image`
+    // stays a string (truthy), so it never gets replaced by an HTMLImageElement.
+    if (typeof parsed.image === 'string') {
+      if (parsed.terrainImage) {
+        parsed.image = parsed.terrainImage
+      } else if (parsed.biomeImage) {
+        parsed.image = parsed.biomeImage
+      } else if (imageSrc) {
+        parsed.image = await loadImageFromSource(imageSrc)
+      } else {
+        parsed.image = null
+      }
+    }
+
     return parsed as MapState
   } catch (error) {
     console.error('Failed to load map state:', error)
