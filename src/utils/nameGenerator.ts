@@ -820,6 +820,331 @@ export function generateTrailRuinsNames(count: number): string[] {
   return Array.from(results)
 }
 
+// --- Ocean ruin (curated places + functions, weighted templates; optional seeded RNG) ---
+
+const OCEAN_RUIN_PLACES = [
+  'Reefwatch',
+  'Tidehollow',
+  'Brinewatch',
+  'Coralreach',
+  'Kelpward',
+  'Saltmere',
+  'Driftwake',
+  'Shoalrest',
+  'Currentfall',
+  'Tideglass',
+  'Brinescar',
+  'Deeprest',
+  'Deepreach',
+  'Wakeharbor',
+  'Lanternreef',
+  'Saltreach',
+  'Wakehollow',
+  'Driftward',
+  'Salthollow',
+  'Reefwake',
+  'Shoalmere',
+  'Brinehollow',
+  'Stormmere',
+  'Pearlward',
+  'Tidefall',
+  'Coralscar',
+  'Drownedmere',
+  'Blackreef'
+] as const
+
+const OCEAN_RUIN_FUNCTIONS = [
+  'Reliquary',
+  'Anchorage',
+  'Causeway',
+  'Shrine',
+  'Watch',
+  'Vault',
+  'Crossing',
+  'Beacon',
+  'Sanctuary',
+  'Archive',
+  'Gate',
+  'Tomb',
+  'Hall',
+  'Cell',
+  'Wharf',
+  'Bastion',
+  'Tidegate',
+  'Observatory'
+] as const
+
+const OCEAN_RUIN_CONDITIONS = [
+  'Sunken',
+  'Weathered',
+  'Bleached',
+  'Salted',
+  'Forgotten',
+  'Silent',
+  'Drowned',
+  'Broken',
+  'Flooded',
+  'Lost',
+  'Ancient',
+  'Barnacled',
+  'Silted',
+  'Reefbound',
+  'Kelp-Choked',
+  'Tideworn'
+] as const
+
+const OCEAN_RUIN_SEA_GODS = [
+  'Nareth',
+  'Othuun',
+  'Velthor',
+  'Korvath',
+  'Thalor',
+  'Myrra',
+  'Vaelith',
+  'Serakar'
+] as const
+
+const OCEAN_RUIN_SACRED_ELEMENTS = [
+  'Prism',
+  'Coral',
+  'Saltstone',
+  'Shell',
+  'Pearl',
+  'Blackglass',
+  'Barnacle',
+  'Kelp',
+  'Moss'
+] as const
+
+const OCEAN_RUIN_NUMERALS = ['First', 'Second', 'Third', 'Fifth', 'Seventh', 'Ninth'] as const
+
+/** "Shrine of Thalor" — functions that read well after "of". */
+const OCEAN_RUIN_FORMAL_OF_FUNCTIONS = [
+  'Shrine',
+  'Sanctuary',
+  'Vault',
+  'Tomb',
+  'Reliquary',
+  'Archive',
+  'Observatory',
+  'Beacon',
+  'Gate',
+  'Anchorage'
+] as const
+
+/** "The Ninth Reliquary of Othuun" — weighty relic-style nouns only. */
+const OCEAN_RUIN_NUMBERED_FUNCTIONS = [
+  'Reliquary',
+  'Tomb',
+  'Vault',
+  'Sanctuary',
+  'Archive',
+  'Shrine',
+  'Gate',
+  'Observatory',
+  'Beacon',
+  'Anchorage'
+] as const
+
+type OceanRuinTemplateType =
+  | 'placeFunction'
+  | 'conditionFunction'
+  | 'godFunction'
+  | 'placeOnly'
+  | 'conditionPlace'
+  | 'elementFunction'
+  | 'godConditionFunction'
+  | 'formalOfGod'
+  | 'numberedRelic'
+
+const OCEAN_RUIN_TEMPLATES: { weight: number; type: OceanRuinTemplateType }[] = [
+  { weight: 35, type: 'placeFunction' },
+  { weight: 20, type: 'conditionFunction' },
+  { weight: 15, type: 'godFunction' },
+  { weight: 10, type: 'placeOnly' },
+  { weight: 8, type: 'conditionPlace' },
+  { weight: 5, type: 'elementFunction' },
+  { weight: 4, type: 'godConditionFunction' },
+  { weight: 2, type: 'formalOfGod' },
+  { weight: 1, type: 'numberedRelic' }
+]
+
+const OCEAN_RUIN_TEMPLATE_WEIGHT_TOTAL = OCEAN_RUIN_TEMPLATES.reduce((s, t) => s + t.weight, 0)
+
+const OCEAN_RUIN_GENERIC_TWO_WORD = new Set([
+  'stone hall',
+  'sand ruin',
+  'salt ruin',
+  'weathered ruin',
+  'ancient hall'
+])
+
+const OCEAN_RUIN_AWKWARD_TOKENS = new Set(['foam', 'gravel'])
+
+type RandomSource = () => number
+
+function hashOceanRuinSeed(seed: string): number {
+  let h = 2166136261 >>> 0
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+/** Mulberry32 — deterministic stream for optional ocean-ruin seeds. */
+function mulberry32(seed: number): RandomSource {
+  let a = seed >>> 0
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function createOceanRuinRandom(seed?: number | string): RandomSource {
+  if (seed === undefined) return () => Math.random()
+  const n = typeof seed === 'number' ? seed >>> 0 : hashOceanRuinSeed(seed)
+  return mulberry32(n)
+}
+
+function pickOceanRuin<T>(arr: readonly T[], random: RandomSource): T {
+  return arr[Math.floor(random() * arr.length)] as T
+}
+
+function weightedPickOceanRuinTemplate(random: RandomSource): OceanRuinTemplateType {
+  let r = random() * OCEAN_RUIN_TEMPLATE_WEIGHT_TOTAL
+  for (const t of OCEAN_RUIN_TEMPLATES) {
+    r -= t.weight
+    if (r < 0) return t.type
+  }
+  return OCEAN_RUIN_TEMPLATES[OCEAN_RUIN_TEMPLATES.length - 1].type
+}
+
+function isOceanRuinNumberedRelicName(tokens: string[]): boolean {
+  return (
+    tokens.length >= 5 &&
+    tokens[0].toLowerCase() === 'the' &&
+    tokens[tokens.length - 2].toLowerCase() === 'of'
+  )
+}
+
+function tokenNorm(t: string): string {
+  return t.toLowerCase().replace(/[^a-z0-9']/g, '')
+}
+
+/** Brinewatch Watch, Tidegate Gate, Salt Salt, >4 words (except numbered relic), generic pairs, awkward tokens. */
+export function isValidOceanRuinName(name: string): boolean {
+  const tokens = name.trim().split(/\s+/).filter(Boolean)
+  if (tokens.length === 0) return false
+
+  for (const w of tokens) {
+    const n = tokenNorm(w)
+    if (OCEAN_RUIN_AWKWARD_TOKENS.has(n)) return false
+  }
+
+  for (let i = 0; i < tokens.length - 1; i++) {
+    const a = tokenNorm(tokens[i])
+    const b = tokenNorm(tokens[i + 1])
+    if (a !== '' && a === b) return false
+    if (a === 'current' && b === 'salt') return false
+    if (b.length >= 3 && a.endsWith(b)) return false
+  }
+
+  if (tokens.length >= 2) {
+    const pair = `${tokenNorm(tokens[0])} ${tokenNorm(tokens[1])}`
+    if (OCEAN_RUIN_GENERIC_TWO_WORD.has(pair)) return false
+  }
+
+  if (tokens.length > 4 && !isOceanRuinNumberedRelicName(tokens)) return false
+
+  return true
+}
+
+function polishOceanRuinName(raw: string): string {
+  return raw
+    .trim()
+    .split(/\s+/)
+    .map(p => (/^of$/i.test(p) ? 'of' : p))
+    .join(' ')
+}
+
+function buildOceanRuinFromTemplate(type: OceanRuinTemplateType, random: RandomSource): string {
+  const place = () => pickOceanRuin(OCEAN_RUIN_PLACES, random)
+  const func = () => pickOceanRuin(OCEAN_RUIN_FUNCTIONS, random)
+  const condition = () => pickOceanRuin(OCEAN_RUIN_CONDITIONS, random)
+  const god = () => pickOceanRuin(OCEAN_RUIN_SEA_GODS, random)
+  const element = () => pickOceanRuin(OCEAN_RUIN_SACRED_ELEMENTS, random)
+  const numeral = () => pickOceanRuin(OCEAN_RUIN_NUMERALS, random)
+
+  switch (type) {
+    case 'placeFunction':
+      return `${place()} ${func()}`
+    case 'conditionFunction':
+      return `${condition()} ${func()}`
+    case 'godFunction':
+      return `${god()}'s ${func()}`
+    case 'placeOnly':
+      return place()
+    case 'conditionPlace':
+      return `${condition()} ${place()}`
+    case 'elementFunction':
+      return `${element()} ${func()}`
+    case 'godConditionFunction':
+      return `${god()}'s ${condition()} ${func()}`
+    case 'formalOfGod':
+      return `${pickOceanRuin(OCEAN_RUIN_FORMAL_OF_FUNCTIONS, random)} of ${god()}`
+    case 'numberedRelic':
+      return `The ${numeral()} ${pickOceanRuin(OCEAN_RUIN_NUMBERED_FUNCTIONS, random)} of ${god()}`
+    default:
+      return `${place()} ${func()}`
+  }
+}
+
+function tryBuildOceanRuinName(random: RandomSource): string {
+  const type = weightedPickOceanRuinTemplate(random)
+  return polishOceanRuinName(buildOceanRuinFromTemplate(type, random))
+}
+
+const OCEAN_RUIN_MAX_ATTEMPTS_PER_NAME = 96
+const OCEAN_RUIN_PRIMARY_TRIES = 20
+
+export function generateOceanRuinName(seed?: number | string): string {
+  const random = createOceanRuinRandom(seed)
+  for (let i = 0; i < OCEAN_RUIN_PRIMARY_TRIES; i++) {
+    const candidate = tryBuildOceanRuinName(random)
+    if (isValidOceanRuinName(candidate)) return candidate
+  }
+  for (let j = 0; j < 24; j++) {
+    const fallback = polishOceanRuinName(`${pickOceanRuin(OCEAN_RUIN_PLACES, random)} ${pickOceanRuin(OCEAN_RUIN_FUNCTIONS, random)}`)
+    if (isValidOceanRuinName(fallback)) return fallback
+  }
+  return polishOceanRuinName(`${pickOceanRuin(OCEAN_RUIN_PLACES, random)} ${pickOceanRuin(OCEAN_RUIN_FUNCTIONS, random)}`)
+}
+
+export function generateOceanRuinNames(count: number, seed?: number | string): string[] {
+  const random = createOceanRuinRandom(seed)
+  const out = new Set<string>()
+  let guard = 0
+  const maxTotal = Math.max(count * 200, 5000)
+  while (out.size < count && guard < maxTotal) {
+    guard++
+    let added = false
+    for (let i = 0; i < OCEAN_RUIN_MAX_ATTEMPTS_PER_NAME; i++) {
+      const candidate = tryBuildOceanRuinName(random)
+      if (isValidOceanRuinName(candidate) && !out.has(candidate)) {
+        out.add(candidate)
+        added = true
+        break
+      }
+    }
+    if (!added) break
+  }
+  return Array.from(out)
+}
+
 // --- Swamp hut (witch hut / bog shelter names) ---
 
 type SwampHutPattern = (pools: SwampHutPools) => string
