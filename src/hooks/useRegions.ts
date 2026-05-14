@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -46,6 +46,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     const migratedRegions = savedRegions.map(region => ({
       ...region,
       centerPoint: region.centerPoint || null,
+      nervePoint: region.nervePoint ?? null,
       challengeLevel: migrateChallengLevel(region.challengeLevel),
       hasSpawn: region.hasSpawn || false,
       isWater: region.isWater ?? false,
@@ -209,8 +210,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         
         // Use current points for scaling to maintain current position
         const pointsToScale = region.points
-        // Use the region's center point if available, otherwise calculate it from current points
-        const center = region.centerPoint || calculateRegionCenter(region)
+        const center = calculateRegionCenter(region)
         const newPoints = resizeRegionPoints(pointsToScale, center.x, center.z, relativeScaleFactor)
         return { ...region, points: newPoints, scaleFactor }
       }
@@ -462,6 +462,36 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       prev.map(r => {
         const cp = updates.get(r.id)
         return cp ? { ...r, centerPoint: cp } : r
+      })
+    )
+    return results
+  }, [regions])
+
+  const importNervesFromCSV = useCallback((csvContent: string) => {
+    const rows = parseRegionNerveImportRows(csvContent)
+    const results = { nerveRows: rows.length, regionsUpdated: 0, orphaned: 0 }
+    if (rows.length === 0) {
+      return results
+    }
+    const regionsSnapshot = regions
+    const updates = new Map<string, { x: number; z: number; y?: number }>()
+    for (const row of rows) {
+      const parent = findParentRegion(row, regionsSnapshot)
+      if (!parent) {
+        results.orphaned++
+        continue
+      }
+      const np: { x: number; z: number; y?: number } = { x: row.x, z: row.z }
+      if (row.y !== undefined && !Number.isNaN(row.y)) {
+        np.y = row.y
+      }
+      updates.set(parent.id, np)
+    }
+    results.regionsUpdated = updates.size
+    setRegions(prev =>
+      prev.map(r => {
+        const np = updates.get(r.id)
+        return np ? { ...r, nervePoint: np } : r
       })
     )
     return results
@@ -729,6 +759,57 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     )
   }, [])
 
+  const setCustomNervePoint = useCallback((regionId: string, nervePoint: { x: number; z: number; y?: number } | null) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId) return region
+        if (nervePoint === null) return { ...region, nervePoint: null }
+        const prevNerve = region.nervePoint
+        const next: { x: number; z: number; y?: number } = {
+          x: nervePoint.x,
+          z: nervePoint.z
+        }
+        if (nervePoint.y !== undefined) {
+          next.y = nervePoint.y
+        } else if (prevNerve?.y !== undefined) {
+          next.y = prevNerve.y
+        }
+        return { ...region, nervePoint: next }
+      })
+    )
+  }, [])
+
+  const updateRegionNerveX = useCallback((regionId: string, _subregionId: string, x: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.nervePoint
+          ? { ...region, nervePoint: { ...region.nervePoint, x } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionNerveZ = useCallback((regionId: string, _subregionId: string, z: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.nervePoint
+          ? { ...region, nervePoint: { ...region.nervePoint, z } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionNerveY = useCallback((regionId: string, _subregionId: string, y: number | undefined) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId || !region.nervePoint) return region
+        const { y: _drop, ...rest } = region.nervePoint
+        const nervePoint = y === undefined ? rest : { ...rest, y }
+        return { ...region, nervePoint }
+      })
+    )
+  }, [])
+
   // Split region functions
   const startSplitRegion = useCallback((regionId: string) => {
     setEditMode(editModeForSplit(regionId))
@@ -869,6 +950,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     importVillagesFromCSV,
     importStructuresFromCSV,
     importHeartsFromCSV,
+    importNervesFromCSV,
     addManualStructureSubregion,
     removeSubregionFromRegion,
     updateSubregionName,
@@ -879,9 +961,13 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     updateVillageSubregionHeight,
     regenerateVillageNames,
     setCustomCenterPoint,
+    setCustomNervePoint,
     updateRegionHeartX,
     updateRegionHeartY,
     updateRegionHeartZ,
+    updateRegionNerveX,
+    updateRegionNerveY,
+    updateRegionNerveZ,
     warpRegion,
     resizeRegion,
     doubleRegionVertices,

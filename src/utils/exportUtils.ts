@@ -157,6 +157,7 @@ function getRegionsYmlExportStats(
   includeVillages: boolean,
   includeStructures: boolean,
   includeHeartRegions: boolean,
+  includeNerveRegions: boolean,
   includeSpawnRegion: boolean,
   spawnCoordinates: { x: number; z: number; y?: number; radius?: number } | null | undefined,
   effectiveDimension: 'overworld' | 'nether' | 'end',
@@ -168,6 +169,7 @@ function getRegionsYmlExportStats(
   villageCount: number
   structureCount: number
   heartCount: number
+  nerveCount: number
   spawn: boolean
 } {
   const enabledRegions = regions.filter((region) => !region.disabled)
@@ -203,11 +205,17 @@ function getRegionsYmlExportStats(
     ? enabledRegions.filter((r) => r.centerPoint != null).length
     : 0
 
+  const nerveCount =
+    includeNerveRegions && effectiveDimension === 'overworld'
+      ? enabledRegions.filter((r) => r.nervePoint != null).length
+      : 0
+
   return {
     regionCount: enabledRegions.length,
     villageCount,
     structureCount,
     heartCount,
+    nerveCount,
     spawn: spawnIncluded,
   }
 }
@@ -225,10 +233,10 @@ function buildRegionForgeYamlPreamble(
   const line1 =
     `# region-forge: generator-version=${gen}; generated-at=${at}; app-version=${REGION_FORGE_APP_VERSION}; ` +
     `project=${proj}; dimension=${effectiveDimension}; plugin=worldguard; export-type=regions-yml; build-id=${buildId}`
-  const { regionCount, villageCount, structureCount, heartCount, spawn } = stats
+  const { regionCount, villageCount, structureCount, heartCount, nerveCount, spawn } = stats
   const line2 =
     `# region-forge: regions=${regionCount}; villages=${villageCount}; structures=${structureCount}; ` +
-    `hearts=${heartCount}; spawn=${spawn}`
+    `hearts=${heartCount}; nerves=${nerveCount}; spawn=${spawn}`
   return `${line1}\n${line2}\n`
 }
 
@@ -247,6 +255,7 @@ export function exportRegionsYAML(
   includeVillages: boolean = true,
   includeStructures: boolean = true,
   includeHeartRegions: boolean = true,
+  includeNerveRegions: boolean = true,
   includeSpawnRegion: boolean = false,
   spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null,
   dimension?: 'overworld' | 'nether' | 'end',
@@ -272,6 +281,7 @@ export function exportRegionsYAML(
     includeVillages,
     includeStructures,
     includeHeartRegions,
+    includeNerveRegions,
     includeSpawnRegion,
     spawnCoordinates,
     effectiveDimension,
@@ -299,7 +309,7 @@ export function exportRegionsYAML(
   }
   
   enabledRegions.forEach((region, index) => {
-    yamlContent += generateRegionYAML(region, includeVillages, includeStructures, includeHeartRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
+    yamlContent += generateRegionYAML(region, includeVillages, includeStructures, includeHeartRegions, includeNerveRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
     // Add a blank line between regions (except after the last one)
     if (index < enabledRegions.length - 1) {
       yamlContent += '\n'
@@ -433,6 +443,7 @@ export function exportRegionsMetaYAML(
   includeVillages: boolean,
   includeStructures: boolean,
   includeHeartRegions: boolean,
+  includeNerveRegions: boolean,
   includeSpawnRegion: boolean,
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   mapState?: MapState | null,
@@ -501,6 +512,14 @@ export function exportRegionsMetaYAML(
         id: `heart_of_${mainId}`,
         world: dim,
         kind: 'heart',
+        discover: { method: 'on_enter' },
+      })
+    }
+    if (includeNerveRegions && region.nervePoint != null && dim === 'overworld') {
+      metaRegions.push({
+        id: `nerve_of_${mainId}`,
+        world: dim,
+        kind: 'nerve',
         discover: { method: 'on_enter' },
       })
     }

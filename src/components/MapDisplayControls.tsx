@@ -133,9 +133,9 @@ export function MapDisplayControls({
             <ToggleButton
               isActive={highlightMode.showCenterPoints}
               onClick={toggleShowCenterPoints}
-              title="Show/hide region hearts on map"
+              title="Show/hide region hearts and nerves on map"
             >
-              Hearts
+              Hearts / Nerves
             </ToggleButton>
           )}
           

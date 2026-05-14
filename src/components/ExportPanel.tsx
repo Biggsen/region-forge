@@ -12,6 +12,7 @@ export function ExportPanel() {
   const [includeVillages, setIncludeVillages] = useState(false)
   const [includeStructures, setIncludeStructures] = useState(true)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
+  const [includeNerveRegions, setIncludeNerveRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
   const [useModernWorldHeight, setUseModernWorldHeight] = useState(true)
   const [useGreetingsAndFarewells, setUseGreetingsAndFarewells] = useState(false)
@@ -27,6 +28,7 @@ export function ExportPanel() {
     setIncludeVillages(saved.includeVillages)
     setIncludeStructures(saved.includeStructures ?? true)
     setIncludeHeartRegions(saved.includeHeartRegions)
+    setIncludeNerveRegions(saved.includeNerveRegions ?? false)
     setIncludeSpawnRegion(saved.includeSpawnRegion)
     setUseModernWorldHeight(saved.useModernWorldHeight)
     setUseGreetingsAndFarewells(saved.useGreetingsAndFarewells)
@@ -66,6 +68,7 @@ export function ExportPanel() {
         includeVillages,
         includeStructures,
         includeHeartRegions,
+        includeNerveRegions,
         includeSpawnRegion,
         useModernWorldHeight,
         useGreetingsAndFarewells,
@@ -79,6 +82,7 @@ export function ExportPanel() {
     includeVillages,
     includeStructures,
     includeHeartRegions,
+    includeNerveRegions,
     includeSpawnRegion,
     useModernWorldHeight,
     useGreetingsAndFarewells,
@@ -97,6 +101,7 @@ export function ExportPanel() {
       includeVillages,
       includeStructures,
       includeHeartRegions,
+      includeNerveRegions,
       finalIncludeSpawnRegion,
       spawnData,
       dimension,
@@ -119,6 +124,7 @@ export function ExportPanel() {
       includeVillages,
       includeStructures,
       includeHeartRegions,
+      includeNerveRegions,
       finalIncludeSpawnRegion,
       toast.showToast,
       mapState.mapState,
@@ -342,6 +348,27 @@ export function ExportPanel() {
                 <label htmlFor="includeHeartRegions" className="ml-2 text-white">
                   Include Heart of Regions
                 </label>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="includeNerveRegions"
+                    checked={includeNerveRegions}
+                    onChange={(e) => setIncludeNerveRegions(e.target.checked)}
+                    title="Nerve cuboids and regions-meta nerve rows are emitted only for overworld exports."
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gunmetal rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <label htmlFor="includeNerveRegions" className="ml-2 text-white">
+                    Include Nerve of Regions
+                  </label>
+                </div>
+                {dimension !== 'overworld' && (
+                  <p className="text-xs text-gray-400 ml-7">
+                    Nerves are overworld-only; this dimension’s export will not include nerve regions.
+                  </p>
+                )}
               </div>
               
               <div className="flex items-center">

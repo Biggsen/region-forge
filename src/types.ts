@@ -25,6 +25,8 @@ export type Region = {
   originalPoints?: { x: number; z: number }[]
   scaleFactor?: number
   centerPoint?: { x: number; z: number; y?: number } | null
+  /** Optional nerve anchor (parallel to centerPoint / heart); separate WG nerve_of_* cuboid when exported. */
+  nervePoint?: { x: number; z: number; y?: number } | null
   labelPosition?: { x: number; z: number } | null
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel

@@ -35,7 +35,7 @@ function getChallengeLevelColor(challengeLevel: ChallengeLevel, isWater?: boolea
   }
 }
 
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeStructures: boolean = true, includeHeartRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeStructures: boolean = true, includeHeartRegions: boolean = true, includeNerveRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -204,6 +204,57 @@ ${points}`
     priority: 10`
   }
 
+  // Add nerve_of_[region] subregion (parallel to heart), overworld only — if enabled and set
+  if (includeNerveRegions && region.nervePoint != null && dim === 'overworld') {
+    const regionCenter = region.nervePoint
+    const nerveRegionName = `nerve_of_${nameToRegionId(region.name)}`
+    const nerveSize = 7
+    const nerveY = regionCenter.y
+    const nerveFallbackMinY = isWaterRegion ? 35 : landMinY
+    const nerveFallbackMaxY = isWaterRegion ? 75 : landMaxY
+    const nerveMinY =
+      nerveY !== undefined && !Number.isNaN(nerveY) ? Math.round(nerveY) - 5 : nerveFallbackMinY
+    const nerveMaxY =
+      nerveY !== undefined && !Number.isNaN(nerveY) ? Math.round(nerveY) + 2 : nerveFallbackMaxY
+
+    let nerveFlags: string
+    if (useGreetingsAndFarewells) {
+      if (greetingSize === 'chat') {
+        nerveFlags = `      greeting: §2Entering §7Nerve of ${region.name}\n      farewell: §6Leaving §7Nerve of ${region.name}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      } else {
+        let greetingLine1: string
+        let greetingLine2: string
+        let farewellLine1: string
+        let farewellLine2: string
+
+        if (greetingSize === 'large') {
+          greetingLine1 = `§fNerve of ${region.name}`
+          greetingLine2 = `§f`
+          farewellLine1 = `§fLeaving Nerve of ${region.name}`
+          farewellLine2 = `§f`
+        } else {
+          greetingLine1 = `§f`
+          greetingLine2 = `§fNerve of ${region.name}`
+          farewellLine1 = `§f`
+          farewellLine2 = `§fLeaving Nerve of ${region.name}`
+        }
+
+        nerveFlags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      }
+    } else {
+      nerveFlags = `{build: deny, interact: allow, creeper-explosion: deny, other-explosion: deny, tnt: deny}`
+    }
+
+    yaml += `\n\n  ${nerveRegionName}:
+    type: cuboid
+    min: {x: ${Math.round(regionCenter.x - Math.floor(nerveSize / 2))}, y: ${nerveMinY}, z: ${Math.round(regionCenter.z - Math.floor(nerveSize / 2))}}
+    max: {x: ${Math.round(regionCenter.x + Math.floor(nerveSize / 2))}, y: ${nerveMaxY}, z: ${Math.round(regionCenter.z + Math.floor(nerveSize / 2))}}
+    members: {}
+    owners: {}
+    flags:${useGreetingsAndFarewells ? '\n' + nerveFlags : ' ' + nerveFlags}
+    priority: 10`
+  }
+
   // Add subregions when includeVillages (villages) or includeStructures (structures) is true (structures without required data e.g. jungle temple without y are skipped)
   if ((includeVillages || includeStructures) && region.subregions && region.subregions.length > 0) {
     const subregionBlocks = region.subregions
@@ -311,7 +362,9 @@ export function calculatePolygonCenter(points: { x: number; z: number }[]): { x:
  * @returns Center point coordinates {x, z}
  */
 export function calculateRegionCenter(region: Region): { x: number; z: number } {
-  // Use custom center point if set, otherwise calculate from polygon
+  if (region.nervePoint) {
+    return region.nervePoint
+  }
   if (region.centerPoint) {
     return region.centerPoint
   }
