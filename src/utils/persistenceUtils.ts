@@ -12,6 +12,7 @@ export interface ExportSettings {
   includeVillages: boolean
   includeStructures: boolean
   includeHeartRegions: boolean
+  includeNerveRegions: boolean
   includeSpawnRegion: boolean
   useModernWorldHeight: boolean
   useGreetingsAndFarewells: boolean
@@ -34,6 +35,7 @@ export type AdvancedPanelSectionsState = {
   isStructuresExpanded: boolean
   isImportExpanded: boolean
   isRegionSpecificExpanded: boolean
+  isRegionNervesExpanded: boolean
   isRegionDescriptionExpanded: boolean
   isBiomeDataExpanded: boolean
   isWorldBiomeDataExpanded: boolean
@@ -48,6 +50,7 @@ const LEGACY_JUNGLE_PYRAMID_STRUCTURE_TYPE = 'jungle_pyramid'
 export function migrateRegionsForLegacyStructureIds(regions: Region[]): Region[] {
   return regions.map(region => ({
     ...region,
+    nervePoint: region.nervePoint ?? null,
     subregions: region.subregions?.map(sub => {
       if (sub.type !== 'structure') return sub
       const st = sub.structureType as string | undefined
@@ -332,6 +335,9 @@ export function loadExportSettings(): ExportSettings | null {
     if (parsed.excludeDescriptionsFromRegionsMeta === undefined) {
       parsed.excludeDescriptionsFromRegionsMeta = false
     }
+    if (parsed.includeNerveRegions === undefined) {
+      parsed.includeNerveRegions = false
+    }
     return parsed as ExportSettings
   } catch (error) {
     console.error('Failed to load export settings:', error)
@@ -435,6 +441,7 @@ export function loadAdvancedPanelSectionsState(defaultState: AdvancedPanelSectio
       isStructuresExpanded: typeof parsed.isStructuresExpanded === 'boolean' ? parsed.isStructuresExpanded : defaultState.isStructuresExpanded,
       isImportExpanded: typeof parsed.isImportExpanded === 'boolean' ? parsed.isImportExpanded : defaultState.isImportExpanded,
       isRegionSpecificExpanded: typeof parsed.isRegionSpecificExpanded === 'boolean' ? parsed.isRegionSpecificExpanded : defaultState.isRegionSpecificExpanded,
+      isRegionNervesExpanded: typeof parsed.isRegionNervesExpanded === 'boolean' ? parsed.isRegionNervesExpanded : defaultState.isRegionNervesExpanded,
       isRegionDescriptionExpanded: typeof parsed.isRegionDescriptionExpanded === 'boolean' ? parsed.isRegionDescriptionExpanded : defaultState.isRegionDescriptionExpanded,
       isBiomeDataExpanded: typeof parsed.isBiomeDataExpanded === 'boolean' ? parsed.isBiomeDataExpanded : defaultState.isBiomeDataExpanded,
       isWorldBiomeDataExpanded: typeof parsed.isWorldBiomeDataExpanded === 'boolean' ? parsed.isWorldBiomeDataExpanded : defaultState.isWorldBiomeDataExpanded,

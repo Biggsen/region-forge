@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, parseRegionHeartImportRows } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -160,6 +160,79 @@ seed;structure;x;y;z;details
 1;Region_Heart;10;20;ignored
 `
     const rows = parseRegionHeartImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0].x).toBe(10)
+    expect(rows[0].z).toBe(20)
+  })
+})
+
+describe('buildRegionNervesVillageFormatCSV', () => {
+  const triangle = [
+    { x: 0, z: 0 },
+    { x: 10, z: 0 },
+    { x: 5, z: 10 }
+  ]
+
+  it('returns null when no nerves', () => {
+    expect(buildRegionNervesVillageFormatCSV([], '1')).toBeNull()
+    expect(
+      buildRegionNervesVillageFormatCSV(
+        [{ id: 'a', name: 'R', points: triangle, nervePoint: null }],
+        '1'
+      )
+    ).toBeNull()
+  })
+
+  it('emits region_nerve rows and round-trips through parseVillageCSV', () => {
+    const regions = [
+      { id: '1', name: 'Mossbound', points: triangle, nervePoint: { x: -100, z: 50 } },
+      { id: '2', name: 'Alpha Peak', points: triangle, nervePoint: { x: 100, z: -200 } }
+    ]
+    const csv = buildRegionNervesVillageFormatCSV(regions, '1203994305')!
+    expect(linesOf(csv)[5]).toBe('seed;structure;x;z;details')
+    expect(csv).toContain(`1203994305;${REGION_NERVE_CSV_STRUCTURE};100;-200;Alpha Peak`)
+    expect(csv).toContain(`1203994305;${REGION_NERVE_CSV_STRUCTURE};-100;50;Mossbound`)
+    const parsed = parseVillageCSV(csv)
+    expect(parsed).toHaveLength(2)
+    expect(parsed.every(r => r.type === REGION_NERVE_CSV_STRUCTURE)).toBe(true)
+  })
+
+  it('uses 0 as seed when unset', () => {
+    const csv = buildRegionNervesVillageFormatCSV(
+      [{ id: '1', name: 'Only', points: triangle, nervePoint: { x: 0, z: 0 } }],
+      undefined
+    )!
+    expect(csv).toContain(`0;${REGION_NERVE_CSV_STRUCTURE};0;0;Only`)
+  })
+})
+
+function linesOf(s: string): string[] {
+  return s.split('\n')
+}
+
+describe('parseRegionNerveImportRows', () => {
+  it('keeps only region_nerve rows', () => {
+    const csv = `Sep=;
+seed;structure;x;y;z;details
+1;village;1;64;3;a
+1203994305;region_nerve;-1234;69;1915;Aureas
+`
+    const rows = parseRegionNerveImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      x: -1234,
+      y: 69,
+      z: 1915,
+      type: 'region_nerve',
+      details: 'Aureas'
+    })
+  })
+
+  it('is case-insensitive on structure column', () => {
+    const csv = `seed;structure;x;z;details
+1;Region_Nerve;10;20;ignored
+`
+    const rows = parseRegionNerveImportRows(csv)
     expect(rows).toHaveLength(1)
     expect(rows[0].x).toBe(10)
     expect(rows[0].z).toBe(20)

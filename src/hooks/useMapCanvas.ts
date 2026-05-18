@@ -3,6 +3,8 @@ import { useState, useCallback } from 'react'
 export function useMapCanvas() {
   const [isSettingCenterPoint, setIsSettingCenterPoint] = useState(false)
   const [centerPointRegionId, setCenterPointRegionId] = useState<string | null>(null)
+  const [isSettingNervePoint, setIsSettingNervePoint] = useState(false)
+  const [nervePointRegionId, setNervePointRegionId] = useState<string | null>(null)
   const [isPlacingLabel, setIsPlacingLabel] = useState(false)
   const [placingLabelRegionId, setPlacingLabelRegionId] = useState<string | null>(null)
   const [isWarping, setIsWarping] = useState(false)
@@ -10,6 +12,8 @@ export function useMapCanvas() {
   const [warpStrength, setWarpStrength] = useState(12)
 
   const startSettingCenterPoint = useCallback((regionId: string) => {
+    setIsSettingNervePoint(false)
+    setNervePointRegionId(null)
     setIsSettingCenterPoint(true)
     setCenterPointRegionId(regionId)
   }, [])
@@ -17,6 +21,18 @@ export function useMapCanvas() {
   const stopSettingCenterPoint = useCallback(() => {
     setIsSettingCenterPoint(false)
     setCenterPointRegionId(null)
+  }, [])
+
+  const startSettingNervePoint = useCallback((regionId: string) => {
+    setIsSettingCenterPoint(false)
+    setCenterPointRegionId(null)
+    setIsSettingNervePoint(true)
+    setNervePointRegionId(regionId)
+  }, [])
+
+  const stopSettingNervePoint = useCallback(() => {
+    setIsSettingNervePoint(false)
+    setNervePointRegionId(null)
   }, [])
 
   const startPlacingLabel = useCallback((regionId: string) => {
@@ -34,6 +50,10 @@ export function useMapCanvas() {
     centerPointRegionId,
     startSettingCenterPoint,
     stopSettingCenterPoint,
+    isSettingNervePoint,
+    nervePointRegionId,
+    startSettingNervePoint,
+    stopSettingNervePoint,
     isPlacingLabel,
     placingLabelRegionId,
     startPlacingLabel,

@@ -299,6 +299,16 @@ export function parseRegionHeartImportRows(csvContent: string): VillageData[] {
   )
 }
 
+/** `structure` column value for region nerve CSV export/import (seed-map style). */
+export const REGION_NERVE_CSV_STRUCTURE = 'region_nerve'
+
+/** Parsed CSV rows whose structure column is {@link REGION_NERVE_CSV_STRUCTURE} (case-insensitive). */
+export function parseRegionNerveImportRows(csvContent: string): VillageData[] {
+  return parseVillageCSV(csvContent).filter(
+    r => r.type.trim().toLowerCase() === REGION_NERVE_CSV_STRUCTURE
+  )
+}
+
 const REGION_HEART_CSV_BOUNDS_PADDING = 256
 
 function sanitizeVillageFormatCsvField(value: string): string {
@@ -349,6 +359,54 @@ export function buildRegionHeartsVillageFormatCSV(regions: Region[], seed: strin
     `#Z2;${z2}`,
     'seed;structure;x;z;details',
     ...rows.map(r => `${seedStr};${REGION_HEART_CSV_STRUCTURE};${r.x};${r.z};${r.details}`)
+  ]
+
+  return lines.join('\n')
+}
+
+/**
+ * Same layout as {@link buildRegionHeartsVillageFormatCSV} but for `region_nerve` rows.
+ * Returns `null` if no regions have a nerve set.
+ */
+export function buildRegionNervesVillageFormatCSV(regions: Region[], seed: string | undefined): string | null {
+  const withNerves = regions.filter(r => r.nervePoint != null && r.points.length >= 3)
+  if (withNerves.length === 0) return null
+
+  const seedStr = sanitizeVillageFormatCsvField(
+    seed != null && seed.trim() !== '' ? seed.trim() : '0'
+  )
+
+  type Row = { x: number; z: number; details: string; sortName: string }
+  const rows: Row[] = withNerves.map(r => {
+    const np = r.nervePoint!
+    return {
+      x: Math.round(np.x),
+      z: Math.round(np.z),
+      details: sanitizeVillageFormatCsvField(r.name),
+      sortName: r.name
+    }
+  })
+
+  const minX = Math.min(...rows.map(r => r.x))
+  const maxX = Math.max(...rows.map(r => r.x))
+  const minZ = Math.min(...rows.map(r => r.z))
+  const maxZ = Math.max(...rows.map(r => r.z))
+  const p = REGION_HEART_CSV_BOUNDS_PADDING
+  const x1 = minX - p
+  const z1 = minZ - p
+  const x2 = maxX + p
+  const z2 = maxZ + p
+
+  rows.sort((a, b) => a.sortName.localeCompare(b.sortName))
+
+  const lines: string[] = [
+    'Sep=;',
+    `#X1;${x1}`,
+    `#Z1;${z1}`,
+    `#X2;${x2}`,
+    `#Z2;${z2}`,
+    'seed;structure;x;z;details',
+    ...rows.map(r => `${seedStr};${REGION_NERVE_CSV_STRUCTURE};${r.x};${r.z};${r.details}`)
   ]
 
   return lines.join('\n')

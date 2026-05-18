@@ -132,7 +132,8 @@ export function useProjectImport({
         const s = sanitized as Partial<ExportSettings>
         saveExportSettings({
           ...(sanitized as ExportSettings),
-          excludeDescriptionsFromRegionsMeta: s.excludeDescriptionsFromRegionsMeta ?? false
+          excludeDescriptionsFromRegionsMeta: s.excludeDescriptionsFromRegionsMeta ?? false,
+          includeNerveRegions: s.includeNerveRegions ?? false
         })
         window.dispatchEvent(new Event('exportSettingsUpdated'))
       }

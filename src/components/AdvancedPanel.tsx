@@ -3,15 +3,15 @@ import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData, loadStructureTableSort, saveStructureTableSort, loadAdvancedPanelSectionsState, saveAdvancedPanelSectionsState } from '../utils/persistenceUtils'
 import { scanBiomes, scanBiomesFullImage, getGroupedLandVsSea } from '../utils/biomeScanner'
-import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
+import { ChallengeLevel, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
+import { Trash2, Heart, Activity, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
-import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
-import { findParentRegion, buildRegionHeartsVillageFormatCSV } from '../utils/villageUtils'
+import { copyToClipboard } from '../utils/polygonUtils'
+import { findParentRegion, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV } from '../utils/villageUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -47,6 +47,7 @@ const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isStructuresExpanded: false,
   isImportExpanded: false,
   isRegionSpecificExpanded: false,
+  isRegionNervesExpanded: false,
   isRegionDescriptionExpanded: false,
   isBiomeDataExpanded: false,
   isWorldBiomeDataExpanded: false,
@@ -64,6 +65,27 @@ type SubregionListItem = {
   height?: number
   z: number
   regionName?: string
+}
+
+type AnchorPoint = { x: number; z: number; y?: number }
+
+function formatMinecraftTpCommand(point: AnchorPoint): string {
+  const y = point.y !== undefined && !Number.isNaN(point.y) ? Math.round(point.y) : '~'
+  return `/minecraft:tp @s ${Math.round(point.x)} ${y} ${Math.round(point.z)}`
+}
+
+function buildBulkAnchorTpText(
+  regions: Region[],
+  getAnchor: (region: Region) => AnchorPoint | null | undefined
+): string {
+  return [...regions]
+    .filter(r => getAnchor(r) != null)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(region => {
+      const anchor = getAnchor(region)!
+      return `${region.name}:\n${formatMinecraftTpCommand(anchor)}`
+    })
+    .join('\n\n')
 }
 
 function SubregionListRow({
@@ -158,7 +180,7 @@ function SubregionListRow({
           type="button"
           onClick={() => onCopyTp(item)}
           className="text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
-          title="Copy /tp command to clipboard"
+          title="Copy /minecraft:tp command to clipboard"
         >
           <ClipboardCopy className="w-3.5 h-3.5" />
         </button>
@@ -322,7 +344,9 @@ export function AdvancedPanel() {
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const structureFileInputRef = useRef<HTMLInputElement>(null)
   const heartCsvFileInputRef = useRef<HTMLInputElement>(null)
+  const nerveCsvFileInputRef = useRef<HTMLInputElement>(null)
   const heartListItemRefs = useRef<Partial<Record<string, HTMLLIElement | null>>>({})
+  const nerveListItemRefs = useRef<Partial<Record<string, HTMLLIElement | null>>>({})
   const pendingStructureTypeRef = useRef<StructureType | null>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -336,6 +360,8 @@ export function AdvancedPanel() {
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
   const [isImportingHearts, setIsImportingHearts] = useState(false)
   const [heartImportError, setHeartImportError] = useState<string | null>(null)
+  const [isImportingNerves, setIsImportingNerves] = useState(false)
+  const [nerveImportError, setNerveImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [manualStructureModalOpen, setManualStructureModalOpen] = useState(false)
   const [manualStructureForm, setManualStructureForm] = useState({
@@ -358,6 +384,7 @@ export function AdvancedPanel() {
   const [expandedStructureAccordion, setExpandedStructureAccordion] = useState<StructureType | null>(null)
   const [isImportExpanded, setIsImportExpanded] = useState(savedSectionState.isImportExpanded)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(savedSectionState.isRegionSpecificExpanded)
+  const [isRegionNervesExpanded, setIsRegionNervesExpanded] = useState(savedSectionState.isRegionNervesExpanded)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(savedSectionState.isRegionDescriptionExpanded)
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(savedSectionState.isBiomeDataExpanded)
   const [isWorldBiomeDataExpanded, setIsWorldBiomeDataExpanded] = useState(savedSectionState.isWorldBiomeDataExpanded)
@@ -374,6 +401,10 @@ export function AdvancedPanel() {
   const [editingHeartX, setEditingHeartX] = useState<XZEditState>(null)
   const [editingHeartZ, setEditingHeartZ] = useState<XZEditState>(null)
   const [expandedRegionHeartsList, setExpandedRegionHeartsList] = useState(true)
+  const [editingNerveY, setEditingNerveY] = useState<YEditState>(null)
+  const [editingNerveX, setEditingNerveX] = useState<XZEditState>(null)
+  const [editingNerveZ, setEditingNerveZ] = useState<XZEditState>(null)
+  const [expandedRegionNervesList, setExpandedRegionNervesList] = useState(true)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
   const [editingVillageHeight, setEditingVillageHeight] = useState<HeightEditState>(null)
 
@@ -390,6 +421,7 @@ export function AdvancedPanel() {
       isStructuresExpanded,
       isImportExpanded,
       isRegionSpecificExpanded,
+      isRegionNervesExpanded,
       isRegionDescriptionExpanded,
       isBiomeDataExpanded,
       isWorldBiomeDataExpanded,
@@ -405,6 +437,7 @@ export function AdvancedPanel() {
     isStructuresExpanded,
     isImportExpanded,
     isRegionSpecificExpanded,
+    isRegionNervesExpanded,
     isRegionDescriptionExpanded,
     isBiomeDataExpanded,
     isWorldBiomeDataExpanded,
@@ -444,6 +477,7 @@ export function AdvancedPanel() {
     item: { regionId: string; subregionId: string; name: string }
   } | null>(null)
   const [pendingHeartDelete, setPendingHeartDelete] = useState<{ regionId: string; name: string } | null>(null)
+  const [pendingNerveDelete, setPendingNerveDelete] = useState<{ regionId: string; name: string } | null>(null)
   const [editCategory, setEditCategory] = useState('')
   const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
   const [editThemePairs, setEditThemePairs] = useState<{ a: string; b: string }[]>([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
@@ -555,6 +589,41 @@ export function AdvancedPanel() {
     }
   }
 
+  const handleNerveImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setIsImportingNerves(true)
+    setNerveImportError(null)
+    try {
+      const text = await file.text()
+      if (!text.trim()) {
+        throw new Error('File is empty or contains no valid data')
+      }
+      const result = regions.importNervesFromCSV(text)
+      if (result.nerveRows === 0) {
+        toast.showToast('No region_nerve rows found in CSV', 'error')
+      } else {
+        const msg = [
+          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
+          result.orphaned > 0
+            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
+            : null
+        ]
+          .filter(Boolean)
+          .join('. ')
+        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
+      }
+      if (nerveCsvFileInputRef.current) {
+        nerveCsvFileInputRef.current.value = ''
+      }
+    } catch (error) {
+      console.error('Nerve import error:', error)
+      setNerveImportError(error instanceof Error ? error.message : 'Failed to import nerves')
+    } finally {
+      setIsImportingNerves(false)
+    }
+  }
+
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -598,22 +667,41 @@ export function AdvancedPanel() {
 
   useEffect(() => {
     const id = regions.selectedRegionId
-    if (!id) return
+    if (!id || !isRegionSpecificExpanded) return
     const selected = regions.regions.find(r => r.id === id)
-    if (!selected?.centerPoint) return
-    if (!isRegionSpecificExpanded || !expandedRegionHeartsList) return
+    if (!selected?.centerPoint || !expandedRegionHeartsList) return
+    const el = heartListItemRefs.current[id]
+    if (!el) return
     let innerRaf = 0
     const outerRaf = requestAnimationFrame(() => {
       innerRaf = requestAnimationFrame(() => {
-        heartListItemRefs.current[id]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
       })
     })
     return () => {
       cancelAnimationFrame(outerRaf)
       cancelAnimationFrame(innerRaf)
     }
-    // Only when the selected region changes and hearts UI is open.
-  }, [regions.selectedRegionId, isRegionSpecificExpanded, expandedRegionHeartsList])
+  }, [regions.selectedRegionId, regions.regions, isRegionSpecificExpanded, expandedRegionHeartsList])
+
+  useEffect(() => {
+    const id = regions.selectedRegionId
+    if (!id || !isRegionNervesExpanded) return
+    const selected = regions.regions.find(r => r.id === id)
+    if (!selected?.nervePoint || !expandedRegionNervesList) return
+    const el = nerveListItemRefs.current[id]
+    if (!el) return
+    let innerRaf = 0
+    const outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(() => {
+        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      })
+    })
+    return () => {
+      cancelAnimationFrame(outerRaf)
+      cancelAnimationFrame(innerRaf)
+    }
+  }, [regions.selectedRegionId, regions.regions, isRegionNervesExpanded, expandedRegionNervesList])
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
@@ -1386,7 +1474,7 @@ export function AdvancedPanel() {
                                   showVillageHeight
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                     navigator.clipboard.writeText(tpCommand)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
@@ -1719,7 +1807,7 @@ export function AdvancedPanel() {
                                   updateZ={regions.updateStructureSubregionZ}
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                     navigator.clipboard.writeText(tpCommand)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
@@ -2167,6 +2255,7 @@ export function AdvancedPanel() {
         {/* Region Hearts */}
         <div>
           <button
+            type="button"
             onClick={() => setIsRegionSpecificExpanded(!isRegionSpecificExpanded)}
             className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
           >
@@ -2270,7 +2359,7 @@ export function AdvancedPanel() {
                                         updateZ={regions.updateRegionHeartZ}
                                         onCopyTp={target => {
                                           const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                           navigator.clipboard.writeText(tpCommand)
                                           toast.showToast('Teleport command copied', 'success')
                                         }}
@@ -2351,10 +2440,11 @@ export function AdvancedPanel() {
                     {(() => {
                       const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
                       const hasCenterPoint = selectedRegion?.centerPoint != null
+                      const selId = regions.selectedRegionId!
                       return (
-                        <div className="flex space-x-2">
+                        <div className="space-y-2">
                           {!hasCenterPoint ? (
-                            mapCanvas.isSettingCenterPoint && mapCanvas.centerPointRegionId === regions.selectedRegionId ? (
+                            mapCanvas.isSettingCenterPoint && mapCanvas.centerPointRegionId === selId ? (
                               <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2 w-full">
                                 <div className="flex items-center gap-2">
                                   <p className="text-gray-900 text-base">
@@ -2377,7 +2467,7 @@ export function AdvancedPanel() {
                             ) : (
                               <Button
                                 onClick={() => {
-                                  mapCanvas.startSettingCenterPoint(regions.selectedRegionId!)
+                                  mapCanvas.startSettingCenterPoint(selId)
                                 }}
                                 variant="secondary"
                                 title="Click on map to set region heart"
@@ -2395,23 +2485,18 @@ export function AdvancedPanel() {
                     Select a region to set its heart on the map
                   </div>
                 )}
-                {regions.regions.length > 0 && (
+                {regions.regions.some(r => r.centerPoint != null) && (
                   <button
+                    type="button"
                     onClick={async () => {
-                      const lines = [...regions.regions]
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map(region => {
-                        const center = calculateRegionCenter(region)
-                        return `${region.name}:\n/tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
-                      })
-                      const text = lines.join('\n\n')
+                      const text = buildBulkAnchorTpText(regions.regions, r => r.centerPoint)
                       await copyToClipboard(text)
-                      toast.showToast('All teleport commands copied', 'success')
+                      toast.showToast('All heart teleport commands copied', 'success')
                     }}
                     className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
                   >
                     <ClipboardCopy className="w-4 h-4" />
-                    Copy all TPs
+                    Copy all heart TPs
                   </button>
                 )}
                 <div className="text-sm text-white mt-2">
@@ -2421,6 +2506,265 @@ export function AdvancedPanel() {
                     return customHearts === totalRegions && totalRegions > 0
                       ? 'All regions have hearts'
                       : `${customHearts} region hearts set out of ${totalRegions} regions`
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Region Nerves */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsRegionNervesExpanded(!isRegionNervesExpanded)}
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
+          >
+            <span className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Region Nerves
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${isRegionNervesExpanded ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {isRegionNervesExpanded && (
+            <div className="ml-4 space-y-4">
+              <div className="space-y-2">
+                <div className="space-y-2">
+                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import nerves</h5>
+                  <p className="text-sm text-gray-300">
+                    Uses rows where structure is region_nerve (same CSV layout as hearts). Only X, Y, and Z are applied;
+                    the details column is ignored. Each point is assigned to the region whose polygon contains it.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => nerveCsvFileInputRef.current?.click()}
+                    disabled={availableRegions.length === 0 || isImportingNerves}
+                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                  >
+                    {isImportingNerves ? 'Importing…' : 'Import nerves (CSV)'}
+                  </button>
+                  <input
+                    ref={nerveCsvFileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleNerveImport}
+                    className="hidden"
+                  />
+                  {nerveImportError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
+                      {nerveImportError}
+                    </div>
+                  )}
+                </div>
+
+                {(() => {
+                  const nerveRegions = availableRegions
+                    .filter(r => r.nervePoint != null)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                  return (
+                    <>
+                      {nerveRegions.length > 0 && (
+                        <div className="space-y-1">
+                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Placed nerves</h5>
+                          <div className="border border-gray-600 rounded-md overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedRegionNervesList(prev => !prev)}
+                              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 hover:text-white border-0"
+                            >
+                              <span>Region nerves ({nerveRegions.length})</span>
+                              <svg
+                                className={`w-4 h-4 shrink-0 transition-transform ${expandedRegionNervesList ? 'rotate-90' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                            {expandedRegionNervesList && (
+                              <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
+                                <ul className="space-y-1.5 text-sm">
+                                  {nerveRegions.map(region => {
+                                    const np = region.nervePoint!
+                                    const item: SubregionListItem = {
+                                      regionId: region.id,
+                                      subregionId: region.id,
+                                      name: region.name,
+                                      x: Math.round(np.x),
+                                      z: Math.round(np.z),
+                                      y: np.y
+                                    }
+                                    const isSelectedNerveRow = regions.selectedRegionId === region.id
+                                    return (
+                                      <SubregionListRow
+                                        key={`nerve-${region.id}`}
+                                        item={item}
+                                        editingY={editingNerveY}
+                                        setEditingY={setEditingNerveY}
+                                        updateY={regions.updateRegionNerveY}
+                                        editingX={editingNerveX}
+                                        setEditingX={setEditingNerveX}
+                                        updateX={regions.updateRegionNerveX}
+                                        editingZ={editingNerveZ}
+                                        setEditingZ={setEditingNerveZ}
+                                        updateZ={regions.updateRegionNerveZ}
+                                        onCopyTp={target => {
+                                          const y = target.y != null ? target.y : '~'
+                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
+                                          navigator.clipboard.writeText(tpCommand)
+                                          toast.showToast('Teleport command copied', 'success')
+                                        }}
+                                        deleteLabel="Remove region nerve"
+                                        onDelete={target => {
+                                          setPendingNerveDelete({ regionId: target.regionId, name: target.name })
+                                        }}
+                                        listItemRef={el => {
+                                          if (el) nerveListItemRefs.current[region.id] = el
+                                          else delete nerveListItemRefs.current[region.id]
+                                        }}
+                                        listItemClassName={
+                                          isSelectedNerveRow
+                                            ? 'rounded-md -mx-1 px-1 ring-2 ring-lapis-lazuli/90 bg-lapis-lazuli/15'
+                                            : undefined
+                                        }
+                                      />
+                                    )
+                                  })}
+                                </ul>
+                                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const names = nerveRegions.map(r => r.name).join(', ')
+                                      navigator.clipboard.writeText(names)
+                                      toast.showToast('Names copied to clipboard', 'success')
+                                    }}
+                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                                  >
+                                    Copy names
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const csv = buildRegionNervesVillageFormatCSV(
+                                        regions.regions,
+                                        seedInfo.seedInfo.seed
+                                      )
+                                      if (!csv) {
+                                        toast.showToast('No region nerves to export', 'error')
+                                        return
+                                      }
+                                      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+                                      const link = document.createElement('a')
+                                      const url = URL.createObjectURL(blob)
+                                      link.href = url
+                                      const slug = (worldName.worldName || 'world')
+                                        .replace(/[^a-zA-Z0-9]/g, '-')
+                                        .toLowerCase()
+                                      const date = new Date().toISOString().split('T')[0]
+                                      link.download = `${slug}-region-nerves-${date}.csv`
+                                      link.click()
+                                      URL.revokeObjectURL(url)
+                                      toast.showToast('Region nerves CSV downloaded', 'success')
+                                    }}
+                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
+                                  >
+                                    Export CSV
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {nerveRegions.length === 0 && availableRegions.length > 0 && (
+                        <p className="text-sm text-gray-500">
+                          No region nerves yet. Select a region and use Set nerve location on the map.
+                        </p>
+                      )}
+                    </>
+                  )
+                })()}
+
+                {regions.selectedRegionId ? (
+                  <div className="space-y-2">
+                    {(() => {
+                      const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
+                      const hasNervePoint = selectedRegion?.nervePoint != null
+                      const selId = regions.selectedRegionId!
+                      return (
+                        <div className="space-y-2">
+                          {!hasNervePoint ? (
+                            mapCanvas.isSettingNervePoint && mapCanvas.nervePointRegionId === selId ? (
+                              <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2 w-full">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-gray-900 text-base">
+                                    <strong>Set Nerve Location</strong>
+                                  </p>
+                                </div>
+                                <p className="text-gray-900 text-sm">
+                                  Click on the map to set the nerve location
+                                </p>
+                                <Button
+                                  onClick={() => {
+                                    mapCanvas.stopSettingNervePoint()
+                                  }}
+                                  variant="primary"
+                                  className="w-full mt-2"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() => {
+                                  mapCanvas.startSettingNervePoint(selId)
+                                }}
+                                variant="secondary"
+                                title="Click on map to set region nerve"
+                              >
+                                Set nerve location
+                              </Button>
+                            )
+                          ) : null}
+                        </div>
+                      )
+                    })()}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
+                    Select a region to set its nerve on the map
+                  </div>
+                )}
+                {regions.regions.some(r => r.nervePoint != null) && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const text = buildBulkAnchorTpText(regions.regions, r => r.nervePoint)
+                      await copyToClipboard(text)
+                      toast.showToast('All nerve teleport commands copied', 'success')
+                    }}
+                    className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
+                  >
+                    <ClipboardCopy className="w-4 h-4" />
+                    Copy all nerve TPs
+                  </button>
+                )}
+                <div className="text-sm text-white mt-2">
+                  {(() => {
+                    const customNerves = regions.regions.filter(r => r.nervePoint != null).length
+                    const totalRegions = regions.regions.length
+                    return customNerves === totalRegions && totalRegions > 0
+                      ? 'All regions have nerves'
+                      : `${customNerves} region nerves set out of ${totalRegions} regions`
                   })()}
                 </div>
               </div>
@@ -2496,6 +2840,23 @@ export function AdvancedPanel() {
           setEditingHeartZ(prev => (prev?.regionId === regionId ? null : prev))
           toast.showToast('Region heart removed', 'success')
           setPendingHeartDelete(null)
+        }}
+      />
+
+      <DeleteSubregionModal
+        isOpen={pendingNerveDelete != null}
+        targetLabel="region nerve"
+        targetName={pendingNerveDelete?.name ?? ''}
+        onCancel={() => setPendingNerveDelete(null)}
+        onConfirm={() => {
+          if (!pendingNerveDelete) return
+          const { regionId } = pendingNerveDelete
+          regions.setCustomNervePoint(regionId, null)
+          setEditingNerveX(prev => (prev?.regionId === regionId ? null : prev))
+          setEditingNerveY(prev => (prev?.regionId === regionId ? null : prev))
+          setEditingNerveZ(prev => (prev?.regionId === regionId ? null : prev))
+          toast.showToast('Region nerve removed', 'success')
+          setPendingNerveDelete(null)
         }}
       />
 

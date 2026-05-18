@@ -194,6 +194,7 @@ export function RegionOverlay({
         const isDisabled = region.disabled === true
         if (highlightMode.showCenterPoints) {
           drawCenterPoint(ctx, region, mapState, img, isSelected)
+          drawNervePoint(ctx, region, mapState, img, isSelected)
         }
         drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames, regionFillOpacity, false)
         if (isSplitting) {
@@ -270,6 +271,7 @@ export function RegionOverlay({
       drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames, regionFillOpacity, false)
       if (highlightMode.showCenterPoints) {
         drawCenterPoint(ctx, drawingRegion, mapState, img, false)
+        drawNervePoint(ctx, drawingRegion, mapState, img, false)
       }
     }
 
@@ -528,6 +530,54 @@ export function RegionOverlay({
       
       ctx.fillStyle = 'white'
       ctx.fillText('Region Heart', canvasPos.x, canvasPos.y - markerSize - 12)
+    }
+  }
+
+  const drawNervePoint = (
+    ctx: CanvasRenderingContext2D,
+    region: Region,
+    mapState: MapState,
+    img: HTMLImageElement,
+    isSelected: boolean = false
+  ) => {
+    if (!region.nervePoint) return
+
+    const pixelPos = worldToPixel(region.nervePoint.x, region.nervePoint.z, img.width, img.height, mapState.originOffset)
+    const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+
+    const markerSize = isSelected ? 6 : 4
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+    ctx.beginPath()
+    ctx.arc(canvasPos.x, canvasPos.y, markerSize + 1, 0, 2 * Math.PI)
+    ctx.fill()
+
+    ctx.fillStyle = 'rgba(0, 180, 200, 1)'
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'
+    ctx.lineWidth = 1
+
+    ctx.beginPath()
+    ctx.arc(canvasPos.x, canvasPos.y, markerSize, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.stroke()
+
+    if (isSelected) {
+      ctx.font = '9px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      const label = 'Region Nerve'
+      const textMetrics = ctx.measureText(label)
+      const textWidth = textMetrics.width
+      const padding = 6
+      const boxWidth = textWidth + padding * 2
+      const boxHeight = 16
+      const labelY = canvasPos.y + markerSize + 20
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+      ctx.fillRect(canvasPos.x - boxWidth / 2, labelY - boxHeight / 2, boxWidth, boxHeight)
+
+      ctx.fillStyle = 'white'
+      ctx.fillText(label, canvasPos.x, labelY)
     }
   }
 
