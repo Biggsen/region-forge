@@ -3,14 +3,14 @@ import { useAppContext } from '../context/AppContext'
 import { importMapData } from '../utils/exportUtils'
 import { clearSavedData, loadStructureTableSort, saveStructureTableSort, loadAdvancedPanelSectionsState, saveAdvancedPanelSectionsState } from '../utils/persistenceUtils'
 import { scanBiomes, scanBiomesFullImage, getGroupedLandVsSea } from '../utils/biomeScanner'
-import { ChallengeLevel, StructureType, STRUCTURE_TYPES } from '../types'
+import { ChallengeLevel, Region, StructureType, STRUCTURE_TYPES } from '../types'
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
 import { Trash2, Heart, Activity, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
-import { copyToClipboard, calculateRegionCenter } from '../utils/polygonUtils'
+import { copyToClipboard } from '../utils/polygonUtils'
 import { findParentRegion, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV } from '../utils/villageUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
@@ -65,6 +65,27 @@ type SubregionListItem = {
   height?: number
   z: number
   regionName?: string
+}
+
+type AnchorPoint = { x: number; z: number; y?: number }
+
+function formatMinecraftTpCommand(point: AnchorPoint): string {
+  const y = point.y !== undefined && !Number.isNaN(point.y) ? Math.round(point.y) : '~'
+  return `/minecraft:tp @s ${Math.round(point.x)} ${y} ${Math.round(point.z)}`
+}
+
+function buildBulkAnchorTpText(
+  regions: Region[],
+  getAnchor: (region: Region) => AnchorPoint | null | undefined
+): string {
+  return [...regions]
+    .filter(r => getAnchor(r) != null)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(region => {
+      const anchor = getAnchor(region)!
+      return `${region.name}:\n${formatMinecraftTpCommand(anchor)}`
+    })
+    .join('\n\n')
 }
 
 function SubregionListRow({
@@ -2464,23 +2485,18 @@ export function AdvancedPanel() {
                     Select a region to set its heart on the map
                   </div>
                 )}
-                {regions.regions.length > 0 && (
+                {regions.regions.some(r => r.centerPoint != null) && (
                   <button
+                    type="button"
                     onClick={async () => {
-                      const lines = [...regions.regions]
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map(region => {
-                        const center = calculateRegionCenter(region)
-                        return `${region.name}:\n/minecraft:tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
-                      })
-                      const text = lines.join('\n\n')
+                      const text = buildBulkAnchorTpText(regions.regions, r => r.centerPoint)
                       await copyToClipboard(text)
-                      toast.showToast('All teleport commands copied', 'success')
+                      toast.showToast('All heart teleport commands copied', 'success')
                     }}
                     className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
                   >
                     <ClipboardCopy className="w-4 h-4" />
-                    Copy all TPs
+                    Copy all heart TPs
                   </button>
                 )}
                 <div className="text-sm text-white mt-2">
@@ -2728,24 +2744,18 @@ export function AdvancedPanel() {
                     Select a region to set its nerve on the map
                   </div>
                 )}
-                {regions.regions.length > 0 && (
+                {regions.regions.some(r => r.nervePoint != null) && (
                   <button
                     type="button"
                     onClick={async () => {
-                      const lines = [...regions.regions]
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(region => {
-                          const center = calculateRegionCenter(region)
-                          return `${region.name}:\n/minecraft:tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
-                        })
-                      const text = lines.join('\n\n')
+                      const text = buildBulkAnchorTpText(regions.regions, r => r.nervePoint)
                       await copyToClipboard(text)
-                      toast.showToast('All teleport commands copied', 'success')
+                      toast.showToast('All nerve teleport commands copied', 'success')
                     }}
                     className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
                   >
                     <ClipboardCopy className="w-4 h-4" />
-                    Copy all TPs
+                    Copy all nerve TPs
                   </button>
                 )}
                 <div className="text-sm text-white mt-2">
