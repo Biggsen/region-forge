@@ -159,7 +159,7 @@ function SubregionListRow({
           type="button"
           onClick={() => onCopyTp(item)}
           className="text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
-          title="Copy /tp command to clipboard"
+          title="Copy /minecraft:tp command to clipboard"
         >
           <ClipboardCopy className="w-3.5 h-3.5" />
         </button>
@@ -1453,7 +1453,7 @@ export function AdvancedPanel() {
                                   showVillageHeight
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                     navigator.clipboard.writeText(tpCommand)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
@@ -1786,7 +1786,7 @@ export function AdvancedPanel() {
                                   updateZ={regions.updateStructureSubregionZ}
                                   onCopyTp={target => {
                                     const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                     navigator.clipboard.writeText(tpCommand)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
@@ -2338,7 +2338,7 @@ export function AdvancedPanel() {
                                         updateZ={regions.updateRegionHeartZ}
                                         onCopyTp={target => {
                                           const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                           navigator.clipboard.writeText(tpCommand)
                                           toast.showToast('Teleport command copied', 'success')
                                         }}
@@ -2471,7 +2471,7 @@ export function AdvancedPanel() {
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map(region => {
                         const center = calculateRegionCenter(region)
-                        return `${region.name}:\n/tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
+                        return `${region.name}:\n/minecraft:tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
                       })
                       const text = lines.join('\n\n')
                       await copyToClipboard(text)
@@ -2602,7 +2602,7 @@ export function AdvancedPanel() {
                                         updateZ={regions.updateRegionNerveZ}
                                         onCopyTp={target => {
                                           const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/tp @s ${target.x} ${y} ${target.z}`
+                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
                                           navigator.clipboard.writeText(tpCommand)
                                           toast.showToast('Teleport command copied', 'success')
                                         }}
@@ -2736,7 +2736,7 @@ export function AdvancedPanel() {
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map(region => {
                           const center = calculateRegionCenter(region)
-                          return `${region.name}:\n/tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
+                          return `${region.name}:\n/minecraft:tp @s ${Math.round(center.x)} ~ ${Math.round(center.z)}`
                         })
                       const text = lines.join('\n\n')
                       await copyToClipboard(text)

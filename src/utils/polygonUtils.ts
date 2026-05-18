@@ -213,7 +213,7 @@ ${points}`
     const nerveFallbackMinY = isWaterRegion ? 35 : landMinY
     const nerveFallbackMaxY = isWaterRegion ? 75 : landMaxY
     const nerveMinY =
-      nerveY !== undefined && !Number.isNaN(nerveY) ? Math.round(nerveY) - 5 : nerveFallbackMinY
+      nerveY !== undefined && !Number.isNaN(nerveY) ? Math.round(nerveY) - 10 : nerveFallbackMinY
     const nerveMaxY =
       nerveY !== undefined && !Number.isNaN(nerveY) ? Math.round(nerveY) + 2 : nerveFallbackMaxY
 

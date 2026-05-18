@@ -32,6 +32,8 @@ describe('generateRegionYAML', () => {
     expect(yaml).toContain('nerve_of_test_region')
     expect(yaml).toContain('Nerve of Test Region')
     expect(yaml).toContain('type: cuboid')
+    expect(yaml).toMatch(/nerve_of_test_region:[\s\S]*?min: \{x: \d+, y: 60, z: \d+\}/)
+    expect(yaml).toMatch(/nerve_of_test_region:[\s\S]*?max: \{x: \d+, y: 72, z: \d+\}/)
   })
 
   it('omits nerve cuboid in nether even when includeNerveRegions is true', () => {
