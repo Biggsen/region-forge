@@ -7,11 +7,20 @@ import { ChallengeLevel, Region, StructureType, STRUCTURE_TYPES } from '../types
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, Heart, Activity, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
+import { Trash2, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
+import {
+  SubregionListRow,
+  type SubregionListItem,
+  type YEditState,
+  type XZEditState,
+  type HeightEditState
+} from './SubregionListRow'
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
-import { copyToClipboard } from '../utils/polygonUtils'
-import { findParentRegion, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV } from '../utils/villageUtils'
+import { copySubregionTpToClipboard } from '../utils/anchorClipboardUtils'
+import { findParentRegion } from '../utils/villageUtils'
+import { RegionAnchorSection } from './regionAnchor/RegionAnchorSection'
+import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG } from './regionAnchor/regionAnchorConfig'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -35,10 +44,6 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.OCEAN_RUIN]: { countLabel: 'Ocean Ruin', pluralLabel: 'ocean ruins', buttonLabel: 'Import Ocean Ruins (CSV)' },
 }
 
-type YEditState = { regionId: string; subregionId: string; value: string } | null
-type XZEditState = YEditState
-type HeightEditState = { regionId: string; subregionId: string; value: string } | null
-
 const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isOtherRegionTypesExpanded: false,
   isWaterExpanded: false,
@@ -56,297 +61,10 @@ const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isLoreInstructionsExpanded: false,
 }
 
-type SubregionListItem = {
-  regionId: string
-  subregionId: string
-  name: string
-  x: number
-  y?: number
-  height?: number
-  z: number
-  regionName?: string
-}
-
-type AnchorPoint = { x: number; z: number; y?: number }
-
-function formatMinecraftTpCommand(point: AnchorPoint): string {
-  const y = point.y !== undefined && !Number.isNaN(point.y) ? Math.round(point.y) : '~'
-  return `/minecraft:tp @s ${Math.round(point.x)} ${y} ${Math.round(point.z)}`
-}
-
-function buildBulkAnchorTpText(
-  regions: Region[],
-  getAnchor: (region: Region) => AnchorPoint | null | undefined
-): string {
-  return [...regions]
-    .filter(r => getAnchor(r) != null)
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(region => {
-      const anchor = getAnchor(region)!
-      return `${region.name}:\n${formatMinecraftTpCommand(anchor)}`
-    })
-    .join('\n\n')
-}
-
-function SubregionListRow({
-  item,
-  editingY,
-  setEditingY,
-  updateY,
-  editingX,
-  setEditingX,
-  updateX,
-  editingZ,
-  setEditingZ,
-  updateZ,
-  editingHeight,
-  setEditingHeight,
-  updateHeight,
-  showVillageHeight,
-  onDelete,
-  deleteLabel,
-  onCopyTp,
-  listItemRef,
-  listItemClassName
-}: {
-  item: SubregionListItem
-  editingY: YEditState
-  setEditingY: React.Dispatch<React.SetStateAction<YEditState>>
-  updateY: (regionId: string, subregionId: string, y: number | undefined) => void
-  editingX?: XZEditState
-  setEditingX?: React.Dispatch<React.SetStateAction<XZEditState>>
-  updateX?: (regionId: string, subregionId: string, x: number) => void
-  editingZ?: XZEditState
-  setEditingZ?: React.Dispatch<React.SetStateAction<XZEditState>>
-  updateZ?: (regionId: string, subregionId: string, z: number) => void
-  editingHeight?: HeightEditState
-  setEditingHeight?: React.Dispatch<React.SetStateAction<HeightEditState>>
-  updateHeight?: (regionId: string, subregionId: string, height: number | undefined) => void
-  showVillageHeight?: boolean
-  onDelete: (item: SubregionListItem) => void
-  deleteLabel: string
-  onCopyTp: (item: SubregionListItem) => void
-  listItemRef?: React.Ref<HTMLLIElement>
-  listItemClassName?: string
-}) {
-  const saveY = () => {
-    if (!editingY) return
-    const v = editingY.value.trim()
-    const n = v === '' ? undefined : parseInt(v, 10)
-    if (v === '' || !Number.isNaN(n)) {
-      updateY(editingY.regionId, editingY.subregionId, v === '' ? undefined : n)
-    }
-    setEditingY(null)
-  }
-
-  const saveX = () => {
-    if (!editingX || !setEditingX || !updateX) return
-    const v = editingX.value.trim()
-    const n = parseInt(v, 10)
-    if (v !== '' && !Number.isNaN(n)) {
-      updateX(editingX.regionId, editingX.subregionId, n)
-    }
-    setEditingX(null)
-  }
-
-  const saveZ = () => {
-    if (!editingZ || !setEditingZ || !updateZ) return
-    const v = editingZ.value.trim()
-    const n = parseInt(v, 10)
-    if (v !== '' && !Number.isNaN(n)) {
-      updateZ(editingZ.regionId, editingZ.subregionId, n)
-    }
-    setEditingZ(null)
-  }
-
-  const saveHeight = () => {
-    if (!editingHeight || !setEditingHeight || !updateHeight) return
-    const v = editingHeight.value.trim()
-    const n = v === '' ? null : parseInt(v, 10)
-    if (v === '' || (n !== null && !Number.isNaN(n) && n > 0)) {
-      updateHeight(editingHeight.regionId, editingHeight.subregionId, v === '' ? undefined : (n ?? undefined))
-    }
-    setEditingHeight(null)
-  }
-
-  return (
-    <li
-      ref={listItemRef}
-      className={`flex flex-col gap-y-0.5${listItemClassName ? ` ${listItemClassName}` : ''}`}
-    >
-      <div className="flex items-start gap-x-2">
-        <span className="text-white font-medium flex-1 min-w-0">{item.name}</span>
-        <button
-          type="button"
-          onClick={() => onCopyTp(item)}
-          className="text-gray-400 p-0.5 rounded transition-colors hover:bg-gray-600 hover:text-white shrink-0"
-          title="Copy /minecraft:tp command to clipboard"
-        >
-          <ClipboardCopy className="w-3.5 h-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(item)}
-          className="text-gray-400 p-0.5 rounded transition-colors hover:bg-red-600/30 hover:text-red-300 shrink-0"
-          title={deleteLabel}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
-      <div className="flex flex-wrap items-center gap-x-1 text-gray-400">
-        {updateX && setEditingX ? (
-          editingX?.subregionId === item.subregionId ? (
-            <input
-              type="text"
-              inputMode="numeric"
-              className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
-              style={{ width: `${Math.max(2, (editingX.value.length || 0) + 1)}ch` }}
-              placeholder="x"
-              autoFocus
-              value={editingX.value}
-              onChange={e => setEditingX(prev => (prev ? { ...prev, value: e.target.value } : null))}
-              onBlur={saveX}
-              onKeyDown={e => {
-                if (e.key === 'Enter') saveX()
-              }}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() =>
-                setEditingX({
-                  regionId: item.regionId,
-                  subregionId: item.subregionId,
-                  value: String(item.x)
-                })
-              }
-              className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
-              title="Set X coordinate"
-            >
-              {item.x}
-            </button>
-          )
-        ) : (
-          <span>{item.x}</span>
-        )}
-        <span>,</span>
-        {editingY?.subregionId === item.subregionId ? (
-          <input
-            type="text"
-            inputMode="numeric"
-            className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
-            style={{ width: `${Math.max(2, (editingY.value.length || 0) + 1)}ch` }}
-            placeholder="y"
-            autoFocus
-            value={editingY.value}
-            onChange={e => setEditingY(prev => (prev ? { ...prev, value: e.target.value } : null))}
-            onBlur={saveY}
-            onKeyDown={e => {
-              if (e.key === 'Enter') saveY()
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() =>
-              setEditingY({
-                regionId: item.regionId,
-                subregionId: item.subregionId,
-                value: String(item.y ?? '')
-              })
-            }
-            className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
-            title="Set Y coordinate"
-          >
-            {item.y != null ? item.y : '\u00a0'}
-          </button>
-        )}
-        <span>,</span>
-        {updateZ && setEditingZ ? (
-          editingZ?.subregionId === item.subregionId ? (
-            <input
-              type="text"
-              inputMode="numeric"
-              className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
-              style={{ width: `${Math.max(2, (editingZ.value.length || 0) + 1)}ch` }}
-              placeholder="z"
-              autoFocus
-              value={editingZ.value}
-              onChange={e => setEditingZ(prev => (prev ? { ...prev, value: e.target.value } : null))}
-              onBlur={saveZ}
-              onKeyDown={e => {
-                if (e.key === 'Enter') saveZ()
-              }}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() =>
-                setEditingZ({
-                  regionId: item.regionId,
-                  subregionId: item.subregionId,
-                  value: String(item.z)
-                })
-              }
-              className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[2ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
-              title="Set Z coordinate"
-            >
-              {item.z}
-            </button>
-          )
-        ) : (
-          <span>{item.z}</span>
-        )}
-        {showVillageHeight && (
-          <>
-            <span className="ml-2">Height:</span>
-            {editingHeight?.subregionId === item.subregionId && setEditingHeight ? (
-              <input
-                type="text"
-                inputMode="numeric"
-                className="appearance-none m-0 bg-transparent border-0 border-b-2 border-lapis-lazuli text-gray-400 focus:outline-none focus:border-lapis-lighter px-0.5 pt-px pb-0 leading-none"
-                style={{ width: `${Math.max(4, (editingHeight.value.length || 0) + 1)}ch` }}
-                placeholder="auto"
-                autoFocus
-                value={editingHeight.value}
-                onChange={e => setEditingHeight(prev => (prev ? { ...prev, value: e.target.value } : null))}
-                onBlur={saveHeight}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') saveHeight()
-                }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  setEditingHeight?.({
-                    regionId: item.regionId,
-                    subregionId: item.subregionId,
-                    value: String(item.height ?? '')
-                  })
-                }
-                className="text-gray-400 border-b-2 border-gray-500 hover:border-gray-400 w-fit min-w-[4ch] text-left px-0.5 pt-px pb-0 leading-none cursor-pointer focus:outline-none"
-                title="Set village export height"
-              >
-                {item.height != null ? item.height : 'auto'}
-              </button>
-            )}
-          </>
-        )}
-      </div>
-      {item.regionName && <span className="text-gray-500 text-xs pl-0">— {item.regionName}</span>}
-    </li>
-  )
-}
-
 export function AdvancedPanel() {
   const { regions, seedInfo, mapCanvas, toast, mapState, worldName, biomeLabelVisibility, customMarkers } = useAppContext()
   const villageFileInputRef = useRef<HTMLInputElement>(null)
   const structureFileInputRef = useRef<HTMLInputElement>(null)
-  const heartCsvFileInputRef = useRef<HTMLInputElement>(null)
-  const nerveCsvFileInputRef = useRef<HTMLInputElement>(null)
-  const heartListItemRefs = useRef<Partial<Record<string, HTMLLIElement | null>>>({})
-  const nerveListItemRefs = useRef<Partial<Record<string, HTMLLIElement | null>>>({})
   const pendingStructureTypeRef = useRef<StructureType | null>(null)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [isImportingVillages, setIsImportingVillages] = useState(false)
@@ -358,10 +76,6 @@ export function AdvancedPanel() {
   const [isImporting, setIsImporting] = useState(false)
   const [villageImportError, setVillageImportError] = useState<string | null>(null)
   const [structureImportError, setStructureImportError] = useState<string | null>(null)
-  const [isImportingHearts, setIsImportingHearts] = useState(false)
-  const [heartImportError, setHeartImportError] = useState<string | null>(null)
-  const [isImportingNerves, setIsImportingNerves] = useState(false)
-  const [nerveImportError, setNerveImportError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [manualStructureModalOpen, setManualStructureModalOpen] = useState(false)
   const [manualStructureForm, setManualStructureForm] = useState({
@@ -397,14 +111,6 @@ export function AdvancedPanel() {
   const [editingStructureY, setEditingStructureY] = useState<YEditState>(null)
   const [editingStructureX, setEditingStructureX] = useState<XZEditState>(null)
   const [editingStructureZ, setEditingStructureZ] = useState<XZEditState>(null)
-  const [editingHeartY, setEditingHeartY] = useState<YEditState>(null)
-  const [editingHeartX, setEditingHeartX] = useState<XZEditState>(null)
-  const [editingHeartZ, setEditingHeartZ] = useState<XZEditState>(null)
-  const [expandedRegionHeartsList, setExpandedRegionHeartsList] = useState(true)
-  const [editingNerveY, setEditingNerveY] = useState<YEditState>(null)
-  const [editingNerveX, setEditingNerveX] = useState<XZEditState>(null)
-  const [editingNerveZ, setEditingNerveZ] = useState<XZEditState>(null)
-  const [expandedRegionNervesList, setExpandedRegionNervesList] = useState(true)
   const [editingVillageY, setEditingVillageY] = useState<YEditState>(null)
   const [editingVillageHeight, setEditingVillageHeight] = useState<HeightEditState>(null)
 
@@ -476,8 +182,6 @@ export function AdvancedPanel() {
     type: 'village' | 'structure'
     item: { regionId: string; subregionId: string; name: string }
   } | null>(null)
-  const [pendingHeartDelete, setPendingHeartDelete] = useState<{ regionId: string; name: string } | null>(null)
-  const [pendingNerveDelete, setPendingNerveDelete] = useState<{ regionId: string; name: string } | null>(null)
   const [editCategory, setEditCategory] = useState('')
   const [editItems, setEditItems] = useState<({ id: string; name: string } | null)[]>([null, null, null])
   const [editThemePairs, setEditThemePairs] = useState<{ a: string; b: string }[]>([{ a: '', b: '' }, { a: '', b: '' }, { a: '', b: '' }])
@@ -554,76 +258,6 @@ export function AdvancedPanel() {
     }
   }
 
-  const handleHeartImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setIsImportingHearts(true)
-    setHeartImportError(null)
-    try {
-      const text = await file.text()
-      if (!text.trim()) {
-        throw new Error('File is empty or contains no valid data')
-      }
-      const result = regions.importHeartsFromCSV(text)
-      if (result.heartRows === 0) {
-        toast.showToast('No region_heart rows found in CSV', 'error')
-      } else {
-        const msg = [
-          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
-          result.orphaned > 0
-            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
-            : null
-        ]
-          .filter(Boolean)
-          .join('. ')
-        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
-      }
-      if (heartCsvFileInputRef.current) {
-        heartCsvFileInputRef.current.value = ''
-      }
-    } catch (error) {
-      console.error('Heart import error:', error)
-      setHeartImportError(error instanceof Error ? error.message : 'Failed to import hearts')
-    } finally {
-      setIsImportingHearts(false)
-    }
-  }
-
-  const handleNerveImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setIsImportingNerves(true)
-    setNerveImportError(null)
-    try {
-      const text = await file.text()
-      if (!text.trim()) {
-        throw new Error('File is empty or contains no valid data')
-      }
-      const result = regions.importNervesFromCSV(text)
-      if (result.nerveRows === 0) {
-        toast.showToast('No region_nerve rows found in CSV', 'error')
-      } else {
-        const msg = [
-          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
-          result.orphaned > 0
-            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
-            : null
-        ]
-          .filter(Boolean)
-          .join('. ')
-        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
-      }
-      if (nerveCsvFileInputRef.current) {
-        nerveCsvFileInputRef.current.value = ''
-      }
-    } catch (error) {
-      console.error('Nerve import error:', error)
-      setNerveImportError(error instanceof Error ? error.message : 'Failed to import nerves')
-    } finally {
-      setIsImportingNerves(false)
-    }
-  }
-
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -664,44 +298,6 @@ export function AdvancedPanel() {
   }
 
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
-
-  useEffect(() => {
-    const id = regions.selectedRegionId
-    if (!id || !isRegionSpecificExpanded) return
-    const selected = regions.regions.find(r => r.id === id)
-    if (!selected?.centerPoint || !expandedRegionHeartsList) return
-    const el = heartListItemRefs.current[id]
-    if (!el) return
-    let innerRaf = 0
-    const outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => {
-        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      })
-    })
-    return () => {
-      cancelAnimationFrame(outerRaf)
-      cancelAnimationFrame(innerRaf)
-    }
-  }, [regions.selectedRegionId, regions.regions, isRegionSpecificExpanded, expandedRegionHeartsList])
-
-  useEffect(() => {
-    const id = regions.selectedRegionId
-    if (!id || !isRegionNervesExpanded) return
-    const selected = regions.regions.find(r => r.id === id)
-    if (!selected?.nervePoint || !expandedRegionNervesList) return
-    const el = nerveListItemRefs.current[id]
-    if (!el) return
-    let innerRaf = 0
-    const outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => {
-        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      })
-    })
-    return () => {
-      cancelAnimationFrame(outerRaf)
-      cancelAnimationFrame(innerRaf)
-    }
-  }, [regions.selectedRegionId, regions.regions, isRegionNervesExpanded, expandedRegionNervesList])
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
@@ -1473,9 +1069,7 @@ export function AdvancedPanel() {
                                   updateHeight={regions.updateVillageSubregionHeight}
                                   showVillageHeight
                                   onCopyTp={target => {
-                                    const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                    navigator.clipboard.writeText(tpCommand)
+                                    copySubregionTpToClipboard(target)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
                                   deleteLabel="Delete village"
@@ -1806,9 +1400,7 @@ export function AdvancedPanel() {
                                   setEditingZ={setEditingStructureZ}
                                   updateZ={regions.updateStructureSubregionZ}
                                   onCopyTp={target => {
-                                    const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                    navigator.clipboard.writeText(tpCommand)
+                                    copySubregionTpToClipboard(target)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
                                   deleteLabel="Delete structure"
@@ -2252,525 +1844,19 @@ export function AdvancedPanel() {
           )}
         </div>
 
-        {/* Region Hearts */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsRegionSpecificExpanded(!isRegionSpecificExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span className="flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Region Hearts
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isRegionSpecificExpanded ? 'rotate-90' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isRegionSpecificExpanded && (
-            <div className="ml-4 space-y-4">
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import hearts</h5>
-                  <p className="text-sm text-gray-300">
-                    Uses rows where structure is region_heart (same CSV as export). Only X, Y, and Z are applied;
-                    the details column is ignored. Each point is assigned to the region whose polygon contains it.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => heartCsvFileInputRef.current?.click()}
-                    disabled={availableRegions.length === 0 || isImportingHearts}
-                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                  >
-                    {isImportingHearts ? 'Importing…' : 'Import hearts (CSV)'}
-                  </button>
-                  <input
-                    ref={heartCsvFileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={handleHeartImport}
-                    className="hidden"
-                  />
-                  {heartImportError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
-                      {heartImportError}
-                    </div>
-                  )}
-                </div>
+        <RegionAnchorSection
+          config={HEART_ANCHOR_CONFIG}
+          expanded={isRegionSpecificExpanded}
+          onToggleExpanded={() => setIsRegionSpecificExpanded(v => !v)}
+          availableRegions={availableRegions}
+        />
 
-                {(() => {
-                  const heartRegions = availableRegions
-                    .filter(r => r.centerPoint != null)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                  return (
-                    <>
-                      {heartRegions.length > 0 && (
-                        <div className="space-y-1">
-                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Placed hearts</h5>
-                          <div className="border border-gray-600 rounded-md overflow-hidden">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedRegionHeartsList(prev => !prev)}
-                              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 hover:text-white border-0"
-                            >
-                              <span>Region hearts ({heartRegions.length})</span>
-                              <svg
-                                className={`w-4 h-4 shrink-0 transition-transform ${expandedRegionHeartsList ? 'rotate-90' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                            {expandedRegionHeartsList && (
-                              <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
-                                <ul className="space-y-1.5 text-sm">
-                                  {heartRegions.map(region => {
-                                    const cp = region.centerPoint!
-                                    const item: SubregionListItem = {
-                                      regionId: region.id,
-                                      subregionId: region.id,
-                                      name: region.name,
-                                      x: Math.round(cp.x),
-                                      z: Math.round(cp.z),
-                                      y: cp.y
-                                    }
-                                    const isSelectedHeartRow = regions.selectedRegionId === region.id
-                                    return (
-                                      <SubregionListRow
-                                        key={region.id}
-                                        item={item}
-                                        editingY={editingHeartY}
-                                        setEditingY={setEditingHeartY}
-                                        updateY={regions.updateRegionHeartY}
-                                        editingX={editingHeartX}
-                                        setEditingX={setEditingHeartX}
-                                        updateX={regions.updateRegionHeartX}
-                                        editingZ={editingHeartZ}
-                                        setEditingZ={setEditingHeartZ}
-                                        updateZ={regions.updateRegionHeartZ}
-                                        onCopyTp={target => {
-                                          const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                          navigator.clipboard.writeText(tpCommand)
-                                          toast.showToast('Teleport command copied', 'success')
-                                        }}
-                                        deleteLabel="Remove region heart"
-                                        onDelete={target => {
-                                          setPendingHeartDelete({ regionId: target.regionId, name: target.name })
-                                        }}
-                                        listItemRef={el => {
-                                          if (el) heartListItemRefs.current[region.id] = el
-                                          else delete heartListItemRefs.current[region.id]
-                                        }}
-                                        listItemClassName={
-                                          isSelectedHeartRow
-                                            ? 'rounded-md -mx-1 px-1 ring-2 ring-lapis-lazuli/90 bg-lapis-lazuli/15'
-                                            : undefined
-                                        }
-                                      />
-                                    )
-                                  })}
-                                </ul>
-                                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const names = heartRegions.map(r => r.name).join(', ')
-                                      navigator.clipboard.writeText(names)
-                                      toast.showToast('Names copied to clipboard', 'success')
-                                    }}
-                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
-                                  >
-                                    Copy names
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const csv = buildRegionHeartsVillageFormatCSV(
-                                        regions.regions,
-                                        seedInfo.seedInfo.seed
-                                      )
-                                      if (!csv) {
-                                        toast.showToast('No region hearts to export', 'error')
-                                        return
-                                      }
-                                      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-                                      const link = document.createElement('a')
-                                      const url = URL.createObjectURL(blob)
-                                      link.href = url
-                                      const slug = (worldName.worldName || 'world')
-                                        .replace(/[^a-zA-Z0-9]/g, '-')
-                                        .toLowerCase()
-                                      const date = new Date().toISOString().split('T')[0]
-                                      link.download = `${slug}-region-hearts-${date}.csv`
-                                      link.click()
-                                      URL.revokeObjectURL(url)
-                                      toast.showToast('Region hearts CSV downloaded', 'success')
-                                    }}
-                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
-                                  >
-                                    Export CSV
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {heartRegions.length === 0 && availableRegions.length > 0 && (
-                        <p className="text-sm text-gray-500">
-                          No region hearts yet. Select a region and use Set heart location on the map.
-                        </p>
-                      )}
-                    </>
-                  )
-                })()}
-
-                {regions.selectedRegionId ? (
-                  <div className="space-y-2">
-                    {(() => {
-                      const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
-                      const hasCenterPoint = selectedRegion?.centerPoint != null
-                      const selId = regions.selectedRegionId!
-                      return (
-                        <div className="space-y-2">
-                          {!hasCenterPoint ? (
-                            mapCanvas.isSettingCenterPoint && mapCanvas.centerPointRegionId === selId ? (
-                              <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2 w-full">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-gray-900 text-base">
-                                    <strong>Set Heart Location</strong>
-                                  </p>
-                                </div>
-                                <p className="text-gray-900 text-sm">
-                                  Click on the map to set the heart location
-                                </p>
-                                <Button
-                                  onClick={() => {
-                                    mapCanvas.stopSettingCenterPoint()
-                                  }}
-                                  variant="primary"
-                                  className="w-full mt-2"
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            ) : (
-                              <Button
-                                onClick={() => {
-                                  mapCanvas.startSettingCenterPoint(selId)
-                                }}
-                                variant="secondary"
-                                title="Click on map to set region heart"
-                              >
-                                Set heart location
-                              </Button>
-                            )
-                          ) : null}
-                        </div>
-                      )
-                    })()}
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
-                    Select a region to set its heart on the map
-                  </div>
-                )}
-                {regions.regions.some(r => r.centerPoint != null) && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const text = buildBulkAnchorTpText(regions.regions, r => r.centerPoint)
-                      await copyToClipboard(text)
-                      toast.showToast('All heart teleport commands copied', 'success')
-                    }}
-                    className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
-                  >
-                    <ClipboardCopy className="w-4 h-4" />
-                    Copy all heart TPs
-                  </button>
-                )}
-                <div className="text-sm text-white mt-2">
-                  {(() => {
-                    const customHearts = regions.regions.filter(r => r.centerPoint != null).length
-                    const totalRegions = regions.regions.length
-                    return customHearts === totalRegions && totalRegions > 0
-                      ? 'All regions have hearts'
-                      : `${customHearts} region hearts set out of ${totalRegions} regions`
-                  })()}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Region Nerves */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsRegionNervesExpanded(!isRegionNervesExpanded)}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 mb-2 px-3 py-2 rounded-md border border-gunmetal bg-gray-700/50 hover:bg-gray-600/50 hover:text-white hover:border-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli"
-          >
-            <span className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Region Nerves
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${isRegionNervesExpanded ? 'rotate-90' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          {isRegionNervesExpanded && (
-            <div className="ml-4 space-y-4">
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import nerves</h5>
-                  <p className="text-sm text-gray-300">
-                    Uses rows where structure is region_nerve (same CSV layout as hearts). Only X, Y, and Z are applied;
-                    the details column is ignored. Each point is assigned to the region whose polygon contains it.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => nerveCsvFileInputRef.current?.click()}
-                    disabled={availableRegions.length === 0 || isImportingNerves}
-                    className="w-full bg-viridian hover:bg-viridian/80 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                  >
-                    {isImportingNerves ? 'Importing…' : 'Import nerves (CSV)'}
-                  </button>
-                  <input
-                    ref={nerveCsvFileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={handleNerveImport}
-                    className="hidden"
-                  />
-                  {nerveImportError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-md text-sm">
-                      {nerveImportError}
-                    </div>
-                  )}
-                </div>
-
-                {(() => {
-                  const nerveRegions = availableRegions
-                    .filter(r => r.nervePoint != null)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                  return (
-                    <>
-                      {nerveRegions.length > 0 && (
-                        <div className="space-y-1">
-                          <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Placed nerves</h5>
-                          <div className="border border-gray-600 rounded-md overflow-hidden">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedRegionNervesList(prev => !prev)}
-                              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 hover:text-white border-0"
-                            >
-                              <span>Region nerves ({nerveRegions.length})</span>
-                              <svg
-                                className={`w-4 h-4 shrink-0 transition-transform ${expandedRegionNervesList ? 'rotate-90' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                            {expandedRegionNervesList && (
-                              <div className="bg-gray-800/50 px-3 py-2 border-t border-gray-600 max-h-48 overflow-y-auto">
-                                <ul className="space-y-1.5 text-sm">
-                                  {nerveRegions.map(region => {
-                                    const np = region.nervePoint!
-                                    const item: SubregionListItem = {
-                                      regionId: region.id,
-                                      subregionId: region.id,
-                                      name: region.name,
-                                      x: Math.round(np.x),
-                                      z: Math.round(np.z),
-                                      y: np.y
-                                    }
-                                    const isSelectedNerveRow = regions.selectedRegionId === region.id
-                                    return (
-                                      <SubregionListRow
-                                        key={`nerve-${region.id}`}
-                                        item={item}
-                                        editingY={editingNerveY}
-                                        setEditingY={setEditingNerveY}
-                                        updateY={regions.updateRegionNerveY}
-                                        editingX={editingNerveX}
-                                        setEditingX={setEditingNerveX}
-                                        updateX={regions.updateRegionNerveX}
-                                        editingZ={editingNerveZ}
-                                        setEditingZ={setEditingNerveZ}
-                                        updateZ={regions.updateRegionNerveZ}
-                                        onCopyTp={target => {
-                                          const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                          navigator.clipboard.writeText(tpCommand)
-                                          toast.showToast('Teleport command copied', 'success')
-                                        }}
-                                        deleteLabel="Remove region nerve"
-                                        onDelete={target => {
-                                          setPendingNerveDelete({ regionId: target.regionId, name: target.name })
-                                        }}
-                                        listItemRef={el => {
-                                          if (el) nerveListItemRefs.current[region.id] = el
-                                          else delete nerveListItemRefs.current[region.id]
-                                        }}
-                                        listItemClassName={
-                                          isSelectedNerveRow
-                                            ? 'rounded-md -mx-1 px-1 ring-2 ring-lapis-lazuli/90 bg-lapis-lazuli/15'
-                                            : undefined
-                                        }
-                                      />
-                                    )
-                                  })}
-                                </ul>
-                                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const names = nerveRegions.map(r => r.name).join(', ')
-                                      navigator.clipboard.writeText(names)
-                                      toast.showToast('Names copied to clipboard', 'success')
-                                    }}
-                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
-                                  >
-                                    Copy names
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const csv = buildRegionNervesVillageFormatCSV(
-                                        regions.regions,
-                                        seedInfo.seedInfo.seed
-                                      )
-                                      if (!csv) {
-                                        toast.showToast('No region nerves to export', 'error')
-                                        return
-                                      }
-                                      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-                                      const link = document.createElement('a')
-                                      const url = URL.createObjectURL(blob)
-                                      link.href = url
-                                      const slug = (worldName.worldName || 'world')
-                                        .replace(/[^a-zA-Z0-9]/g, '-')
-                                        .toLowerCase()
-                                      const date = new Date().toISOString().split('T')[0]
-                                      link.download = `${slug}-region-nerves-${date}.csv`
-                                      link.click()
-                                      URL.revokeObjectURL(url)
-                                      toast.showToast('Region nerves CSV downloaded', 'success')
-                                    }}
-                                    className="text-xs text-gray-400 hover:text-gray-300 underline cursor-pointer focus:outline-none"
-                                  >
-                                    Export CSV
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {nerveRegions.length === 0 && availableRegions.length > 0 && (
-                        <p className="text-sm text-gray-500">
-                          No region nerves yet. Select a region and use Set nerve location on the map.
-                        </p>
-                      )}
-                    </>
-                  )
-                })()}
-
-                {regions.selectedRegionId ? (
-                  <div className="space-y-2">
-                    {(() => {
-                      const selectedRegion = regions.regions.find(r => r.id === regions.selectedRegionId)
-                      const hasNervePoint = selectedRegion?.nervePoint != null
-                      const selId = regions.selectedRegionId!
-                      return (
-                        <div className="space-y-2">
-                          {!hasNervePoint ? (
-                            mapCanvas.isSettingNervePoint && mapCanvas.nervePointRegionId === selId ? (
-                              <div className="mb-4 p-3 bg-saffron border border-saffron rounded space-y-2 w-full">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-gray-900 text-base">
-                                    <strong>Set Nerve Location</strong>
-                                  </p>
-                                </div>
-                                <p className="text-gray-900 text-sm">
-                                  Click on the map to set the nerve location
-                                </p>
-                                <Button
-                                  onClick={() => {
-                                    mapCanvas.stopSettingNervePoint()
-                                  }}
-                                  variant="primary"
-                                  className="w-full mt-2"
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            ) : (
-                              <Button
-                                onClick={() => {
-                                  mapCanvas.startSettingNervePoint(selId)
-                                }}
-                                variant="secondary"
-                                title="Click on map to set region nerve"
-                              >
-                                Set nerve location
-                              </Button>
-                            )
-                          ) : null}
-                        </div>
-                      )
-                    })()}
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-400 pt-3 pr-3 pb-3 bg-eerie-back/50 rounded-md">
-                    Select a region to set its nerve on the map
-                  </div>
-                )}
-                {regions.regions.some(r => r.nervePoint != null) && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const text = buildBulkAnchorTpText(regions.regions, r => r.nervePoint)
-                      await copyToClipboard(text)
-                      toast.showToast('All nerve teleport commands copied', 'success')
-                    }}
-                    className="text-sm text-lapis-lazuli hover:text-lapis-lighter hover:underline transition-colors flex items-center gap-1"
-                  >
-                    <ClipboardCopy className="w-4 h-4" />
-                    Copy all nerve TPs
-                  </button>
-                )}
-                <div className="text-sm text-white mt-2">
-                  {(() => {
-                    const customNerves = regions.regions.filter(r => r.nervePoint != null).length
-                    const totalRegions = regions.regions.length
-                    return customNerves === totalRegions && totalRegions > 0
-                      ? 'All regions have nerves'
-                      : `${customNerves} region nerves set out of ${totalRegions} regions`
-                  })()}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <RegionAnchorSection
+          config={NERVE_ANCHOR_CONFIG}
+          expanded={isRegionNervesExpanded}
+          onToggleExpanded={() => setIsRegionNervesExpanded(v => !v)}
+          availableRegions={availableRegions}
+        />
 
         {availableRegions.length === 0 && (
           <div className="text-orange-400 text-sm">
@@ -2823,40 +1909,6 @@ export function AdvancedPanel() {
           setEditingStructureZ(prev => (prev?.subregionId === item.subregionId ? null : prev))
           toast.showToast(type === 'village' ? 'Village deleted' : 'Structure deleted', 'success')
           setPendingSubregionDelete(null)
-        }}
-      />
-
-      <DeleteSubregionModal
-        isOpen={pendingHeartDelete != null}
-        targetLabel="region heart"
-        targetName={pendingHeartDelete?.name ?? ''}
-        onCancel={() => setPendingHeartDelete(null)}
-        onConfirm={() => {
-          if (!pendingHeartDelete) return
-          const { regionId } = pendingHeartDelete
-          regions.setCustomCenterPoint(regionId, null)
-          setEditingHeartX(prev => (prev?.regionId === regionId ? null : prev))
-          setEditingHeartY(prev => (prev?.regionId === regionId ? null : prev))
-          setEditingHeartZ(prev => (prev?.regionId === regionId ? null : prev))
-          toast.showToast('Region heart removed', 'success')
-          setPendingHeartDelete(null)
-        }}
-      />
-
-      <DeleteSubregionModal
-        isOpen={pendingNerveDelete != null}
-        targetLabel="region nerve"
-        targetName={pendingNerveDelete?.name ?? ''}
-        onCancel={() => setPendingNerveDelete(null)}
-        onConfirm={() => {
-          if (!pendingNerveDelete) return
-          const { regionId } = pendingNerveDelete
-          regions.setCustomNervePoint(regionId, null)
-          setEditingNerveX(prev => (prev?.regionId === regionId ? null : prev))
-          setEditingNerveY(prev => (prev?.regionId === regionId ? null : prev))
-          setEditingNerveZ(prev => (prev?.regionId === regionId ? null : prev))
-          toast.showToast('Region nerve removed', 'success')
-          setPendingNerveDelete(null)
         }}
       />
 
