@@ -1,12 +1,17 @@
 # Regions-meta: structure export + discover (`recipeId`) alignment
 
-## Status: ✅ Complete (Phases 1–3)
+## Status: ✅ IMPLEMENTED (Phases 1–3)
+
+**Completed:** March 2026  
+**Archived:** `tasks/completed/` (May 2026)
 
 **Schema reference:** `reference/regions-meta-schema.md` (format `1`, changelog 1.9+)
 
-**Primary implementation:** `src/utils/exportUtils.ts` — `exportRegionsMetaYAML`
+**Primary implementation:** `src/utils/exportUtils.ts` — `exportRegionsMetaYAML` (`STRUCTURE_FAMILY_META`, `pickStructureFamilies`)
 
 **Related:** `tasks/completed/region-meta-export-spec.md` (initial regions-meta export; predates full structure schema and `recipeId` omission guidance)
+
+**Out of scope for this spec (shipped separately, same `recipeId` omission):** `kind: water` (`discover.method: passive`) — see `tasks/completed/water-region-kind-spec.md`; `kind: nerve` (overworld only) — see region-nerves work and `reference/regions-meta-schema.md`.
 
 ---
 
@@ -57,7 +62,7 @@ Align Region Forge with **`reference/regions-meta-schema.md`** §3.2: use **`jun
 | Persisted data | Map JSON / `localStorage` may key structure visibility by **`jungle_pyramid`**. Add one-time migration or load-time fallback → **`jungle_temple`**. |
 | CSV / docs | Update anything that treats `jungle_pyramid` as a stable external id. |
 
-All other `STRUCTURE_TYPES` values already match the schema (`ancient_city`, `buried_treasure`, `desert_pyramid`, `desert_well`, `igloo`, `pillager_outpost`, `trail_ruins`).
+All other `STRUCTURE_TYPES` values match the schema (`ancient_city`, `buried_treasure`, `desert_pyramid`, `desert_well`, `igloo`, `pillager_outpost`, `trail_ruins`, plus later additions `woodland_mansion`, `swamp_hut`, `shipwreck`, `ocean_ruin` — all covered in `STRUCTURE_FAMILY_META`).
 
 ### Files (Phase 1)
 
@@ -87,8 +92,8 @@ All other `STRUCTURE_TYPES` values already match the schema (`ancient_city`, `bu
 
 ### `recipeId` removal (all kinds)
 
-| kind | Current behaviour | Target |
-|------|-------------------|--------|
+| kind | Prior behaviour | Shipped |
+|------|-----------------|--------|
 | `system` | `discover: { method: disabled, recipeId: none }` | `{ method: disabled }` only |
 | `region` | `recipeId` from `getRecipeId('region', dim)` | omit |
 | `heart` | `recipeId` from `getRecipeId('heart', dim)` | omit |
@@ -126,6 +131,10 @@ Stable **`label`** and **`counter`** (AA key without `Custom.` prefix). Default 
 | `jungle_temple` | Jungle Temples | `jungle_temples_found` |
 | `pillager_outpost` | Pillager Outposts | `pillager_outposts_found` |
 | `trail_ruins` | Trail Ruins | `trail_ruins_found` |
+| `woodland_mansion` | Woodland Mansions | `woodland_mansions_found` |
+| `swamp_hut` | Swamp Huts | `swamp_huts_found` |
+| `shipwreck` | Shipwrecks | `shipwrecks_found` |
+| `ocean_ruin` | Ocean Ruins | `ocean_ruins_found` |
 
 **Build rule:** Collect the set of `structureType` values on exported structure rows; emit **`structureFamilies`** with at least those keys (`label` + `counter` each). Optionally include all known families for stable ordering; minimum is **every referenced type**.
 
@@ -182,3 +191,4 @@ Stable **`label`** and **`counter`** (AA key without `Custom.` prefix). Default 
 | 2026-03-23 | Decision: refactor `jungle_pyramid` → `jungle_temple` in code and persisted ids; no export-only mapping. |
 | 2026-03-23 | Restructured into **Phase 1** (jungle id + persistence), **Phase 2** (export YAML), **Phase 3** (reference docs). |
 | 2026-03-24 | Phase 3: `reference/regions-meta-schema.md` §3.4 note, §10 example, §12 notes, changelog 1.9; supersession note on completed region-meta spec. |
+| 2026-05-21 | Marked IMPLEMENTED; expanded `structureFamilies` table to all 12 `STRUCTURE_TYPES`; archived to `tasks/completed/`. |

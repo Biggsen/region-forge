@@ -5,7 +5,7 @@
 **Implementation Date**: January 2026  
 **Validation**: Verified working with mc-plugin-manager
 
-**Superseded for export shape:** `discover.recipeId` omission, `kind: structure` rows (`structureType`, no `recipeId`), and root `structureFamilies` are specified in `tasks/regions-meta-structure-and-discover-export-spec.md` and `reference/regions-meta-schema.md` (changelog 1.7+). This document remains the historical record of the initial regions-meta feature.
+**Superseded for export shape:** `discover.recipeId` omission, `kind: structure` rows (`structureType`, no `recipeId`), and root `structureFamilies` are specified in `tasks/completed/regions-meta-structure-and-discover-export-spec.md` and `reference/regions-meta-schema.md` (changelog 1.7+). This document remains the historical record of the initial regions-meta feature.
 
 ## Overview
 
