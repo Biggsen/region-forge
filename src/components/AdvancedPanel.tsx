@@ -11,6 +11,9 @@ import { Trash2, Heart, Activity, ClipboardCopy, LocateFixed, Skull, Home, Folde
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copyToClipboard } from '../utils/polygonUtils'
+import { buildBulkAnchorTpText, copySubregionTpToClipboard } from '../utils/anchorClipboardUtils'
+import { runRegionAnchorCsvImport } from '../utils/regionAnchorImport'
+import { useScrollAnchorRowIntoView } from '../hooks/useScrollAnchorRowIntoView'
 import { findParentRegion, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV } from '../utils/villageUtils'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
@@ -65,27 +68,6 @@ type SubregionListItem = {
   height?: number
   z: number
   regionName?: string
-}
-
-type AnchorPoint = { x: number; z: number; y?: number }
-
-function formatMinecraftTpCommand(point: AnchorPoint): string {
-  const y = point.y !== undefined && !Number.isNaN(point.y) ? Math.round(point.y) : '~'
-  return `/minecraft:tp @s ${Math.round(point.x)} ${y} ${Math.round(point.z)}`
-}
-
-function buildBulkAnchorTpText(
-  regions: Region[],
-  getAnchor: (region: Region) => AnchorPoint | null | undefined
-): string {
-  return [...regions]
-    .filter(r => getAnchor(r) != null)
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(region => {
-      const anchor = getAnchor(region)!
-      return `${region.name}:\n${formatMinecraftTpCommand(anchor)}`
-    })
-    .join('\n\n')
 }
 
 function SubregionListRow({
@@ -559,34 +541,19 @@ export function AdvancedPanel() {
     if (!file) return
     setIsImportingHearts(true)
     setHeartImportError(null)
-    try {
-      const text = await file.text()
-      if (!text.trim()) {
-        throw new Error('File is empty or contains no valid data')
-      }
-      const result = regions.importHeartsFromCSV(text)
-      if (result.heartRows === 0) {
-        toast.showToast('No region_heart rows found in CSV', 'error')
-      } else {
-        const msg = [
-          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
-          result.orphaned > 0
-            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
-            : null
-        ]
-          .filter(Boolean)
-          .join('. ')
-        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
-      }
-      if (heartCsvFileInputRef.current) {
-        heartCsvFileInputRef.current.value = ''
-      }
-    } catch (error) {
-      console.error('Heart import error:', error)
-      setHeartImportError(error instanceof Error ? error.message : 'Failed to import hearts')
-    } finally {
-      setIsImportingHearts(false)
-    }
+    const { error } = await runRegionAnchorCsvImport(
+      file,
+      regions.importHeartsFromCSV,
+      {
+        rowKey: 'heartRows',
+        noRowsToast: 'No region_heart rows found in CSV',
+        failureMessage: 'Failed to import hearts'
+      },
+      toast.showToast
+    )
+    if (error) setHeartImportError(error)
+    if (heartCsvFileInputRef.current) heartCsvFileInputRef.current.value = ''
+    setIsImportingHearts(false)
   }
 
   const handleNerveImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -594,34 +561,19 @@ export function AdvancedPanel() {
     if (!file) return
     setIsImportingNerves(true)
     setNerveImportError(null)
-    try {
-      const text = await file.text()
-      if (!text.trim()) {
-        throw new Error('File is empty or contains no valid data')
-      }
-      const result = regions.importNervesFromCSV(text)
-      if (result.nerveRows === 0) {
-        toast.showToast('No region_nerve rows found in CSV', 'error')
-      } else {
-        const msg = [
-          `Updated ${result.regionsUpdated} region${result.regionsUpdated === 1 ? '' : 's'}`,
-          result.orphaned > 0
-            ? `${result.orphaned} row${result.orphaned === 1 ? '' : 's'} not inside any region`
-            : null
-        ]
-          .filter(Boolean)
-          .join('. ')
-        toast.showToast(msg, result.orphaned > 0 ? 'warning' : 'success')
-      }
-      if (nerveCsvFileInputRef.current) {
-        nerveCsvFileInputRef.current.value = ''
-      }
-    } catch (error) {
-      console.error('Nerve import error:', error)
-      setNerveImportError(error instanceof Error ? error.message : 'Failed to import nerves')
-    } finally {
-      setIsImportingNerves(false)
-    }
+    const { error } = await runRegionAnchorCsvImport(
+      file,
+      regions.importNervesFromCSV,
+      {
+        rowKey: 'nerveRows',
+        noRowsToast: 'No region_nerve rows found in CSV',
+        failureMessage: 'Failed to import nerves'
+      },
+      toast.showToast
+    )
+    if (error) setNerveImportError(error)
+    if (nerveCsvFileInputRef.current) nerveCsvFileInputRef.current.value = ''
+    setIsImportingNerves(false)
   }
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -665,43 +617,23 @@ export function AdvancedPanel() {
 
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
 
-  useEffect(() => {
-    const id = regions.selectedRegionId
-    if (!id || !isRegionSpecificExpanded) return
-    const selected = regions.regions.find(r => r.id === id)
-    if (!selected?.centerPoint || !expandedRegionHeartsList) return
-    const el = heartListItemRefs.current[id]
-    if (!el) return
-    let innerRaf = 0
-    const outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => {
-        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      })
-    })
-    return () => {
-      cancelAnimationFrame(outerRaf)
-      cancelAnimationFrame(innerRaf)
-    }
-  }, [regions.selectedRegionId, regions.regions, isRegionSpecificExpanded, expandedRegionHeartsList])
+  useScrollAnchorRowIntoView({
+    selectedRegionId: regions.selectedRegionId,
+    regions: regions.regions,
+    sectionExpanded: isRegionSpecificExpanded,
+    listExpanded: expandedRegionHeartsList,
+    listItemRefs: heartListItemRefs,
+    anchorField: 'centerPoint'
+  })
 
-  useEffect(() => {
-    const id = regions.selectedRegionId
-    if (!id || !isRegionNervesExpanded) return
-    const selected = regions.regions.find(r => r.id === id)
-    if (!selected?.nervePoint || !expandedRegionNervesList) return
-    const el = nerveListItemRefs.current[id]
-    if (!el) return
-    let innerRaf = 0
-    const outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => {
-        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      })
-    })
-    return () => {
-      cancelAnimationFrame(outerRaf)
-      cancelAnimationFrame(innerRaf)
-    }
-  }, [regions.selectedRegionId, regions.regions, isRegionNervesExpanded, expandedRegionNervesList])
+  useScrollAnchorRowIntoView({
+    selectedRegionId: regions.selectedRegionId,
+    regions: regions.regions,
+    sectionExpanded: isRegionNervesExpanded,
+    listExpanded: expandedRegionNervesList,
+    listItemRefs: nerveListItemRefs,
+    anchorField: 'nervePoint'
+  })
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
@@ -1473,9 +1405,7 @@ export function AdvancedPanel() {
                                   updateHeight={regions.updateVillageSubregionHeight}
                                   showVillageHeight
                                   onCopyTp={target => {
-                                    const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                    navigator.clipboard.writeText(tpCommand)
+                                    copySubregionTpToClipboard(target)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
                                   deleteLabel="Delete village"
@@ -1806,9 +1736,7 @@ export function AdvancedPanel() {
                                   setEditingZ={setEditingStructureZ}
                                   updateZ={regions.updateStructureSubregionZ}
                                   onCopyTp={target => {
-                                    const y = target.y != null ? target.y : '~'
-                                    const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                    navigator.clipboard.writeText(tpCommand)
+                                    copySubregionTpToClipboard(target)
                                     toast.showToast('Teleport command copied', 'success')
                                   }}
                                   deleteLabel="Delete structure"
@@ -2358,9 +2286,7 @@ export function AdvancedPanel() {
                                         setEditingZ={setEditingHeartZ}
                                         updateZ={regions.updateRegionHeartZ}
                                         onCopyTp={target => {
-                                          const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                          navigator.clipboard.writeText(tpCommand)
+                                          copySubregionTpToClipboard(target)
                                           toast.showToast('Teleport command copied', 'success')
                                         }}
                                         deleteLabel="Remove region heart"
@@ -2617,9 +2543,7 @@ export function AdvancedPanel() {
                                         setEditingZ={setEditingNerveZ}
                                         updateZ={regions.updateRegionNerveZ}
                                         onCopyTp={target => {
-                                          const y = target.y != null ? target.y : '~'
-                                          const tpCommand = `/minecraft:tp @s ${target.x} ${y} ${target.z}`
-                                          navigator.clipboard.writeText(tpCommand)
+                                          copySubregionTpToClipboard(target)
                                           toast.showToast('Teleport command copied', 'success')
                                         }}
                                         deleteLabel="Remove region nerve"
