@@ -19,8 +19,8 @@ import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../u
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copySubregionTpToClipboard } from '../utils/anchorClipboardUtils'
 import { findParentRegion } from '../utils/villageUtils'
-import { RegionHeartsSection } from './regionAnchor/RegionHeartsSection'
-import { RegionNervesSection } from './regionAnchor/RegionNervesSection'
+import { RegionAnchorSection } from './regionAnchor/RegionAnchorSection'
+import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG } from './regionAnchor/regionAnchorConfig'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -1844,13 +1844,15 @@ export function AdvancedPanel() {
           )}
         </div>
 
-        <RegionHeartsSection
+        <RegionAnchorSection
+          config={HEART_ANCHOR_CONFIG}
           expanded={isRegionSpecificExpanded}
           onToggleExpanded={() => setIsRegionSpecificExpanded(v => !v)}
           availableRegions={availableRegions}
         />
 
-        <RegionNervesSection
+        <RegionAnchorSection
+          config={NERVE_ANCHOR_CONFIG}
           expanded={isRegionNervesExpanded}
           onToggleExpanded={() => setIsRegionNervesExpanded(v => !v)}
           availableRegions={availableRegions}
