@@ -47,6 +47,7 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `items`  | array  | No       | Up to 3 Minecraft items for this region. See §3.7. Used for economy plugins or discovery rewards. VZ price guide item IDs. |
 | `theme`  | array  | No       | Up to 3 theme pairs (A + B) for narrative flavor. See §3.8. Storyteller's Automaton table. |
 | `description` | string | No   | Free-form description of the region. Used for display, quest hooks, or discovery text. mc-plugin-manager may use this for region lore or UI. May be multiline; Region Forge exports as YAML literal block scalar (`|`) to preserve line breaks. |
+| `coords` | object | No       | Canonical block position for this region in the export world. See §3.9. Region Forge should export on `kind: village`, `heart`, `nerve`, and `structure` when a navigation anchor is known. |
 
 Unknown keys on a region object are ignored.
 
@@ -112,6 +113,7 @@ When `kind` is `water`, **`structureType` must be omitted.**
 | `nether_region`| Nether region. |
 | `end_region`   | End region. |
 | `heart`        | Overworld heart. |
+| `nerve`        | Overworld nerve. |
 | `nether_heart` | Nether heart. |
 | `end_heart`    | End heart. |
 | `village`      | Overworld village. (Note: Villages are overworld-only; there is no `nether_village` or `end_village`.) |
@@ -146,6 +148,28 @@ Up to 3 theme pairs (A + B) from the Storyteller's Automaton table. Region Forge
 |--------|--------|----------|-------------|
 | `a`    | string | **Yes**  | First word (e.g. `Return`, `Seek`, `Hidden`). |
 | `b`    | string | **Yes**  | Second word (e.g. `Death`, `Truth`, `Conquest`). |
+
+### 3.9 `coords` (object, optional)
+
+Block coordinates for the region’s canonical map/navigation position (e.g. lodestone, village centre, structure landmark). **World is not repeated here** — use the region’s `world` field (§3.1); mc-plugin-manager maps that to the correct Minecraft dimension when generating configs.
+
+Region Forge should export `coords` on regions where players need a fixed point to navigate to:
+
+| `kind`      | Export `coords`? |
+|-------------|------------------|
+| `village`   | Yes, when known |
+| `heart`     | Yes, when known |
+| `nerve`     | Yes, when known (overworld only) |
+| `structure` | Yes, when known |
+| `region`, `water`, `system` | Omit unless a future consumer needs them |
+
+| Field | Type   | Required | Description |
+|-------|--------|----------|-------------|
+| `x`   | number | **Yes**  | Block X coordinate. |
+| `y`   | number | No       | Block Y coordinate. Region Forge exports when set (manual; default 0). |
+| `z`   | number | **Yes**  | Block Z coordinate. |
+
+Omitted regions are skipped by consumers that require coordinates (e.g. random compass rewards in MyCommand). Unknown keys inside `coords` are ignored.
 
 ---
 
@@ -293,24 +317,40 @@ regions:
     kind: heart
     discover:
       method: on_enter
+    coords:
+      x: 224
+      y: 99
+      z: -848
 
   - id: nerve_of_dradacliff
     world: overworld
     kind: nerve
     discover:
       method: on_enter
+    coords:
+      x: 220
+      y: 100
+      z: -850
 
   - id: acornbrook
     world: overworld
     kind: village
     discover:
       method: first_join
+    coords:
+      x: 120
+      y: 64
+      z: -340
 
   - id: rotherhithe
     world: overworld
     kind: village
     discover:
       method: on_enter
+    coords:
+      x: 507
+      y: 72
+      z: -1220
 
   - id: dradacliff
     world: overworld
@@ -360,6 +400,10 @@ regions:
     structureType: ancient_city
     discover:
       method: on_enter
+    coords:
+      x: -300
+      y: 85
+      z: 600
 
 structureFamilies:
   ancient_city:
@@ -439,6 +483,12 @@ regions:
   - `label` is for display only; human-facing names for individual regions come from **`id`** (formatting rules in mc-plugin-manager).  
   - Region Forge emits an entry for **each `structureType` used** in that file (not necessarily every known family).
 
+- **`coords`**  
+  - Optional on any region. **Region Forge should export on `kind: village`, `heart`, `nerve`, and `structure`** when a navigation anchor is known.  
+  - Must be an object with numeric `x` and `z`. `y` is optional (default 0 when omitted). Invalid or partial `coords`: mc-plugin-manager may warn and treat the region as having no coordinates.  
+  - Mc-plugin-manager may warn if `coords` is present on `kind: system` or `kind: water`.  
+  - Dimension for generated configs is derived from the region’s `world`, not from a field inside `coords`.
+
 ---
 
 ## 13. Changelog
@@ -459,6 +509,7 @@ regions:
 | 2.0    | Added **`kind: water`** (oceans, seas, lakes): live regions for LM/TAB bands, excluded from main exploration metrics; **`discover.method: passive`** for no CE/AA discovery output; importer derives `recipeId: none`. Extended **`biomes`** to `kind: water`. §6.1: `regionBands` may target water ids. §12: validation notes for unknown kinds and invalid `discover.method`. |
 | 2.1    | §3.2: canonical `structureType` includes **`ocean_ruin`** (and **`woodland_mansion`**, **`swamp_hut`**, **`shipwreck`** for parity with Region Forge). §7.1 example: **`ocean_ruins_found`** counter for Ocean Ruins. |
 | 2.2    | Added **`kind: nerve`** (e.g. `nerve_of_<region>`): overworld-only; Region Forge and valid exports must not emit nerve rows for `world: nether` or `world: end`. §10 example includes a nerve row next to its paired heart. |
+| 2.3    | Added optional **`coords`** on region objects (§3.9): block position `{ x, y?, z }` for navigation anchors. Region Forge should export on `village`, `heart`, `nerve`, and `structure`. World/dimension comes from the region’s `world` field. |
 
 ---
 
