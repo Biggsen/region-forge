@@ -599,7 +599,7 @@ export function AdvancedPanel() {
           </div>
         )}
 
-        {seedInfo.seedInfo.dimension !== 'nether' && (
+        {seedInfo.seedInfo.dimension === 'overworld' && (
           <div>
             <button
               type="button"
@@ -624,7 +624,7 @@ export function AdvancedPanel() {
             {isWaterExpanded && (
               <div className="space-y-3 ml-4">
                 <p className="text-xs text-gray-400">
-                  Exports as <code className="text-gray-300">kind: water</code> with{' '}
+                  Overworld only. Exports as <code className="text-gray-300">kind: water</code> with{' '}
                   <code className="text-gray-300">discover.method: passive</code>. WorldGuard and LevelledMobs bands still apply; no main discovery flow in mc-plugin-manager.
                 </p>
                 {regions.selectedRegionId ? (

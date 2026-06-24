@@ -49,7 +49,7 @@ export function generateRegionYAML(region: Region, includeVillages: boolean = tr
   
   // Generate flags based on region type
   let flags: string
-  const isWaterRegion = region.isWater === true && dim !== 'nether'
+  const isWaterRegion = region.isWater === true && dim === 'overworld'
   if (useGreetingsAndFarewells) {
     if (greetingSize === 'chat') {
       // Chat format uses greeting: and farewell: with single-line values

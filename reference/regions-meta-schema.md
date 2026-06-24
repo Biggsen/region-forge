@@ -41,7 +41,7 @@ Each element describes one region. Order is preserved for display; mc-plugin-man
 | `world`  | string | **Yes**  | World name. Should match the root-level `world` field. Typically `overworld`, `nether`, or `end`; mc-plugin-manager accepts any string. |
 | `kind`   | string | **Yes**  | One of: `system`, `region`, `village`, `heart`, `nerve`, `structure`, `water`. See §3.2. |
 | `structureType` | string | **If `kind: structure`** | Which structure family this region belongs to. Must match a key in root `structureFamilies`. See §3.2 and §7. |
-| `discover` | object | **Yes**  | Discovery behaviour. See §3.3. For `kind: structure`, use `method: on_enter` (mc-plugin-manager derives `recipeId` when omitted). For `kind: water`, use `method: passive` until optional discovery is implemented (see §3.4). |
+| `discover` | object | **Yes**  | Discovery behaviour. See §3.3. For `kind: structure` and `kind: heart`, use `method: on_enter`. For `kind: nerve`, use `method: on_enter` (same convention as `heart`). For `kind: water`, use `method: passive` (see §3.4). |
 | `biomes` | array  | No       | Biome breakdown for this region (from map scan). See §3.6. Present for `kind: region` or `kind: water` when a biome map is available. Omitted for `kind: structure`. |
 | `category` | string | No     | Minecraft item category (e.g. `ores`, `stone`, `wood`, `food`). Used for economy plugins or discovery rewards. VZ price guide categories. |
 | `items`  | array  | No       | Up to 3 Minecraft items for this region. See §3.7. Used for economy plugins or discovery rewards. VZ price guide item IDs. |
@@ -59,13 +59,15 @@ Unknown keys on a region object are ignored.
 | `region` | Normal discoverable region. Counts toward main exploration metrics (with villages, hearts, and overworld nerves when present). |
 | `village`| Village. Uses village-specific crates/counters in CE and village band in LevelledMobs. Counts toward main exploration metrics. |
 | `heart`  | Region heart (e.g. `heart_of_xyz`). Uses heart-specific crates/counters. Counts toward main exploration metrics. |
-| `nerve`  | Region nerve (e.g. `nerve_of_xyz`). Parallel gameplay anchor to a heart; consumer plugins may treat it like a heart or separately. **Overworld only:** Region Forge emits `kind: nerve` rows only when the export `world` is `overworld`. Nether and End exports must not include nerve rows (there is no `nether_nerve` / `end_nerve` split in this schema). |
+| `nerve`  | Region nerve (e.g. `nerve_of_xyz`). Parallel gameplay anchor to a heart; consumer plugins may treat it like a heart or separately. Use **`discover.method: on_enter`** (same convention as `heart`). **Overworld only:** Region Forge emits `kind: nerve` rows only when the export `world` is `overworld`. Nether and End exports must not include nerve rows (there is no `nether_nerve` / `end_nerve` split in this schema). |
 | `structure` | WorldGen / POI footprint (ancient city, desert well, igloo, etc.). **Does not** count toward main exploration totals. Uses separate AA counters, CE rules, and TAB scoreboard lines defined via `structureFamilies` and `structureType`. Display strings are derived from `id` (unique snake_case ids). |
-| `water` | Large water body (ocean, sea, lake). **Does not** count toward main exploration totals (regions / villages / hearts / overworld nerves). Live WorldGuard region for **LevelledMobs** `regionBands` and TAB region-name difficulty coloring when bands are set. Use **`discover.method: passive`** for “no CE discover-once, no AA discovery commands, no progression counters” (see §3.4). Optional metadata (`biomes`, `description`, `theme`, etc.) is allowed. |
+| `water` | Large water body (ocean, sea, lake). **Does not** count toward main exploration totals (regions / villages / hearts / overworld nerves). Live WorldGuard region for **LevelledMobs** `regionBands` and TAB region-name difficulty coloring when bands are set. Use **`discover.method: passive`** for “no CE discover-once, no AA discovery commands, no progression counters” (see §3.4). Optional metadata (`biomes`, `description`, `theme`, etc.) is allowed. **Overworld only:** Region Forge emits `kind: water` rows only when the export `world` is `overworld`. Nether and End exports must not include water rows. |
 
 When `kind` is `structure`, **`structureType` is required** and must be one of the keys in `structureFamilies` for this export.
 
-When `kind` is `water`, **`structureType` must be omitted.**
+When `kind` is `water`, **`structureType` must be omitted** and the file’s root `world` must be `overworld`.
+
+When `kind` is `nerve`, **`discover.method` should be `on_enter`** (same as `heart`).
 
 **`structureType` — canonical values** (extend in Region Forge if you add families; keep in sync with `structureFamilies`):
 
@@ -89,7 +91,7 @@ When `kind` is `water`, **`structureType` must be omitted.**
 | Field               | Type   | Required | Description |
 |---------------------|--------|----------|-------------|
 | `method`            | string | **Yes**  | One of: `disabled`, `on_enter`, `first_join`, `passive`. See §3.4. |
-| `recipeId`         | string | No (deprecated) | **Omit** in new Region Forge exports. Mc-plugin-manager derives a stored value from `kind` + `world` when absent. If present, must be one of: `none`, `region`, `nether_region`, `end_region`, `heart`, `nether_heart`, `end_heart`, `village`. See §3.5. |
+| `recipeId`         | string | No (deprecated) | **Omit** in new Region Forge exports. Mc-plugin-manager derives a stored value from `kind` + `world` when absent. If present, must be one of: `none`, `region`, `nether_region`, `end_region`, `heart`, `nerve`, `nether_heart`, `end_heart`, `village`. See §3.5. |
 | `commandIdOverride` | string | No       | Override for AA command ID. If omitted, mc-plugin-manager derives from `id`. |
 | `displayNameOverride` | string | No     | Override for AA display name. If omitted, derived from `id`. |
 
@@ -98,9 +100,9 @@ When `kind` is `water`, **`structureType` must be omitted.**
 | Value       | Meaning |
 |-------------|---------|
 | `disabled`  | No discovery (e.g. spawn). The region is not treated as an active exploration target. New exports **omit** `recipeId`; mc-plugin-manager derives `none` for `kind: system`. In legacy files, if `recipeId` is present it **must** be `none`. |
-| `on_enter`  | Discover when player enters the region. |
+| `on_enter`  | Discover when player enters the region. **Convention:** use for `kind: region`, `village`, `heart`, `nerve`, and `structure`. |
 | `first_join`| Discover on first join (only one region per world should use this). |
-| `passive`   | Region remains **active** in the catalogue (WorldGuard id, LM bands, UI). Mc-plugin-manager **does not** emit CE discover-once events, AA discovery commands, or main exploration counters for this row. **Intended for `kind: water`** in v1; other kinds may log a warning. Distinct from `disabled`, which implies system-style exclusion from discovery flows. |
+| `passive`   | Region remains **active** in the catalogue (WorldGuard id, LM bands, UI). Mc-plugin-manager **does not** emit CE discover-once events, AA discovery commands, or main exploration counters for this row. **Required convention for `kind: water`**; other kinds may log a warning. Distinct from `disabled`, which implies system-style exclusion from discovery flows. |
 
 **Region Forge (current exports):** omits `recipeId` on **every** `discover` object (all kinds). Omitting `recipeId` with `method: disabled` matches the importer’s derived `none` for `kind: system`—the same end state as legacy `recipeId: none`. For `kind: water`, omit `recipeId`; the importer derives **`none`**.
 
@@ -118,11 +120,13 @@ When `kind` is `water`, **`structureType` must be omitted.**
 | `end_heart`    | End heart. |
 | `village`      | Overworld village. (Note: Villages are overworld-only; there is no `nether_village` or `end_village`.) |
 
-**`kind: nerve`:** Region Forge omits `recipeId` on new exports (like other kinds). Nerve rows exist **only** when `world` is `overworld`; nether and end exports must not include `kind: nerve` entries.
+**`kind: nerve`:** Region Forge omits `recipeId` on new exports (like other kinds). Nerve rows exist **only** when `world` is `overworld`; nether and end exports must not include `kind: nerve` entries. Use **`discover.method: on_enter`**.
 
-When `recipeId` is **omitted**, mc-plugin-manager sets a stored value from `kind` + `world` (e.g. `region` + overworld → `region`; `structure` and **`water`** → `none`). **Generators use `kind` and `world`, not `recipeId`.** When `recipeId` is **present**, it should match `kind` and `world`. The field is deprecated for new exports; it remains documented for older files.
+When `recipeId` is **omitted**, mc-plugin-manager sets a stored value from `kind` + `world` (e.g. `region` + overworld → `region`; `nerve` + overworld → `nerve`; `structure` and **`water`** → `none`). **Generators use `kind` and `world`, not `recipeId`.** When `recipeId` is **present**, it should match `kind` and `world`. The field is deprecated for new exports; it remains documented for older files.
 
-Biome breakdown for a region, derived from sampling the biome map within the region polygon. Region Forge populates this when a biome map is loaded and the map origin is set. Present for **`kind: region`** or **`kind: water`** in overworld and nether exports when a biome map is available. Omitted for spawn, hearts, nerves, villages, `kind: structure`, and for End dimension (End has no biome map support).
+### 3.6 `biomes` (array, optional)
+
+Biome breakdown for a region, derived from sampling the biome map within the region polygon. Region Forge populates this when a biome map is loaded and the map origin is set. Present for **`kind: region`** in overworld and nether exports when a biome map is available, and for **`kind: water`** in **overworld** exports only. Omitted for spawn, hearts, nerves, villages, `kind: structure`, and for End dimension (End has no biome map support).
 
 | Field        | Type   | Required | Description |
 |-------------|--------|----------|-------------|
@@ -455,14 +459,16 @@ regions:
 - **`discover.method` / `recipeId`**  
   - If `method` is `disabled`, legacy `recipeId` (when present) should be `none`; mc-plugin-manager may warn otherwise. When `recipeId` is omitted, the importer derives stored values from `kind` + `world` (`none` for `kind: system`, `structure`, and **`water`**, and the appropriate recipe for regions, hearts, nerves, and villages).  
   - If `method` is not one of `disabled`, `on_enter`, `first_join`, **`passive`**, mc-plugin-manager should skip that region (or reject the file).  
-  - **`passive`** is intended for **`kind: water`**; other kinds may produce an importer warning.  
-  - **`kind: water`** with `method: disabled` or `on_enter` may produce importer warnings (`disabled` discouraged; `on_enter` not yet implemented in generators—prefer `passive` until supported).
+  - See **`kind: nerve`** and **`kind: water`** below for per-kind `method` conventions.
 
 - **`kind: nerve`**  
-  - Valid **only** when the file’s root `world` is `overworld`. If `kind` is `nerve` and `world` is `nether` or `end`, mc-plugin-manager should warn or reject that row (Region Forge does not emit nerves for non-overworld exports).
+  - Valid **only** when the file’s root `world` is `overworld`. If `kind` is `nerve` and `world` is `nether` or `end`, mc-plugin-manager should warn or reject that row (Region Forge does not emit nerves for non-overworld exports).  
+  - **`discover.method` should be `on_enter`** (same convention as `heart`). Other methods may produce an importer warning.
 
 - **`kind: water`**  
+  - Valid **only** when the file’s root `world` is `overworld`. If `kind` is `water` and `world` is `nether` or `end`, mc-plugin-manager should warn or reject that row (Region Forge does not emit water rows for non-overworld exports).  
   - Does not use `structureType`. Counts toward build-report “water” tallies but not toward TAB exploration totals that mirror main region discovery.  
+  - **`discover.method` should be `passive`**. `disabled` or `on_enter` may produce importer warnings.  
   - May appear in `levelledMobs.regionBands` like `kind: region`.
 
 - **`levelledMobs.regionBands`**  
@@ -510,6 +516,7 @@ regions:
 | 2.1    | §3.2: canonical `structureType` includes **`ocean_ruin`** (and **`woodland_mansion`**, **`swamp_hut`**, **`shipwreck`** for parity with Region Forge). §7.1 example: **`ocean_ruins_found`** counter for Ocean Ruins. |
 | 2.2    | Added **`kind: nerve`** (e.g. `nerve_of_<region>`): overworld-only; Region Forge and valid exports must not emit nerve rows for `world: nether` or `world: end`. §10 example includes a nerve row next to its paired heart. |
 | 2.3    | Added optional **`coords`** on region objects (§3.9): block position `{ x, y?, z }` for navigation anchors. Region Forge should export on `village`, `heart`, `nerve`, and `structure`. World/dimension comes from the region’s `world` field. |
+| 2.4    | **`kind: nerve`:** document **`discover.method: on_enter`** convention (same as `heart`); §12 validation. **`kind: water`:** overworld-only (Region Forge must not emit water rows for nether/end); §3.6 heading restored; `nerve` added to §3.3 legacy `recipeId` enum. |
 
 ---
 

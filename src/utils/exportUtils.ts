@@ -435,45 +435,78 @@ function getStandardWorldName(dimension: 'overworld' | 'nether' | 'end'): string
   }
 }
 
-export function exportRegionsMetaYAML(
-  regions: Region[],
-  dimension: 'overworld' | 'nether' | 'end',
-  worldName: string,
-  spawnState: { coordinates: { x: number; z: number; y: number } | null; radius: number },
-  includeVillages: boolean,
-  includeStructures: boolean,
-  includeHeartRegions: boolean,
-  includeNerveRegions: boolean,
-  includeSpawnRegion: boolean,
-  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  mapState?: MapState | null,
+export type RegionsMetaCoords = { x: number; z: number; y?: number }
+
+export type RegionsMetaRegionRow = {
+  id: string
+  world: string
+  kind: string
+  discover: { method: string }
+  structureType?: string
+  coords?: RegionsMetaCoords
+  biomes?: { biome: string; percentage: number }[]
+  category?: string
+  items?: { id: string; name: string }[]
+  theme?: { a: string; b: string }[]
+  description?: string
+}
+
+/** Block coords for regions-meta §3.9; omits `y` when unset. */
+export function metaCoordsFromAnchor(
+  anchor: { x: number; z: number; y?: number } | null | undefined
+): RegionsMetaCoords | undefined {
+  if (anchor == null) return undefined
+  const coords: RegionsMetaCoords = {
+    x: Math.round(anchor.x),
+    z: Math.round(anchor.z),
+  }
+  if (anchor.y !== undefined && !Number.isNaN(anchor.y)) {
+    coords.y = Math.round(anchor.y)
+  }
+  return coords
+}
+
+export function isRegionsMetaWater(
+  region: Region,
+  dimension: 'overworld' | 'nether' | 'end'
+): boolean {
+  return region.isWater === true && dimension === 'overworld'
+}
+
+export interface BuildRegionsMetaParams {
+  regions: Region[]
+  dimension: 'overworld' | 'nether' | 'end'
+  spawnState: { coordinates: { x: number; z: number; y: number } | null; radius: number }
+  includeVillages: boolean
+  includeStructures: boolean
+  includeHeartRegions: boolean
+  includeNerveRegions: boolean
+  includeSpawnRegion: boolean
+  mapState?: MapState | null
   excludeDescriptions?: boolean
-): void {
-  const dim = dimension
+}
+
+export function buildRegionsMetaRoot(params: BuildRegionsMetaParams): Record<string, unknown> | null {
+  const {
+    regions,
+    dimension: dim,
+    spawnState,
+    includeVillages,
+    includeStructures,
+    includeHeartRegions,
+    includeNerveRegions,
+    includeSpawnRegion,
+    mapState,
+    excludeDescriptions,
+  } = params
+
   const hasSpawnCoords = !!spawnState.coordinates
   const hasSpawnRegion = dim === 'overworld' && includeSpawnRegion && hasSpawnCoords && !!spawnState.radius
-
-  // Filter out disabled regions
   const enabledRegions = regions.filter(region => !region.disabled)
-
   const biomeImage = mapState?.biomeImage ?? mapState?.terrainImage ?? mapState?.image ?? null
   const originOffset = mapState?.originOffset ?? null
 
-  type MetaDiscover = { method: string }
-  type MetaRegionRow = {
-    id: string
-    world: string
-    kind: string
-    discover: MetaDiscover
-    structureType?: string
-    biomes?: { biome: string; percentage: number }[]
-    category?: string
-    items?: { id: string; name: string }[]
-    theme?: { a: string; b: string }[]
-    description?: string
-  }
-
-  const metaRegions: MetaRegionRow[] = []
+  const metaRegions: RegionsMetaRegionRow[] = []
   const usedStructureTypes = new Set<StructureType>()
 
   if (hasSpawnRegion) {
@@ -487,8 +520,8 @@ export function exportRegionsMetaYAML(
 
   for (const region of enabledRegions) {
     const mainId = toRegionId(region.name)
-    const isWater = region.isWater === true && dim !== 'nether'
-    let regionEntry: MetaRegionRow = {
+    const isWater = isRegionsMetaWater(region, dim)
+    const regionEntry: RegionsMetaRegionRow = {
       id: mainId,
       world: dim,
       kind: isWater ? 'water' : 'region',
@@ -507,50 +540,62 @@ export function exportRegionsMetaYAML(
       }
     }
     metaRegions.push(regionEntry)
+
     if (includeHeartRegions && region.centerPoint != null) {
-      metaRegions.push({
+      const heartRow: RegionsMetaRegionRow = {
         id: `heart_of_${mainId}`,
         world: dim,
         kind: 'heart',
         discover: { method: 'on_enter' },
-      })
+      }
+      const heartCoords = metaCoordsFromAnchor(region.centerPoint)
+      if (heartCoords) heartRow.coords = heartCoords
+      metaRegions.push(heartRow)
     }
+
     if (includeNerveRegions && region.nervePoint != null && dim === 'overworld') {
-      metaRegions.push({
+      const nerveRow: RegionsMetaRegionRow = {
         id: `nerve_of_${mainId}`,
         world: dim,
         kind: 'nerve',
         discover: { method: 'on_enter' },
-      })
+      }
+      const nerveCoords = metaCoordsFromAnchor(region.nervePoint)
+      if (nerveCoords) nerveRow.coords = nerveCoords
+      metaRegions.push(nerveRow)
     }
+
     if ((includeVillages || includeStructures) && dim !== 'nether' && region.subregions) {
       for (const sub of region.subregions) {
         if (sub.type === 'village' && includeVillages) {
-          metaRegions.push({
+          const villageRow: RegionsMetaRegionRow = {
             id: toRegionId(sub.name),
             world: dim,
             kind: 'village',
             discover: { method: 'on_enter' },
-          })
+          }
+          const villageCoords = metaCoordsFromAnchor({ x: sub.x, z: sub.z, y: sub.y })
+          if (villageCoords) villageRow.coords = villageCoords
+          metaRegions.push(villageRow)
         }
         if (sub.type === 'structure' && includeStructures && sub.structureType) {
           usedStructureTypes.add(sub.structureType)
-          metaRegions.push({
+          const structureRow: RegionsMetaRegionRow = {
             id: yamlSubregionRegionId(sub),
             world: dim,
             kind: 'structure',
             structureType: sub.structureType,
             discover: { method: 'on_enter' },
-          })
+          }
+          const structureCoords = metaCoordsFromAnchor({ x: sub.x, z: sub.z, y: sub.y })
+          if (structureCoords) structureRow.coords = structureCoords
+          metaRegions.push(structureRow)
         }
       }
     }
   }
 
-  if (metaRegions.length === 0) {
-    onShowToast('No regions to export', 'error')
-    return
-  }
+  if (metaRegions.length === 0) return null
 
   const root: Record<string, unknown> = {
     format: 1,
@@ -567,7 +612,7 @@ export function exportRegionsMetaYAML(
       world: getStandardWorldName(dim),
       x: spawnState.coordinates!.x,
       y: spawnState.coordinates!.y,
-      z: spawnState.coordinates!.z
+      z: spawnState.coordinates!.z,
     }
   }
 
@@ -581,15 +626,14 @@ export function exportRegionsMetaYAML(
         world: getStandardWorldName(dim),
         x: spawnState.coordinates!.x,
         y: spawnState.coordinates!.y,
-        z: spawnState.coordinates!.z
-      }
+        z: spawnState.coordinates!.z,
+      },
     }
   }
 
   const regionBands: Record<string, string> = {}
   for (const r of enabledRegions) {
     if (r.challengeLevel) {
-      // Challenge levels are now stored as band names directly, but handle legacy imports
       const band = migrateChallengLevel(r.challengeLevel)
       if (band) {
         regionBands[toRegionId(r.name)] = band
@@ -600,11 +644,46 @@ export function exportRegionsMetaYAML(
   if (Object.keys(regionBands).length > 0 || hasVillagesForLevelled) {
     root.levelledMobs = {
       ...(dim !== 'nether' ? { villageBandStrategy: 'easy' as const } : {}),
-      ...(Object.keys(regionBands).length > 0 ? { regionBands } : {})
+      ...(Object.keys(regionBands).length > 0 ? { regionBands } : {}),
     }
   }
 
-  const prefix = exportFilenamePrefix(worldName, dim)
+  return root
+}
+
+export function exportRegionsMetaYAML(
+  regions: Region[],
+  dimension: 'overworld' | 'nether' | 'end',
+  worldName: string,
+  spawnState: { coordinates: { x: number; z: number; y: number } | null; radius: number },
+  includeVillages: boolean,
+  includeStructures: boolean,
+  includeHeartRegions: boolean,
+  includeNerveRegions: boolean,
+  includeSpawnRegion: boolean,
+  onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
+  mapState?: MapState | null,
+  excludeDescriptions?: boolean
+): void {
+  const root = buildRegionsMetaRoot({
+    regions,
+    dimension,
+    spawnState,
+    includeVillages,
+    includeStructures,
+    includeHeartRegions,
+    includeNerveRegions,
+    includeSpawnRegion,
+    mapState,
+    excludeDescriptions,
+  })
+
+  if (!root) {
+    onShowToast('No regions to export', 'error')
+    return
+  }
+
+  const prefix = exportFilenamePrefix(worldName, dimension)
   const filename = `${prefix}-regions-meta.yml`
   try {
     let yamlStr = yaml.dump(root, { lineWidth: -1, noRefs: true })
@@ -615,7 +694,7 @@ export function exportRegionsMetaYAML(
     link.download = filename
     link.click()
     URL.revokeObjectURL(link.href)
-  } catch (e) {
+  } catch {
     onShowToast(`Failed to generate ${filename}`, 'error')
   }
 }
