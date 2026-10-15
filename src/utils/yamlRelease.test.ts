@@ -245,6 +245,36 @@ describe('yaml release history', () => {
     expect(readReleaseState()?.releases.some((release) => release.generation === 99)).toBe(false)
   })
 
+  it('offers the dated regions file and then a plain regions.yml', async () => {
+    const names: string[] = []
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      names.push(this.download)
+    })
+    const result = await exportRegionsYAML(
+      [region()],
+      () => {},
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      'overworld',
+      'Charidh',
+      true,
+      false,
+      'large',
+      false,
+      { promptDescription: () => 'note' }
+    )
+
+    expect(result.status).toBe('downloaded')
+    expect(names).toEqual([
+      expect.stringMatching(/^charidh-overworld-\d{4}-\d{2}-\d{2}-regions\.yml$/),
+      'regions.yml',
+    ])
+  })
+
   it('does not download or advance when saving the release throws', async () => {
     installStorage(() => {
       throw new Error('quota')

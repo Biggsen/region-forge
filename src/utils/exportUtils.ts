@@ -359,7 +359,9 @@ export async function exportRegionsYAML(
     return { status: published.reason }
   }
 
-  downloadTextFile(published.yaml, `${exportFilenamePrefix(worldName, effectiveDimension)}-regions.yml`, 'text/yaml')
+  const datedName = `${exportFilenamePrefix(worldName, effectiveDimension)}-regions.yml`
+  downloadTextFile(published.yaml, datedName, 'text/yaml')
+  downloadTextFile(published.yaml, 'regions.yml', 'text/yaml')
   return { status: 'downloaded', yaml: published.yaml, generation: published.generation }
 }
 
