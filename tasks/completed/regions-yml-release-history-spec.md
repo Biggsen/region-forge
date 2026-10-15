@@ -1,16 +1,26 @@
 # regions.yml Release History Specification
 
-## Status: Not started
+## Status: ✅ IMPLEMENTED
+
+**Completed:** October 2026
+**Archived:** `tasks/completed/`
 
 **Scope:** Region Forge only. MCPM is not changed by this work.
 
-**Primary code:** `src/utils/exportUtils.ts`, `src/utils/persistenceUtils.ts`, `src/hooks/useRegionForgeYamlGeneration.ts`, `src/hooks/useProjectImport.ts`, `src/components/ExportPanel.tsx`, `src/components/MainApp.tsx`, `src/components/AppHeader.tsx`
+**Primary code:** `src/utils/yamlRelease.ts`, `src/utils/yamlRelease.test.ts`, `src/utils/exportUtils.ts`, `src/utils/persistenceUtils.ts`, `src/hooks/useRegionForgeYamlGeneration.ts`, `src/hooks/useProjectImport.ts`, `src/components/ExportPanel.tsx`, `src/components/MainApp.tsx`
+
+**Shipped beyond the first draft:**
+
+- A matching download still opens a dialog so the note can be edited or cleared. An unchanged note does not write. Generation, timestamp, checksum, and dimension stay fixed.
+- The export panel shows the current release, its description, and **Unexported changes** when the current `regions:` body no longer matches the latest verified checksum.
+- The new-release dialog names the next generation (persisted max + 1) before the write. The write still re-reads storage after confirm.
+- Project JSON downloads are named `{world}-{dimension}-{date}-project.json`. YAML names are unchanged (`-regions.yml`, `-regions-meta.yml`).
 
 ---
 
 ## Overview
 
-`regions.yml` export currently bumps `regionForgeYamlGeneration` in React state and writes that number into the file preamble. The counter is not stored in `localStorage`. It is written into the project JSON only when the user saves the project, and a reload starts it at `0` again. The preamble also stamps `generated-at` and `build-id` from the current time, so two downloads of the same regions are different files.
+`regions.yml` export used to bump `regionForgeYamlGeneration` in React state and write that number into the file preamble. The counter was not stored in `localStorage`. It was written into the project JSON only when the user saved the project, and a reload started it at `0` again. The preamble also stamped `generated-at` and `build-id` from the current time, so two downloads of the same regions were different files.
 
 This spec replaces that counter with a persisted release history for the one working project already stored in `localStorage`.
 
@@ -29,7 +39,7 @@ This spec replaces that counter with a persisted release history for the one wor
 ## Goals
 
 1. A new release is created only when the generated `regions:` body changes.
-2. Downloading that release again does not change its metadata and produces the same file bytes.
+2. Downloading that release again leaves generation, timestamp, checksum, and dimension unchanged. An unchanged note produces the same file bytes. Editing or clearing the note updates that field only.
 3. Release history survives refresh without a manual project save.
 4. The project JSON contains the project id and the full release history, and loading a file restores them.
 5. An old project file that has only `regionForgeYamlGeneration` stays compatible and does not reuse that generation.
@@ -45,7 +55,7 @@ This spec replaces that counter with a persisted release history for the one wor
 | Project id | Identifies the project independently of its world name. |
 | Generation | Monotonically increasing release number within that project. |
 | Checksum | Identifies the exact generated `regions:` body. |
-| Release metadata | Immutable generation, timestamp, description, dimension, and checksum. |
+| Release metadata | Generation, timestamp, dimension, and checksum are fixed at creation. The description can be edited or cleared on a later download of the same body. |
 | Application version | `REGION_FORGE_APP_VERSION` (`1.0.0`). Not a release number. |
 
 ```ts
@@ -135,9 +145,9 @@ Compare the checksum only to the latest **verified** release. A match downloads 
 1. Build the `regions:` body with the current export settings. Keep the existing empty-export error before any release work. That path does not allocate a generation.
 2. Checksum the body.
 3. Read persisted release state.
-4. If the latest verified release has the same checksum, rebuild the file from that release's immutable metadata and download it. Do not prompt. Do not call `setItem`. Do not change `createdAt`, description, generation, or `build-id`.
-5. Otherwise prompt for a description. The description may be empty. Cancelling the prompt cancels the export: no write, no download.
-6. Read persisted state again. Allocate `next` as above. Build the release record (`verified: true`, `checksum` set, `createdAt` set once, dimension from the export).
+4. If the latest verified release has the same checksum, prompt with that release's generation and current description. Cancel aborts: no write, no download. If the sanitized description is unchanged, rebuild the file from the stored metadata and download it. Do not call `setItem`. Do not change `createdAt`, generation, checksum, dimension, or `build-id`. If the description changed, including when it was cleared, update that field on the matching release, read it back, then download. Generation stays the same.
+5. Otherwise prompt for a new release. The dialog shows `Create Release N`, where `N` is the persisted maximum plus one from this pre-prompt read. When a previous release exists, the body says the configuration changed since that release. The description may be empty. Cancelling the prompt cancels the export: no write, no download.
+6. Read persisted state again. Allocate `next` from that second read, so the number shown in the dialog is a preview and can differ if another tab wrote during the prompt. Build the release record (`verified: true`, `checksum` set, `createdAt` set once, dimension from the export).
 7. `localStorage.setItem`. If it throws (unavailable storage, quota, or private-mode failure), show an error, do not advance React state, and do not download.
 8. Read back. On conflict, show an error and do not download.
 9. Download only after the write has been confirmed.
@@ -182,6 +192,8 @@ Keep writing `regionForgeYamlGeneration` as the high-water mark (`max` generatio
 
 On save, write the history currently persisted in `localStorage`, not a separate in-memory copy that might be behind.
 
+The downloaded project file is `{world}-{dimension}-{date}-project.json`. `regions.yml` stays `{world}-{dimension}-{date}-regions.yml`.
+
 ### Import
 
 `importMapData` / `useProjectImport`:
@@ -209,13 +221,23 @@ Cancelling leaves `localStorage` and the open session unchanged.
 
 ## Description prompt
 
-On a new release only, ask for a short description before the write.
+Both paths ask before the download. Cancel aborts either path: no write, no download. An empty description is valid.
 
-- Empty string is valid.
-- Cancel aborts the export.
-- A repeated download does not ask again and does not update the stored description.
+**New release.** Title `Create Release N`. When `N` is 1, the body does not mention a previous release. Label: "Release note (optional)". Placeholder: "Describe what changed...". Confirm button: "Create & Download".
 
-No release-history browser, list, or editor in this change. History is persisted, embedded in the project file, and restored on load.
+**Matching release.** Title `Release N`. Body: this configuration matches the latest release and downloading it will not create a new release. The stored note is shown as text until the user chooses Edit. Confirm button: "Download release". An unchanged note does not call `setItem`.
+
+There is no release-history browser or list. History is persisted, embedded in the project file, and restored on load.
+
+## Export panel
+
+Above **Generate regions.yml**:
+
+- `Release N` when a release exists, otherwise "No release". `N` is the maximum stored generation.
+- A **DESCRIPTION** subheading, with the current release's note on the line below when one is set.
+- **Unexported changes** only when the panel has finished loading and the current `regions:` body checksum differs from the latest verified release. An empty export (no enabled regions, and spawn not applicable) does not show the warning.
+
+The warning follows the regions.yml body only. Region description, theme, Minecraft category, items, and biomes are regions-meta fields and do not trip it. Polygon edits and added structures are the same kind of change when they alter that body: one new generation, with no separate change type.
 
 ---
 
@@ -227,8 +249,9 @@ No release-history browser, list, or editor in this change. History is persisted
 |---------|--------|
 | `setItem` throws | Error toast. No download. No generation consumed in React state. Storage unchanged if the throw happened before a write. |
 | Read-back checksum mismatch | Error toast. No download. Do not overwrite the stored record. |
-| User cancels the description prompt | No write. No download. |
-| Repeated download of a verified match | Download the frozen release. No `setItem`. |
+| User cancels either description prompt | No write. No download. |
+| Matching download, description unchanged | Download the frozen release. No `setItem`. |
+| Matching download, description changed or cleared | Update that release's description, read it back, then download. Generation unchanged. A failed write or a mismatched read-back does not download. |
 
 ---
 
@@ -255,7 +278,7 @@ MCPM keeps consuming the `regions:` map as it does today. This spec does not mov
 
 - IndexedDB or any server-side store.
 - Changes to MCPM.
-- A history UI.
+- A release-history browser or list. The export panel shows only the current release, its description, and the unexported-changes warning.
 - Geometric or key-order normalization.
 - Cross-tab locks beyond read-before-allocate and read-back.
 - A "save as new project" control. Duplicated JSON files share a project id until such a control exists.
@@ -266,10 +289,10 @@ MCPM keeps consuming the `regions:` map as it does today. This spec does not mov
 
 ## Tests
 
-Add tests next to `src/utils/exportUtils.test.ts` (or a focused `yamlRelease` test module if the export function stays awkward to call without DOM). Cover at least:
+Tests live in `src/utils/yamlRelease.test.ts`. Cover at least:
 
 1. **Legacy import.** File with `regionForgeYamlGeneration: 27` and no `yamlReleases` restores an unverified baseline. The next changed export is generation 28. Generation 27 is not reused when the current body happens to match what the user might have exported before.
-2. **Repeated download.** Two exports of the same body produce one release, identical file text, and no second `setItem`. `createdAt`, description, and `build-id` stay as stored.
+2. **Repeated download.** Two exports of the same body and the same note produce one release, identical file text, and no second `setItem`. `createdAt`, description, and `build-id` stay as stored. Editing or clearing the note updates that release only and does not allocate a new generation.
 3. **Project switching.** Importing a file with a different `projectId` while local history exists warns. Confirming replaces local history. Cancelling leaves local history in place. A world rename does not change `projectId`.
 4. **Divergent histories.** Same `projectId`, same generation, different checksums warns and does not silently keep either side without confirmation. After confirm, the file's history is the stored history.
 5. **Persistence failure.** `setItem` throws. No download is returned, and the in-memory generation does not advance.
@@ -282,7 +305,7 @@ Add tests next to `src/utils/exportUtils.test.ts` (or a focused `yamlRelease` te
 
 ## Implementation notes
 
-- `bumpRegionForgeYamlGeneration` in `src/hooks/useRegionForgeYamlGeneration.ts` is the current increment. Replace that call path from `ExportPanel` rather than bumping and then persisting.
+- `bumpRegionForgeYamlGeneration` was removed. `publishRegionsYaml` in `src/utils/yamlRelease.ts` allocates and writes. `useRegionForgeYamlGeneration` mirrors storage for the panel and the project save.
 - `exportCompleteMap` already copies `regionForgeYamlGeneration` onto the project JSON. Extend that object; do not start a second save format.
 - `buildRegionForgeYamlPreamble` is the function that currently calls `Date.now()` for `build-id`.
 - `clearSavedData` is used from `MapLoaderControls` and `AdvancedPanel`. New keys must be in `STORAGE_KEYS` or be removed there explicitly, or a data clear will leave release history behind.
