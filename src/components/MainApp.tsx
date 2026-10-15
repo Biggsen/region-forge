@@ -34,9 +34,9 @@ function MainAppContent() {
     dimension
   )
 
-  const { fileInputRef, handleFileImport } = useProjectImport({
+  const { fileInputRef, handleFileImport, releaseConflict, confirmReleaseConflict, cancelReleaseConflict } = useProjectImport({
     markAsSaved,
-    setRegionForgeYamlGenerationFromImport: regionForgeYaml.setRegionForgeYamlGenerationFromImport,
+    replaceReleaseState: regionForgeYaml.replaceReleaseState,
   })
 
   const showAdvancedTab = useAdvancedFeatures()
@@ -60,7 +60,6 @@ function MainAppContent() {
       mapState.mapState,
       worldName.worldName,
       toast.showToast,
-      regionForgeYaml.regionForgeYamlGeneration,
       spawnData,
       dimension,
       seedInfo.seedInfo.seed,
@@ -136,6 +135,15 @@ function MainAppContent() {
           isOpen={showImportModal}
           onConfirm={confirmImport}
           onCancel={cancelImport}
+        />
+        <ImportConfirmationModal
+          isOpen={releaseConflict !== null}
+          onConfirm={confirmReleaseConflict}
+          onCancel={cancelReleaseConflict}
+          title="Replace release history?"
+          message={releaseConflict?.message ?? ''}
+          showRegionOption={false}
+          confirmLabel="Load Project"
         />
       </div>
     </>

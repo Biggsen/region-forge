@@ -62,6 +62,8 @@ export function migrateRegionsForLegacyStructureIds(regions: Region[]): Region[]
   }))
 }
 
+export const YAML_RELEASES_STORAGE_KEY = 'mc-region-maker-yaml-releases'
+
 const STORAGE_KEYS = {
   MAP_STATE: 'mc-region-maker-map-state',
   REGIONS: 'mc-region-maker-regions',
@@ -76,7 +78,8 @@ const STORAGE_KEYS = {
   REGION_FILL_OPACITY: 'mc-region-maker-region-fill-opacity',
   HIGHLIGHT_MODE: 'mc-region-maker-highlight-mode',
   STRUCTURE_TABLE_SORT: 'mc-region-maker-structure-table-sort',
-  ADVANCED_PANEL_SECTIONS: 'mc-region-maker-advanced-panel-sections'
+  ADVANCED_PANEL_SECTIONS: 'mc-region-maker-advanced-panel-sections',
+  YAML_RELEASES: YAML_RELEASES_STORAGE_KEY
 }
 
 // Get image source URL for storage
@@ -453,6 +456,26 @@ export function loadAdvancedPanelSectionsState(defaultState: AdvancedPanelSectio
     console.error('Failed to load advanced panel sections state:', error)
     return defaultState
   }
+}
+
+export function loadYamlReleaseState(): { projectId: string; releases: unknown[] } | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.YAML_RELEASES)
+    if (!saved) return null
+    const parsed: unknown = JSON.parse(saved)
+    if (!parsed || typeof parsed !== 'object') return null
+    const projectId = (parsed as { projectId?: unknown }).projectId
+    const releases = (parsed as { releases?: unknown }).releases
+    if (typeof projectId !== 'string' || projectId.trim() === '' || !Array.isArray(releases)) return null
+    return { projectId, releases }
+  } catch (error) {
+    console.error('Failed to load YAML release history:', error)
+    return null
+  }
+}
+
+export function saveYamlReleaseState(state: { projectId: string; releases: unknown[] }): void {
+  localStorage.setItem(STORAGE_KEYS.YAML_RELEASES, JSON.stringify(state))
 }
 
 // Clear all saved data

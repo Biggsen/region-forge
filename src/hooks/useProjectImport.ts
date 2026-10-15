@@ -1,29 +1,44 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { importMapData, loadImageFromSrc, loadImageFromBase64 } from '../utils/exportUtils'
+import { importMapData, loadImageFromSrc, loadImageFromBase64, type MapExportData } from '../utils/exportUtils'
 import { loadImageDetails, saveImageDetails, saveExportSettings, type ImageDetails, type ExportSettings } from '../utils/persistenceUtils'
 import { validateImageDimensions } from '../utils/imageValidation'
 import { getValidDimension } from '../utils/dimensionUtils'
+import {
+  describeReleaseImportConflict,
+  detectReleaseImportConflict,
+  readReleaseState,
+  releaseStateFromProjectFile,
+  type YamlReleaseState,
+} from '../utils/yamlRelease'
 
 export interface UseProjectImportOptions {
   markAsSaved: () => void
-  setRegionForgeYamlGenerationFromImport: (value: number) => void
+  replaceReleaseState: (state: YamlReleaseState) => void
 }
 
 export function useProjectImport({
   markAsSaved,
-  setRegionForgeYamlGenerationFromImport,
+  replaceReleaseState,
 }: UseProjectImportOptions) {
   const { regions, mapState, worldName, spawn, seedInfo, toast } = useAppContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingImport, setPendingImport] = useState<{
+    data: MapExportData
+    releaseState: YamlReleaseState
+    message: string
+  } | null>(null)
 
-  const handleFileImport = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const applyImportedProject = useCallback(async (importData: MapExportData, releaseState: YamlReleaseState) => {
+    try {
+      replaceReleaseState(releaseState)
+    } catch (error) {
+      toast.showToast('Could not save release history, so the project was not loaded.', 'error')
+      console.error('Import error:', error)
+      return
+    }
 
     try {
-      const importData = await importMapData(file)
-
       if (importData.terrainImageData && importData.biomeImageData) {
         try {
           const [terrainImg, biomeImg] = await Promise.all([
@@ -93,8 +108,6 @@ export function useProjectImport({
       regions.setSelectedRegionId(null)
       worldName.updateWorldName(importData.worldName || 'world')
 
-      setRegionForgeYamlGenerationFromImport(importData.regionForgeYamlGeneration ?? 0)
-
       if (importData.spawnCoordinates) {
         spawn.setSpawnCoordinates(importData.spawnCoordinates)
         if (importData.spawnCoordinates.radius) {
@@ -102,15 +115,9 @@ export function useProjectImport({
         }
       }
 
-      let dimensionToUse = importData.dimension
-      if (!dimensionToUse && importData.worldType) {
-        dimensionToUse = getValidDimension(importData.worldType)
-      } else {
-        dimensionToUse = getValidDimension(dimensionToUse)
-      }
       seedInfo.updateSeedInfo({
         seed: importData.seed,
-        dimension: dimensionToUse
+        dimension: getValidDimension(importData.dimension || importData.worldType)
       })
 
       const currentDetails = loadImageDetails() || {}
@@ -138,17 +145,54 @@ export function useProjectImport({
         window.dispatchEvent(new Event('exportSettingsUpdated'))
       }
 
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-
       markAsSaved()
       toast.showToast('Project file loaded successfully', 'success')
     } catch (error) {
       toast.showToast('Failed to load project file. Please make sure it\'s a valid project file.', 'error')
       console.error('Import error:', error)
     }
-  }, [regions, mapState, worldName, spawn, seedInfo, toast, markAsSaved, setRegionForgeYamlGenerationFromImport])
+  }, [regions, mapState, worldName, spawn, seedInfo, toast, markAsSaved, replaceReleaseState])
 
-  return { fileInputRef, handleFileImport }
+  const handleFileImport = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    event.target.value = ''
+
+    try {
+      const importData = await importMapData(file)
+      const releaseState = releaseStateFromProjectFile(importData, () => crypto.randomUUID())
+      const conflict = detectReleaseImportConflict(readReleaseState(), releaseState)
+      if (conflict) {
+        setPendingImport({
+          data: importData,
+          releaseState,
+          message: describeReleaseImportConflict(conflict),
+        })
+        return
+      }
+      await applyImportedProject(importData, releaseState)
+    } catch (error) {
+      toast.showToast('Failed to load project file. Please make sure it\'s a valid project file.', 'error')
+      console.error('Import error:', error)
+    }
+  }, [applyImportedProject, toast])
+
+  const confirmReleaseConflict = useCallback(() => {
+    if (!pendingImport) return
+    const { data, releaseState } = pendingImport
+    setPendingImport(null)
+    void applyImportedProject(data, releaseState)
+  }, [pendingImport, applyImportedProject])
+
+  const cancelReleaseConflict = useCallback(() => {
+    setPendingImport(null)
+  }, [])
+
+  return {
+    fileInputRef,
+    handleFileImport,
+    releaseConflict: pendingImport ? { message: pendingImport.message } : null,
+    confirmReleaseConflict,
+    cancelReleaseConflict,
+  }
 }

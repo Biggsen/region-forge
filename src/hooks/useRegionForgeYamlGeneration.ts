@@ -1,24 +1,55 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { ensureYamlReleaseState, maxYamlGeneration, readReleaseState, writeReleaseState, type YamlRelease, type YamlReleaseState } from '../utils/yamlRelease'
+
+function currentReleaseDescription(releases: YamlRelease[]): string {
+  const generation = maxYamlGeneration(releases)
+  if (generation < 1) return ''
+  for (let index = releases.length - 1; index >= 0; index -= 1) {
+    if (releases[index].generation === generation) return releases[index].description
+  }
+  return ''
+}
 
 export function useRegionForgeYamlGeneration() {
   const [regionForgeYamlGeneration, setRegionForgeYamlGeneration] = useState(0)
+  const [regionForgeYamlDescription, setRegionForgeYamlDescription] = useState('')
+  const [projectId, setProjectId] = useState<string | null>(null)
 
-  const setRegionForgeYamlGenerationFromImport = useCallback((value: number) => {
-    setRegionForgeYamlGeneration(Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0)
+  const applyState = useCallback((state: YamlReleaseState) => {
+    setProjectId(state.projectId)
+    setRegionForgeYamlGeneration(maxYamlGeneration(state.releases))
+    setRegionForgeYamlDescription(currentReleaseDescription(state.releases))
   }, [])
 
-  const bumpRegionForgeYamlGeneration = useCallback((): number => {
-    let next = 0
-    setRegionForgeYamlGeneration((g) => {
-      next = g + 1
-      return next
-    })
-    return next
-  }, [])
+  useEffect(() => {
+    try {
+      applyState(ensureYamlReleaseState())
+    } catch (error) {
+      console.warn('Failed to prepare release history:', error)
+    }
+  }, [applyState])
+
+  const syncFromStorage = useCallback(() => {
+    const state = readReleaseState()
+    if (!state) {
+      setProjectId(null)
+      setRegionForgeYamlGeneration(0)
+      setRegionForgeYamlDescription('')
+      return
+    }
+    applyState(state)
+  }, [applyState])
+
+  const replaceReleaseState = useCallback((state: YamlReleaseState) => {
+    writeReleaseState(state)
+    applyState(state)
+  }, [applyState])
 
   return {
     regionForgeYamlGeneration,
-    setRegionForgeYamlGenerationFromImport,
-    bumpRegionForgeYamlGeneration,
+    regionForgeYamlDescription,
+    projectId,
+    syncFromStorage,
+    replaceReleaseState,
   }
 }

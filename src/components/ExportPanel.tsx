@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
-import { exportRegionsYAML, exportRegionsMetaYAML } from '../utils/exportUtils'
+import { exportRegionsYAML, exportRegionsMetaYAML, buildRegionsYamlBody } from '../utils/exportUtils'
 import { loadExportSettings, saveExportSettings } from '../utils/persistenceUtils'
 import { getSpawnExportData } from '../utils/spawnUtils'
+import { latestVerifiedRelease, readReleaseState, sha256Hex, type ReleaseDescriptionContext } from '../utils/yamlRelease'
 import { BaseModal } from './BaseModal'
 import { Button } from './Button'
+import { AlertCircle, Pencil } from 'lucide-react'
 
 export function ExportPanel() {
   const { regions, spawn, worldName, dimension, toast, mapState, regionForgeYaml } = useAppContext()
@@ -21,6 +23,41 @@ export function ExportPanel() {
   const [excludeDescriptionsFromRegionsMeta, setExcludeDescriptionsFromRegionsMeta] = useState(false)
   const [viewingImage, setViewingImage] = useState<{ type: 'greeting' | 'farewell', size: 'large' | 'small' | 'chat' } | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [releasePromptOpen, setReleasePromptOpen] = useState(false)
+  const [releaseDescription, setReleaseDescription] = useState('')
+  const [releasePromptExisting, setReleasePromptExisting] = useState(false)
+  const [releasePromptGeneration, setReleasePromptGeneration] = useState(0)
+  const [releasePromptPreviousGeneration, setReleasePromptPreviousGeneration] = useState(0)
+  const [editingReleaseNote, setEditingReleaseNote] = useState(false)
+  const [unexportedChanges, setUnexportedChanges] = useState(false)
+  const releasePrompt = useRef<((value: string | null) => void) | null>(null)
+  const exportInFlight = useRef(false)
+
+  const askReleaseDescription = useCallback((context: ReleaseDescriptionContext) => {
+    return new Promise<string | null>((resolve) => {
+      releasePrompt.current = resolve
+      setReleaseDescription(context.description)
+      setReleasePromptExisting(context.existing)
+      setReleasePromptGeneration(context.generation)
+      setReleasePromptPreviousGeneration(context.previousGeneration)
+      setEditingReleaseNote(false)
+      setReleasePromptOpen(true)
+    })
+  }, [])
+
+  const finishReleasePrompt = (value: string | null) => {
+    setReleasePromptOpen(false)
+    const resolve = releasePrompt.current
+    releasePrompt.current = null
+    resolve?.(value)
+  }
+
+  useEffect(() => {
+    return () => {
+      releasePrompt.current?.(null)
+      releasePrompt.current = null
+    }
+  }, [])
 
   const applyExportSettingsFromStorage = useCallback(() => {
     const saved = loadExportSettings()
@@ -91,13 +128,20 @@ export function ExportPanel() {
     excludeDescriptionsFromRegionsMeta
   ])
 
-  const handleExportYAML = () => {
+  useEffect(() => {
+    if (!isInitialized) return
+    let cancelled = false
     const spawnData = getSpawnExportData(spawn.spawnState)
-    // Force spawn region to false for nether and end since they don't have spawn
-    const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
-    exportRegionsYAML(
+    const finalIncludeSpawnRegion = dimension === 'nether' || dimension === 'end' ? false : includeSpawnRegion
+    const enabledRegions = regions.regions.filter((region) => !region.disabled)
+    const nothingToExport = enabledRegions.length === 0 && (!finalIncludeSpawnRegion || dimension === 'nether' || dimension === 'end')
+    if (nothingToExport) {
+      setUnexportedChanges(false)
+      return
+    }
+
+    const body = buildRegionsYamlBody(
       regions.regions,
-      toast.showToast,
       includeVillages,
       includeStructures,
       includeHeartRegions,
@@ -105,13 +149,67 @@ export function ExportPanel() {
       finalIncludeSpawnRegion,
       spawnData,
       dimension,
-      worldName.worldName,
       useModernWorldHeight,
       useGreetingsAndFarewells,
       greetingSize,
-      includeChallengeLevelSubheading,
-      { regionForge: { bumpGeneration: regionForgeYaml.bumpRegionForgeYamlGeneration } }
+      includeChallengeLevelSubheading
     )
+    sha256Hex(body).then((checksum) => {
+      if (cancelled) return
+      const latest = latestVerifiedRelease(readReleaseState()?.releases ?? [])
+      setUnexportedChanges(latest?.checksum !== checksum)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    regions.regions,
+    includeVillages,
+    includeStructures,
+    includeHeartRegions,
+    includeNerveRegions,
+    includeSpawnRegion,
+    spawn.spawnState,
+    dimension,
+    useModernWorldHeight,
+    useGreetingsAndFarewells,
+    greetingSize,
+    includeChallengeLevelSubheading,
+    regionForgeYaml.regionForgeYamlGeneration,
+    isInitialized,
+  ])
+
+  const handleExportYAML = async () => {
+    if (exportInFlight.current) return
+    exportInFlight.current = true
+    try {
+      const spawnData = getSpawnExportData(spawn.spawnState)
+      // Force spawn region to false for nether and end since they don't have spawn
+      const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
+      const result = await exportRegionsYAML(
+        regions.regions,
+        toast.showToast,
+        includeVillages,
+        includeStructures,
+        includeHeartRegions,
+        includeNerveRegions,
+        finalIncludeSpawnRegion,
+        spawnData,
+        dimension,
+        worldName.worldName,
+        useModernWorldHeight,
+        useGreetingsAndFarewells,
+        greetingSize,
+        includeChallengeLevelSubheading,
+        { promptDescription: askReleaseDescription }
+      )
+      if (result.status === 'downloaded') {
+        regionForgeYaml.syncFromStorage()
+      }
+    } finally {
+      exportInFlight.current = false
+    }
   }
 
   const handleExportRegionsMeta = () => {
@@ -409,6 +507,23 @@ export function ExportPanel() {
         )}
 
         <div className="space-y-2 pt-4">
+          <p className="text-gray-200 text-lg font-medium">
+            {regionForgeYaml.regionForgeYamlGeneration > 0 ? `Release ${regionForgeYaml.regionForgeYamlGeneration}` : 'No release'}
+          </p>
+          {regionForgeYaml.regionForgeYamlGeneration > 0 && (
+            <div>
+              <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Description</h5>
+              {regionForgeYaml.regionForgeYamlDescription && (
+                <p className="text-gray-300 text-sm mt-1">{regionForgeYaml.regionForgeYamlDescription}</p>
+              )}
+            </div>
+          )}
+          {unexportedChanges && (
+            <p className="text-amber-400 text-sm flex items-center gap-1.5">
+              <AlertCircle size={14} />
+              Unexported changes
+            </p>
+          )}
           <Button
             onClick={handleExportYAML}
             disabled={regions.regions.length === 0}
@@ -453,6 +568,83 @@ export function ExportPanel() {
           )}
         </div>
       </div>
+
+      <BaseModal
+        isOpen={releasePromptOpen}
+        onClose={() => finishReleasePrompt(null)}
+        title={releasePromptExisting ? `Release ${releasePromptGeneration}` : `Create Release ${releasePromptGeneration}`}
+        size="md"
+      >
+        <div className="space-y-4">
+          {releasePromptExisting ? (
+            <>
+              <p className="text-gray-300 text-sm">
+                This configuration matches the latest release. Downloading it will not create a new release.
+              </p>
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Release note</p>
+                {editingReleaseNote ? (
+                  <input
+                    type="text"
+                    value={releaseDescription}
+                    onChange={(e) => setReleaseDescription(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') finishReleasePrompt(releaseDescription)
+                    }}
+                    autoFocus
+                    placeholder="Optional note for this release"
+                    className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-md focus:outline-none focus:border-lapis-lighter text-sm text-input-text placeholder:text-gray-500"
+                  />
+                ) : (
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm text-white">
+                      {releaseDescription || <span className="text-gray-500">No note</span>}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setEditingReleaseNote(true)}
+                      className="flex items-center gap-1.5 text-sm text-gray-300 hover:text-white shrink-0"
+                    >
+                      <Pencil size={14} />
+                      Edit
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-300 text-sm">
+                {releasePromptPreviousGeneration > 0
+                  ? `Your configuration has changed since Release ${releasePromptPreviousGeneration}. A new release will be created when you download.`
+                  : 'A new release will be created when you download.'}
+              </p>
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Release note (optional)</p>
+                <input
+                  type="text"
+                  value={releaseDescription}
+                  onChange={(e) => setReleaseDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') finishReleasePrompt(releaseDescription)
+                  }}
+                  autoFocus
+                  placeholder="Describe what changed..."
+                  className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-md focus:outline-none focus:border-lapis-lighter text-sm text-input-text placeholder:text-gray-500"
+                />
+              </div>
+            </>
+          )}
+          <div className="flex space-x-3">
+            <Button variant="ghost" onClick={() => finishReleasePrompt(null)} className="flex-1">
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={() => finishReleasePrompt(releaseDescription)} className="flex-1">
+              {releasePromptExisting ? 'Download release' : 'Create & Download'}
+            </Button>
+          </div>
+        </div>
+      </BaseModal>
 
       <BaseModal
         isOpen={viewingImage !== null}

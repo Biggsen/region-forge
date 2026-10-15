@@ -5,13 +5,24 @@ import { generateRegionYAML } from './polygonUtils'
 import { generateSubregionYAML, nameToRegionId, yamlSubregionRegionId } from './villageUtils'
 import { ExportSettings, loadExportSettings } from './persistenceUtils'
 import yaml from 'js-yaml'
+import {
+  currentProjectReleaseSnapshot,
+  publishRegionsYaml,
+  type RegionsYamlPreambleStats,
+  type ReleaseDescriptionContext,
+  type YamlRelease,
+} from './yamlRelease'
 
 
 export interface MapExportData {
   version: string
-  /** Increments on each regions.yml export; persisted in project JSON. */
+  /** High-water mark of regions.yml releases. Older readers still see a number. */
   regionForgeYamlGeneration?: number
+  projectId?: string
+  yamlReleases?: YamlRelease[]
   worldName: string
+  /** Legacy project files stored dimension here instead of `dimension`. */
+  worldType?: string
   seed?: string
   dimension?: string
   worldSize?: number
@@ -39,7 +50,6 @@ export async function exportCompleteMap(
   mapState: MapState, 
   worldName: string, 
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  regionForgeYamlGeneration: number = 0,
   spawnCoordinates?: { x: number; z: number; y?: number; radius?: number } | null, 
   dimension?: 'overworld' | 'nether' | 'end', 
   seed?: string, 
@@ -88,10 +98,20 @@ export async function exportCompleteMap(
 
     const exportSettings = loadExportSettings()
     const dateStr = new Date().toISOString().split('T')[0]
+    let releaseSnapshot: ReturnType<typeof currentProjectReleaseSnapshot>
+    try {
+      releaseSnapshot = currentProjectReleaseSnapshot()
+    } catch (error) {
+      console.error('Failed to read YAML release history:', error)
+      onShowToast('Could not read release history, so the project file was not saved.', 'error')
+      return
+    }
 
     const exportData: MapExportData = {
       version: REGION_FORGE_APP_VERSION,
-      regionForgeYamlGeneration,
+      regionForgeYamlGeneration: releaseSnapshot.regionForgeYamlGeneration,
+      projectId: releaseSnapshot.projectId,
+      yamlReleases: releaseSnapshot.yamlReleases,
       worldName,
       seed,
       dimension,
@@ -127,7 +147,7 @@ export async function exportCompleteMap(
     const worldNameSlug = worldName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
     const date = new Date().toISOString().split('T')[0]
     const dimensionSlug = dimension || 'overworld'
-    link.download = `${worldNameSlug}-${dimensionSlug}-${date}.json`
+    link.download = `${worldNameSlug}-${dimensionSlug}-${date}-project.json`
     link.click()
     
     URL.revokeObjectURL(link.href)
@@ -148,10 +168,6 @@ function exportFilenamePrefix(worldName: string, dimension: 'overworld' | 'nethe
   return `${worldNameSlug}-${dimensionSlug}-${date}`
 }
 
-function sanitizeRegionForgeField(s: string): string {
-  return s.replace(/[\n\r;]/g, ' ').trim()
-}
-
 function getRegionsYmlExportStats(
   regions: Region[],
   includeVillages: boolean,
@@ -164,14 +180,7 @@ function getRegionsYmlExportStats(
   useModernWorldHeight: boolean,
   useGreetingsAndFarewells: boolean,
   greetingSize: 'large' | 'small' | 'chat'
-): {
-  regionCount: number
-  villageCount: number
-  structureCount: number
-  heartCount: number
-  nerveCount: number
-  spawn: boolean
-} {
+): RegionsYamlPreambleStats {
   const enabledRegions = regions.filter((region) => !region.disabled)
   const spawnIncluded = !!(
     includeSpawnRegion &&
@@ -220,36 +229,67 @@ function getRegionsYmlExportStats(
   }
 }
 
-function buildRegionForgeYamlPreamble(
-  generatorVersion: number,
-  worldName: string,
-  effectiveDimension: 'overworld' | 'nether' | 'end',
-  stats: ReturnType<typeof getRegionsYmlExportStats>
+export function buildRegionsYamlBody(
+  regions: Region[],
+  includeVillages: boolean,
+  includeStructures: boolean,
+  includeHeartRegions: boolean,
+  includeNerveRegions: boolean,
+  includeSpawnRegion: boolean,
+  spawnCoordinates: { x: number; z: number; y?: number; radius?: number } | null | undefined,
+  dimension: 'overworld' | 'nether' | 'end',
+  useModernWorldHeight: boolean,
+  useGreetingsAndFarewells: boolean,
+  greetingSize: 'large' | 'small' | 'chat',
+  includeChallengeLevelSubheading: boolean
 ): string {
-  const gen = String(generatorVersion).padStart(3, '0')
-  const at = new Date().toISOString()
-  const buildId = `rf-${Date.now()}`
-  const proj = sanitizeRegionForgeField(worldName)
-  const line1 =
-    `# region-forge: generator-version=${gen}; generated-at=${at}; app-version=${REGION_FORGE_APP_VERSION}; ` +
-    `project=${proj}; dimension=${effectiveDimension}; plugin=worldguard; export-type=regions-yml; build-id=${buildId}`
-  const { regionCount, villageCount, structureCount, heartCount, nerveCount, spawn } = stats
-  const line2 =
-    `# region-forge: regions=${regionCount}; villages=${villageCount}; structures=${structureCount}; ` +
-    `hearts=${heartCount}; nerves=${nerveCount}; spawn=${spawn}`
-  return `${line1}\n${line2}\n`
+  const enabledRegions = regions.filter(region => !region.disabled)
+  let yamlContent = 'regions:\n'
+
+  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && dimension === 'overworld') {
+    const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; y: number; radius: number }, useModernWorldHeight)
+    yamlContent += spawnRegion
+    if (enabledRegions.length > 0) {
+      yamlContent += '\n'
+    }
+  }
+
+  enabledRegions.forEach((region, index) => {
+    yamlContent += generateRegionYAML(region, includeVillages, includeStructures, includeHeartRegions, includeNerveRegions, dimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
+    if (index < enabledRegions.length - 1) {
+      yamlContent += '\n'
+    }
+  })
+
+  return yamlContent
 }
 
-export type RegionsYmlRegionForgeOptions = {
-  bumpGeneration: () => number
-}
+export type RegionsYamlExportResult =
+  | { status: 'downloaded'; yaml: string; generation: number }
+  | { status: 'empty' | 'cancelled' | 'storage' | 'conflict' }
 
 export type ExportRegionsYAMLOptions = {
-  regionForge?: RegionsYmlRegionForgeOptions
+  promptDescription?: (context: ReleaseDescriptionContext) => string | null | Promise<string | null>
+}
+
+function downloadTextFile(content: string, filename: string, mime: string): void {
+  const dataBlob = new Blob([content], { type: mime })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(dataBlob)
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+function defaultReleaseDescriptionPrompt(context: ReleaseDescriptionContext): string | null {
+  const message = context.existing
+    ? 'Edit the release description, or delete it. Cancel aborts the download.'
+    : `This will create release ${context.generation}. Describe what changed, or leave it blank. Cancel aborts the download.`
+  return window.prompt(message, context.description)
 }
 
 // Export all regions to YAML file in WorldGuard format
-export function exportRegionsYAML(
+export async function exportRegionsYAML(
   regions: Region[], 
   onShowToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   includeVillages: boolean = true,
@@ -265,17 +305,29 @@ export function exportRegionsYAML(
   greetingSize: 'large' | 'small' | 'chat' = 'large',
   includeChallengeLevelSubheading: boolean = false,
   options?: ExportRegionsYAMLOptions
-): void {
+): Promise<RegionsYamlExportResult> {
   const effectiveDimension = dimension || 'overworld'
-  
-  // Filter out disabled regions
   const enabledRegions = regions.filter(region => !region.disabled)
-  
+
   if (enabledRegions.length === 0 && (!includeSpawnRegion || effectiveDimension === 'nether' || effectiveDimension === 'end')) {
     onShowToast('No regions to export', 'error')
-    return
+    return { status: 'empty' }
   }
 
+  const body = buildRegionsYamlBody(
+    regions,
+    includeVillages,
+    includeStructures,
+    includeHeartRegions,
+    includeNerveRegions,
+    includeSpawnRegion,
+    spawnCoordinates,
+    effectiveDimension,
+    useModernWorldHeight,
+    useGreetingsAndFarewells,
+    greetingSize,
+    includeChallengeLevelSubheading
+  )
   const stats = getRegionsYmlExportStats(
     regions,
     includeVillages,
@@ -289,41 +341,26 @@ export function exportRegionsYAML(
     useGreetingsAndFarewells,
     greetingSize
   )
-
-  let preamble = ''
-  const regionForge = options?.regionForge
-  if (regionForge) {
-    const generatorVersion = regionForge.bumpGeneration()
-    preamble = buildRegionForgeYamlPreamble(generatorVersion, worldName, effectiveDimension, stats)
-  }
-
-  let yamlContent = preamble + 'regions:\n'
-  
-  // Add spawn region if requested and coordinates exist (only for overworld)
-  if (includeSpawnRegion && spawnCoordinates && spawnCoordinates.radius && effectiveDimension === 'overworld') {
-    const spawnRegion = generateSpawnRegionYAML(spawnCoordinates as { x: number; z: number; y: number; radius: number }, useModernWorldHeight)
-    yamlContent += spawnRegion
-    if (enabledRegions.length > 0) {
-      yamlContent += '\n'
-    }
-  }
-  
-  enabledRegions.forEach((region, index) => {
-    yamlContent += generateRegionYAML(region, includeVillages, includeStructures, includeHeartRegions, includeNerveRegions, effectiveDimension, useModernWorldHeight, useGreetingsAndFarewells, greetingSize, includeChallengeLevelSubheading)
-    // Add a blank line between regions (except after the last one)
-    if (index < enabledRegions.length - 1) {
-      yamlContent += '\n'
-    }
+  const published = await publishRegionsYaml({
+    body,
+    worldName,
+    dimension: effectiveDimension,
+    stats,
+    appVersion: REGION_FORGE_APP_VERSION,
+    promptDescription: options?.promptDescription ?? defaultReleaseDescriptionPrompt,
   })
 
-  const dataBlob = new Blob([yamlContent], { type: 'text/yaml' })
-  const prefix = exportFilenamePrefix(worldName, effectiveDimension)
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(dataBlob)
-  link.download = `${prefix}-regions.yml`
-  link.click()
-  
-  URL.revokeObjectURL(link.href)
+  if (!published.ok) {
+    if (published.reason === 'storage') {
+      onShowToast('Could not save this release, so the file was not downloaded.', 'error')
+    } else if (published.reason === 'conflict') {
+      onShowToast('Release history changed before it could be saved, so the file was not downloaded.', 'error')
+    }
+    return { status: published.reason }
+  }
+
+  downloadTextFile(published.yaml, `${exportFilenamePrefix(worldName, effectiveDimension)}-regions.yml`, 'text/yaml')
+  return { status: 'downloaded', yaml: published.yaml, generation: published.generation }
 }
 
 // Generate spawn region YAML
