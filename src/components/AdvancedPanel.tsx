@@ -7,7 +7,7 @@ import { ChallengeLevel, Region, StructureType, STRUCTURE_TYPES } from '../types
 import { RegionActions } from './RegionActions'
 import { SpawnButton } from './SpawnButton'
 import { Button } from './Button'
-import { Trash2, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets } from 'lucide-react'
+import { Trash2, ClipboardCopy, LocateFixed, Skull, Home, FolderOpen, FileText, TreePine, Globe, Sparkles, BookOpen, ScrollText, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Highlighter, Droplets, Search, X } from 'lucide-react'
 import {
   SubregionListRow,
   type SubregionListItem,
@@ -96,6 +96,7 @@ export function AdvancedPanel() {
   const [isStructuresExpanded, setIsStructuresExpanded] = useState(savedSectionState.isStructuresExpanded)
   const [structureTableSort, setStructureTableSort] = useState<{ column: 'type' | 'count' | 'regions'; dir: 'asc' | 'desc' }>(() => loadStructureTableSort())
   const [expandedStructureAccordion, setExpandedStructureAccordion] = useState<StructureType | null>(null)
+  const [structureNameQuery, setStructureNameQuery] = useState('')
   const [isImportExpanded, setIsImportExpanded] = useState(savedSectionState.isImportExpanded)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(savedSectionState.isRegionSpecificExpanded)
   const [isRegionNervesExpanded, setIsRegionNervesExpanded] = useState(savedSectionState.isRegionNervesExpanded)
@@ -298,6 +299,33 @@ export function AdvancedPanel() {
   }
 
   const availableRegions = regions.regions.filter(r => r.points.length >= 3)
+
+  const structureLocators = useMemo(
+    () =>
+      availableRegions.flatMap(region =>
+        (region.subregions || [])
+          .filter((s): s is typeof s & { structureType: StructureType } => s.type === 'structure' && !!s.structureType)
+          .map(s => ({
+            regionId: region.id,
+            subregionId: s.id,
+            name: s.name,
+            x: s.x,
+            z: s.z,
+            y: s.y,
+            regionName: region.name,
+            structureType: s.structureType,
+            typeLabel: STRUCTURE_DISPLAY[s.structureType].countLabel
+          }))
+      ),
+    [availableRegions]
+  )
+  const structureNameQueryNormalized = structureNameQuery.trim().toLowerCase()
+  const structureNameMatches = useMemo(() => {
+    if (!structureNameQueryNormalized) return []
+    return structureLocators
+      .filter(item => item.name.toLowerCase().includes(structureNameQueryNormalized))
+      .sort((a, b) => a.name.localeCompare(b.name) || a.typeLabel.localeCompare(b.typeLabel))
+  }, [structureLocators, structureNameQueryNormalized])
 
   const manualStructureParsedXZ = useMemo(() => {
     const x = parseInt(manualStructureForm.x, 10)
@@ -1271,6 +1299,78 @@ export function AdvancedPanel() {
                     {structureImportError}
                   </div>
                 )}
+                <div className="space-y-2">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={structureNameQuery}
+                      onChange={e => setStructureNameQuery(e.target.value)}
+                      placeholder="Search structures by name..."
+                      aria-label="Search structures by name"
+                      className="w-full rounded-md border border-gray-600 bg-gray-700 text-white pl-9 pr-8 py-2 text-sm focus:ring-2 focus:ring-lapis-lazuli focus:border-lapis-lazuli placeholder:text-gray-500"
+                    />
+                    {structureNameQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setStructureNameQuery('')}
+                        className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-white"
+                        title="Clear search"
+                        aria-label="Clear structure search"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  {structureNameQueryNormalized && (
+                    <div className="bg-gray-800/50 px-3 py-2 border border-gray-600 rounded-md max-h-64 overflow-y-auto">
+                      {structureNameMatches.length === 0 ? (
+                        <p className="text-sm text-gray-500">No structures match “{structureNameQuery.trim()}”.</p>
+                      ) : (
+                        <>
+                          <p className="text-xs text-gray-500 mb-2">
+                            {structureNameMatches.length} {structureNameMatches.length === 1 ? 'structure' : 'structures'}
+                          </p>
+                          <ul className="space-y-2 text-sm">
+                            {structureNameMatches.map(item => (
+                              <SubregionListRow
+                                key={item.subregionId}
+                                item={item}
+                                eyebrow={item.typeLabel}
+                                editingY={editingStructureY}
+                                setEditingY={setEditingStructureY}
+                                updateY={regions.updateStructureSubregionY}
+                                editingX={editingStructureX}
+                                setEditingX={setEditingStructureX}
+                                updateX={regions.updateStructureSubregionX}
+                                editingZ={editingStructureZ}
+                                setEditingZ={setEditingStructureZ}
+                                updateZ={regions.updateStructureSubregionZ}
+                                onCopyTp={target => {
+                                  copySubregionTpToClipboard(target)
+                                  toast.showToast('Teleport command copied', 'success')
+                                }}
+                                deleteLabel="Delete structure"
+                                onDelete={target => {
+                                  setPendingSubregionDelete({
+                                    type: 'structure',
+                                    item: {
+                                      regionId: target.regionId,
+                                      subregionId: target.subregionId,
+                                      name: target.name
+                                    }
+                                  })
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {(() => {
                   const structureSubregionsByType = (r: { subregions?: { type: string; structureType?: StructureType }[] }, type: StructureType) =>
                     (r.subregions || []).filter(s => s.type === 'structure' && s.structureType === type)

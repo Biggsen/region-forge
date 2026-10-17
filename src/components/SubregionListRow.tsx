@@ -36,6 +36,7 @@ export type SubregionListRowProps = {
   onCopyTp: (item: SubregionListItem) => void
   listItemRef?: React.Ref<HTMLLIElement>
   listItemClassName?: string
+  eyebrow?: string
 }
 
 export function SubregionListRow({
@@ -57,7 +58,8 @@ export function SubregionListRow({
   deleteLabel,
   onCopyTp,
   listItemRef,
-  listItemClassName
+  listItemClassName,
+  eyebrow
 }: SubregionListRowProps) {
   const saveY = () => {
     if (!editingY) return
@@ -104,6 +106,9 @@ export function SubregionListRow({
       ref={listItemRef}
       className={`flex flex-col gap-y-0.5${listItemClassName ? ` ${listItemClassName}` : ''}`}
     >
+      {eyebrow && (
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-500">{eyebrow}</span>
+      )}
       <div className="flex items-start gap-x-2">
         <span className="text-white font-medium flex-1 min-w-0">{item.name}</span>
         <button
