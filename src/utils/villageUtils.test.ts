@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, subregionRenameRejected } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -259,7 +259,7 @@ describe('buildManualStructureSubregion', () => {
       z: 20,
       y: 64,
       parentRegionId: 'region-a',
-      existingNames: new Set(),
+      takenSlugs: new Set(),
       subregionId: 'structure_desert_pyramid_customid123',
     })
     expect(sub.id).toBe('structure_desert_pyramid_customid123')
@@ -278,25 +278,27 @@ describe('buildManualStructureSubregion', () => {
       z: 0,
       y: 70,
       parentRegionId: 'r1',
-      existingNames: new Set(),
+      takenSlugs: new Set(),
       subregionId: 'structure_igloo_x',
       name: 'Custom Igloo Name',
     })
     expect(sub.name).toBe('Custom Igloo Name')
   })
 
-  it('suffixes manual name when it collides with an existing subregion name', () => {
+  it('suffixes manual name when its slug collides and marks it for review', () => {
     const sub = buildManualStructureSubregion({
       structureType: STRUCTURE_TYPES.WOODLAND_MANSION,
       x: 1,
       z: 2,
       y: 64,
       parentRegionId: 'r1',
-      existingNames: new Set(['Blackbriar Hall', 'Blackbriar Hall 1']),
+      takenSlugs: new Set(['blackbriar_hall', 'blackbriar_hall_1']),
       subregionId: 'structure_woodland_mansion_x',
       name: 'Blackbriar Hall',
     })
     expect(sub.name).toBe('Blackbriar Hall 2')
+    expect(sub.nameNeedsReview).toBe(true)
+    expect(nameToRegionId(sub.name)).toBe('blackbriar_hall_2')
   })
 
   it('uses ancient city fixed Y like createStructureSubregion', () => {
@@ -306,10 +308,82 @@ describe('buildManualStructureSubregion', () => {
       z: 0,
       y: 100,
       parentRegionId: 'r1',
-      existingNames: new Set(),
+      takenSlugs: new Set(),
       subregionId: 'structure_ancient_city_x',
     })
     expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
+  })
+})
+
+describe('allocateUniqueDisplayName', () => {
+  it('suffixes a repeated slug and marks the allocation for review', () => {
+    const taken = new Set(['foo_bar'])
+    const allocated = allocateUniqueDisplayName(() => 'Foo Bar', taken)
+    expect(allocated.name).toBe('Foo Bar 1')
+    expect(allocated.suffixed).toBe(true)
+    expect(nameToRegionId(allocated.name)).toBe('foo_bar_1')
+    expect(taken.has('foo_bar_1')).toBe(true)
+  })
+
+  it('keeps a free name without a suffix', () => {
+    const taken = new Set(['other_hall'])
+    const allocated = allocateUniqueDisplayName(() => 'Tideglass Beacon', taken)
+    expect(allocated).toEqual({ name: 'Tideglass Beacon', suffixed: false })
+    expect(taken.has('tideglass_beacon')).toBe(true)
+  })
+})
+
+describe('collectTakenRegionSlugs', () => {
+  const triangle = [{ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 0, z: 10 }]
+
+  it('drops the replaced structure type and still reserves a village slug', () => {
+    const taken = collectTakenRegionSlugs(
+      [
+        {
+          id: 'r1',
+          name: 'Mossbound',
+          points: triangle,
+          centerPoint: { x: 1, z: 2 },
+          nervePoint: { x: 3, z: 4 },
+          subregions: [
+            {
+              id: 'v1',
+              name: 'Ancient Tomb',
+              x: 1,
+              z: 2,
+              radius: 64,
+              type: 'village'
+            },
+            {
+              id: 's1',
+              name: 'Dust Vault',
+              x: 3,
+              z: 4,
+              radius: 64,
+              type: 'structure',
+              structureType: STRUCTURE_TYPES.DESERT_PYRAMID
+            }
+          ]
+        }
+      ],
+      { structureType: STRUCTURE_TYPES.DESERT_PYRAMID }
+    )
+    expect(taken.has('dust_vault')).toBe(false)
+    expect(taken.has('ancient_tomb')).toBe(true)
+    expect(taken.has('mossbound')).toBe(true)
+    expect(taken.has('heart_of_mossbound')).toBe(true)
+    expect(taken.has('nerve_of_mossbound')).toBe(true)
+  })
+})
+
+describe('subregionRenameRejected', () => {
+  it('rejects a slug another region already owns', () => {
+    expect(subregionRenameRejected('Foo Bar', new Set(['foo_bar']))).toBe(true)
+  })
+
+  it('allows the same slug when that id is excluded from the taken set', () => {
+    expect(subregionRenameRejected('Foo   Bar', new Set(['other_hall']))).toBe(false)
+    expect(nameToRegionId('Foo   Bar')).toBe('foo_bar')
   })
 })
 

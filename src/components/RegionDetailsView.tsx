@@ -32,7 +32,7 @@ interface RegionDetailsViewProps {
   onSimplifyRegionVertices: (regionId: string, tolerance: number) => void
   onResizeRegion: (regionId: string, scaleFactor: number) => void
   onRemoveSubregionFromRegion: (regionId: string, subregionId: string) => void
-  onUpdateSubregionName: (regionId: string, subregionId: string, newName: string) => void
+  onUpdateSubregionName: (regionId: string, subregionId: string, newName: string) => boolean
   onCopyYAML: (regionId: string) => void
   onSetWarping: (warping: boolean) => void
   onSetWarpRadius: (radius: number) => void

@@ -176,7 +176,10 @@ export function AdvancedPanel() {
     orphaned: number
     singularLabel: string
     pluralLabel: string
+    suffixed: { name: string; regionName: string; typeLabel: string }[]
   } | null>(null)
+  const [reviewingSlugName, setReviewingSlugName] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
+  const [reviewSlugNameError, setReviewSlugNameError] = useState<string | null>(null)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [pendingSubregionDelete, setPendingSubregionDelete] = useState<{
@@ -216,6 +219,7 @@ export function AdvancedPanel() {
         orphaned: results.orphaned,
         singularLabel: 'village',
         pluralLabel: 'villages',
+        suffixed: [],
       })
 
       // Clear the file input
@@ -249,6 +253,11 @@ export function AdvancedPanel() {
         orphaned: results.orphaned,
         singularLabel: display.countLabel,
         pluralLabel: display.pluralLabel,
+        suffixed: results.suffixed.map(item => ({
+          name: item.name,
+          regionName: item.regionName,
+          typeLabel: STRUCTURE_DISPLAY[item.structureType].countLabel,
+        })),
       })
       if (structureFileInputRef.current) structureFileInputRef.current.value = ''
     } catch (error) {
@@ -319,6 +328,31 @@ export function AdvancedPanel() {
       ),
     [availableRegions]
   )
+  const slugReviewStructures = useMemo(
+    () =>
+      structureLocators
+        .filter(item => {
+          const region = availableRegions.find(r => r.id === item.regionId)
+          const sub = region?.subregions?.find(s => s.id === item.subregionId)
+          return sub?.nameNeedsReview === true
+        })
+        .sort((a, b) => a.name.localeCompare(b.name) || a.typeLabel.localeCompare(b.typeLabel)),
+    [structureLocators, availableRegions]
+  )
+
+  const saveReviewedStructureName = () => {
+    if (!reviewingSlugName) return
+    const trimmed = reviewingSlugName.value.trim()
+    if (!trimmed) return
+    const saved = regions.updateSubregionName(reviewingSlugName.regionId, reviewingSlugName.subregionId, trimmed)
+    if (!saved) {
+      setReviewSlugNameError('A region with this name already exists')
+      return
+    }
+    setReviewSlugNameError(null)
+    setReviewingSlugName(null)
+  }
+
   const structureNameQueryNormalized = structureNameQuery.trim().toLowerCase()
   const structureNameMatches = useMemo(() => {
     if (!structureNameQueryNormalized) return []
@@ -1155,6 +1189,86 @@ export function AdvancedPanel() {
             </button>
             {isStructuresExpanded && (
               <div className="ml-4 space-y-4">
+                {slugReviewStructures.length > 0 && (
+                  <div className="space-y-2 rounded-md border border-amber-700/50 bg-amber-950/20 px-3 py-2">
+                    <h5 className="text-xs font-medium text-amber-100 uppercase tracking-wide">Names to review</h5>
+                    <p className="text-xs text-amber-200/80">
+                      These structures got a number so the exported id stayed unique. Rename each one.
+                    </p>
+                    <ul className="space-y-2">
+                      {slugReviewStructures.map(item => (
+                        <li key={item.subregionId} className="text-sm">
+                          {reviewingSlugName?.subregionId === item.subregionId ? (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="text"
+                                  value={reviewingSlugName.value}
+                                  autoFocus
+                                  onChange={e => {
+                                    setReviewingSlugName({ ...reviewingSlugName, value: e.target.value })
+                                    setReviewSlugNameError(null)
+                                  }}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') saveReviewedStructureName()
+                                    if (e.key === 'Escape') {
+                                      setReviewingSlugName(null)
+                                      setReviewSlugNameError(null)
+                                    }
+                                  }}
+                                  className={`flex-1 bg-gray-700 text-white text-xs px-2 py-1 rounded border focus:outline-none ${
+                                    reviewSlugNameError ? 'border-red-500' : 'border-gray-500 focus:border-lapis-lazuli'
+                                  }`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={saveReviewedStructureName}
+                                  className="text-zomp/80 hover:text-zomp text-xs px-1"
+                                  title="Save"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReviewingSlugName(null)
+                                    setReviewSlugNameError(null)
+                                  }}
+                                  className="text-gray-400 hover:text-gray-300 text-xs px-1"
+                                  title="Cancel"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                              {reviewSlugNameError && (
+                                <p className="text-red-300 text-xs">{reviewSlugNameError}</p>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReviewingSlugName({
+                                  regionId: item.regionId,
+                                  subregionId: item.subregionId,
+                                  value: item.name,
+                                })
+                                setReviewSlugNameError(null)
+                              }}
+                              className="text-left text-white hover:text-lapis-lazuli/80"
+                              title="Rename"
+                            >
+                              <span className="font-medium">{item.name}</span>
+                              <span className="block text-xs text-gray-400">
+                                {item.typeLabel} — {item.regionName}
+                              </span>
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import structures</h5>
                   <div className="flex gap-2 items-center">
@@ -1986,6 +2100,7 @@ export function AdvancedPanel() {
         orphaned={csvImportResults?.orphaned ?? 0}
         singularLabel={csvImportResults?.singularLabel ?? ''}
         pluralLabel={csvImportResults?.pluralLabel ?? ''}
+        suffixed={csvImportResults?.suffixed ?? []}
       />
 
       <ClearDataModal

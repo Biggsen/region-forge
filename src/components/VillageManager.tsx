@@ -13,7 +13,7 @@ interface VillageManagerProps {
   subregions: Subregion[]
   regionId: string
   onRemoveSubregion: (regionId: string, subregionId: string) => void
-  onUpdateSubregionName: (regionId: string, subregionId: string, newName: string) => void
+  onUpdateSubregionName: (regionId: string, subregionId: string, newName: string) => boolean
 }
 
 export function VillageManager({ 
@@ -24,15 +24,22 @@ export function VillageManager({
 }: VillageManagerProps) {
   const [editingVillageId, setEditingVillageId] = useState<string | null>(null)
   const [editingVillageName, setEditingVillageName] = useState('')
+  const [nameError, setNameError] = useState<string | null>(null)
 
   const handleStartVillageRename = (villageId: string, currentName: string) => {
     setEditingVillageId(villageId)
     setEditingVillageName(currentName)
+    setNameError(null)
   }
 
   const handleSaveVillageRename = () => {
     if (editingVillageId && editingVillageName.trim()) {
-      onUpdateSubregionName(regionId, editingVillageId, editingVillageName.trim())
+      const saved = onUpdateSubregionName(regionId, editingVillageId, editingVillageName.trim())
+      if (!saved) {
+        setNameError('A region with this name already exists')
+        return
+      }
+      setNameError(null)
       setEditingVillageId(null)
       setEditingVillageName('')
     }
@@ -41,6 +48,7 @@ export function VillageManager({
   const handleCancelVillageRename = () => {
     setEditingVillageId(null)
     setEditingVillageName('')
+    setNameError(null)
   }
 
   if (!subregions || subregions.length === 0) {
@@ -59,7 +67,10 @@ export function VillageManager({
                   <input
                     type="text"
                     value={editingVillageName}
-                    onChange={(e) => setEditingVillageName(e.target.value)}
+                    onChange={(e) => {
+                      setEditingVillageName(e.target.value)
+                      setNameError(null)
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleSaveVillageRename()
@@ -67,7 +78,9 @@ export function VillageManager({
                         handleCancelVillageRename()
                       }
                     }}
-                    className="flex-1 bg-gray-700 text-white text-xs px-2 py-1 rounded border border-gray-500 focus:outline-none focus:border-lapis-lazuli/80"
+                    className={`flex-1 bg-gray-700 text-white text-xs px-2 py-1 rounded border focus:outline-none ${
+                      nameError ? 'border-red-500 focus:border-red-500' : 'border-gray-500 focus:border-lapis-lazuli/80'
+                    }`}
                     autoFocus
                   />
                   <button
@@ -85,6 +98,9 @@ export function VillageManager({
                     ✕
                   </button>
                 </div>
+                {nameError && (
+                  <p className="text-red-300 text-xs">{nameError}</p>
+                )}
                 <div className="text-gray-400 text-xs">
                   ({subregion.x}, {subregion.y != null ? subregion.y : '—'}, {subregion.z}){subregion.details ? ` - ${subregion.details}` : ''}
                 </div>

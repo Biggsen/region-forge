@@ -54,6 +54,8 @@ export type Subregion = {
   height?: number
   details?: string
   parentRegionId?: string
+  /** True when a numeric suffix was added so the exported id stayed unique. */
+  nameNeedsReview?: boolean
 }
 
 export type WorldCoordinate = {

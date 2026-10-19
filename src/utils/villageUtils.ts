@@ -461,28 +461,14 @@ export function createStructureSubregion(
   index: number,
   structureType: StructureType,
   parentRegionId?: string,
-  existingNames: Set<string> = new Set()
+  takenSlugs: Set<string> = new Set()
 ): Subregion {
   const generateName = STRUCTURE_NAME_GENERATORS[structureType]
-  let generatedName = generateName()
-  let attempts = 0
-  const maxAttempts = 100
-  while (existingNames.has(generatedName) && attempts < maxAttempts) {
-    generatedName = generateName()
-    attempts++
-  }
-  if (existingNames.has(generatedName)) {
-    let counter = 1
-    const baseName = generatedName
-    while (existingNames.has(generatedName) && counter < 1000) {
-      generatedName = `${baseName} ${counter}`
-      counter++
-    }
-  }
+  const allocated = allocateUniqueDisplayName(generateName, takenSlugs)
   const y = structureType === STRUCTURE_TYPES.ANCIENT_CITY ? ANCIENT_CITY_IMPORT_Y : row.y
   return {
     id: `structure_${structureType}_${index}`,
-    name: generatedName,
+    name: allocated.name,
     x: row.x,
     z: row.z,
     ...(y !== undefined ? { y } : {}),
@@ -490,20 +476,27 @@ export function createStructureSubregion(
     type: 'structure',
     structureType,
     details: row.details,
-    parentRegionId
+    parentRegionId,
+    ...(allocated.suffixed ? { nameNeedsReview: true } : {})
   }
 }
 
-/** Same numeric suffix rule as {@link createStructureSubregion} when a generated name still collides. */
-function uniqueSubregionDisplayNameAmong(base: string, existingNames: Set<string>): string {
-  if (!existingNames.has(base)) return base
+/** Same numeric suffix rule as {@link allocateUniqueDisplayName} when a typed name still collides. */
+function uniqueSubregionDisplayNameAmong(base: string, takenSlugs: Set<string>): { name: string; suffixed: boolean } {
+  if (!isRegionSlugTaken(base, takenSlugs)) {
+    reserveRegionSlug(base, takenSlugs)
+    return { name: base, suffixed: false }
+  }
   let counter = 1
   while (counter < 1000) {
     const candidate = `${base} ${counter}`
-    if (!existingNames.has(candidate)) return candidate
+    if (!isRegionSlugTaken(candidate, takenSlugs)) {
+      reserveRegionSlug(candidate, takenSlugs)
+      return { name: candidate, suffixed: true }
+    }
     counter++
   }
-  return base
+  return { name: base, suffixed: false }
 }
 
 /** Single manual structure: same as CSV row via {@link createStructureSubregion}, with explicit id and optional display name. */
@@ -513,7 +506,7 @@ export function buildManualStructureSubregion(options: {
   z: number
   y: number
   parentRegionId: string
-  existingNames: Set<string>
+  takenSlugs: Set<string>
   subregionId: string
   name?: string
 }): Subregion {
@@ -524,16 +517,19 @@ export function buildManualStructureSubregion(options: {
     details: '',
     type: options.structureType,
   }
-  const sub = createStructureSubregion(row, 0, options.structureType, options.parentRegionId, options.existingNames)
-  const name =
-    options.name?.trim()
-      ? uniqueSubregionDisplayNameAmong(options.name.trim(), options.existingNames)
-      : sub.name
-  return {
+  const sub = createStructureSubregion(row, 0, options.structureType, options.parentRegionId, options.takenSlugs)
+  const typedName = options.name?.trim()
+  if (!typedName) return { ...sub, id: options.subregionId }
+  options.takenSlugs.delete(nameToRegionId(sub.name))
+  const unique = uniqueSubregionDisplayNameAmong(typedName, options.takenSlugs)
+  const next: Subregion = {
     ...sub,
     id: options.subregionId,
-    name,
+    name: unique.name,
   }
+  if (unique.suffixed) next.nameNeedsReview = true
+  else delete next.nameNeedsReview
+  return next
 }
 
 /**
@@ -553,6 +549,80 @@ export function nameToRegionId(name: string): string {
 /** WorldGuard region key for subregions in regions.yml (normalized display name only; no structure-type prefix). */
 export function yamlSubregionRegionId(subregion: Subregion): string {
   return nameToRegionId(subregion.name)
+}
+
+export type TakenRegionSlugExclude = {
+  structureType?: StructureType
+  subregionId?: string
+}
+
+/** Ids that share regions.yml: region names, heart/nerve keys, and subregion slugs. */
+export function collectTakenRegionSlugs(regions: Region[], exclude?: TakenRegionSlugExclude): Set<string> {
+  const taken = new Set<string>()
+  for (const region of regions) {
+    const regionSlug = nameToRegionId(region.name)
+    if (regionSlug) taken.add(regionSlug)
+    if (region.centerPoint != null && regionSlug) taken.add(`heart_of_${regionSlug}`)
+    if (region.nervePoint != null && regionSlug) taken.add(`nerve_of_${regionSlug}`)
+    for (const sub of region.subregions ?? []) {
+      if (exclude?.structureType && sub.type === 'structure' && sub.structureType === exclude.structureType) continue
+      if (exclude?.subregionId && sub.id === exclude.subregionId) continue
+      const slug = nameToRegionId(sub.name)
+      if (slug) taken.add(slug)
+    }
+  }
+  return taken
+}
+
+function isRegionSlugTaken(name: string, takenSlugs: Set<string>): boolean {
+  const slug = nameToRegionId(name)
+  return slug === '' || takenSlugs.has(slug)
+}
+
+function reserveRegionSlug(name: string, takenSlugs: Set<string>): void {
+  const slug = nameToRegionId(name)
+  if (slug) takenSlugs.add(slug)
+}
+
+export type AllocatedDisplayName = {
+  name: string
+  suffixed: boolean
+}
+
+/**
+ * Rolls `generate` until the slug is free (up to 100 times). If every roll collides,
+ * appends ` 1`, ` 2`, … and reports that a numeric suffix was required.
+ * Inserts the chosen slug into `takenSlugs`.
+ */
+export function allocateUniqueDisplayName(generate: () => string, takenSlugs: Set<string>): AllocatedDisplayName {
+  let generatedName = generate()
+  let attempts = 0
+  const maxAttempts = 100
+  while (isRegionSlugTaken(generatedName, takenSlugs) && attempts < maxAttempts) {
+    generatedName = generate()
+    attempts++
+  }
+  let suffixed = false
+  if (isRegionSlugTaken(generatedName, takenSlugs)) {
+    suffixed = true
+    const baseName = generatedName
+    let counter = 1
+    while (counter < 1000) {
+      const candidate = `${baseName} ${counter}`
+      if (!isRegionSlugTaken(candidate, takenSlugs)) {
+        generatedName = candidate
+        break
+      }
+      counter++
+    }
+  }
+  reserveRegionSlug(generatedName, takenSlugs)
+  return { name: generatedName, suffixed }
+}
+
+/** True when a rename would reuse an exported id. The caller's own slug must already be excluded. */
+export function subregionRenameRejected(newName: string, takenSlugs: Set<string>): boolean {
+  return isRegionSlugTaken(newName.trim(), takenSlugs)
 }
 
 export function generateSubregionYAML(subregion: Subregion, parentRegionName: string, _dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large'): string | null {

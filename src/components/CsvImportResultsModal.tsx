@@ -11,6 +11,7 @@ export interface CsvImportResultsModalProps {
   singularLabel: string
   /** e.g. "villages" / "jungle temples" for count !== 1 */
   pluralLabel: string
+  suffixed?: { name: string; regionName: string; typeLabel: string }[]
 }
 
 export function CsvImportResultsModal({
@@ -21,6 +22,7 @@ export function CsvImportResultsModal({
   orphaned,
   singularLabel,
   pluralLabel,
+  suffixed = [],
 }: CsvImportResultsModalProps) {
   const itemWord = (n: number) => (n === 1 ? singularLabel : pluralLabel)
 
@@ -45,6 +47,23 @@ export function CsvImportResultsModal({
               </p>
             ) : (
               <p className="text-gray-500 text-xs">Every row from the file matched a containing region.</p>
+            )}
+            {suffixed.length > 0 && (
+              <div className="rounded-md border border-amber-700/50 bg-amber-950/30 px-3 py-2 space-y-2">
+                <p className="text-amber-100">
+                  <span className="font-semibold">{suffixed.length}</span>{' '}
+                  {suffixed.length === 1 ? 'name got a number' : 'names got a number'} so the exported id stayed unique.
+                  Rename each one from the structures list.
+                </p>
+                <ul className="space-y-1 text-amber-50/95">
+                  {suffixed.map(item => (
+                    <li key={`${item.regionName}-${item.name}`}>
+                      <span className="font-medium">{item.name}</span>
+                      <span className="text-amber-200/80"> — {item.typeLabel}, {item.regionName}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         )}

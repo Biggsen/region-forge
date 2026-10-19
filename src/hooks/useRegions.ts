@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows, collectTakenRegionSlugs, subregionRenameRejected } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -392,9 +392,10 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       const results = {
         added: 0,
         orphaned: 0,
-        orphanedVillages: [] as { x: number; z: number; y?: number; details: string; type: string }[]
+        orphanedVillages: [] as { x: number; z: number; y?: number; details: string; type: string }[],
+        suffixed: [] as { name: string; regionName: string; structureType: StructureType }[]
       }
-      const existingNames = new Set<string>()
+      const takenSlugs = collectTakenRegionSlugs(regions, { structureType })
 
       setRegions(prev => prev.map(region => ({
         ...region,
@@ -406,8 +407,14 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       rows.forEach((row, index) => {
         const parentRegion = findParentRegion(row, regions)
         if (parentRegion) {
-          const subregion = createStructureSubregion(row, index, structureType, parentRegion.id, existingNames)
-          existingNames.add(subregion.name)
+          const subregion = createStructureSubregion(row, index, structureType, parentRegion.id, takenSlugs)
+          if (subregion.nameNeedsReview) {
+            results.suffixed.push({
+              name: subregion.name,
+              regionName: parentRegion.name,
+              structureType
+            })
+          }
           setRegions(prev => prev.map(region =>
             region.id === parentRegion.id
               ? { ...region, subregions: [...(region.subregions || []), subregion] }
@@ -513,14 +520,14 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
         const region = prev.find(r => r.id === regionId)
         if (!region) return prev
         added = true
-        const existingNames = new Set(prev.flatMap(r => (r.subregions || []).map(s => s.name)))
+        const takenSlugs = collectTakenRegionSlugs(prev)
         const sub = buildManualStructureSubregion({
           structureType: payload.structureType,
           x: payload.x,
           z: payload.z,
           y: payload.y,
           parentRegionId: regionId,
-          existingNames,
+          takenSlugs,
           subregionId: `structure_${payload.structureType}_${generateId()}`,
           name: payload.name,
         })
@@ -544,44 +551,25 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     ))
   }, [])
 
-  const updateSubregionName = useCallback((regionId: string, subregionId: string, newName: string) => {
-    // Check if the new name is unique among all villages
-    const existingVillageNames = new Set<string>()
-    
-    // Collect all existing village names except the one being renamed
-    regions.forEach(region => {
-      if (region.subregions) {
-        region.subregions.forEach(subregion => {
-          if (subregion.type === 'village' && subregion.id !== subregionId) {
-            existingVillageNames.add(subregion.name)
-          }
-        })
-      }
-    })
-    
-    // If the new name already exists, append a number to make it unique
-    let finalName = newName
-    if (existingVillageNames.has(newName)) {
-      let counter = 1
-      let baseName = newName
-      while (existingVillageNames.has(finalName) && counter < 1000) {
-        finalName = `${baseName} ${counter}`
-        counter++
-      }
-    }
-    
-    setRegions(prev => prev.map(region => 
-      region.id === regionId 
-        ? { 
-            ...region, 
-            subregions: (region.subregions || []).map(sub => 
-              sub.id === subregionId 
-                ? { ...sub, name: finalName }
-                : sub
-            )
+  const updateSubregionName = useCallback((regionId: string, subregionId: string, newName: string): boolean => {
+    const trimmedName = newName.trim()
+    const takenSlugs = collectTakenRegionSlugs(regions, { subregionId })
+    if (subregionRenameRejected(trimmedName, takenSlugs)) return false
+
+    setRegions(prev => prev.map(region =>
+      region.id === regionId
+        ? {
+            ...region,
+            subregions: (region.subregions || []).map(sub => {
+              if (sub.id !== subregionId) return sub
+              const next = { ...sub, name: trimmedName }
+              delete next.nameNeedsReview
+              return next
+            })
           }
         : region
     ))
+    return true
   }, [regions])
 
   const updateStructureSubregionY = useCallback((regionId: string, subregionId: string, y: number | undefined) => {
