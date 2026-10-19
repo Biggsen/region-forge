@@ -18,7 +18,7 @@ import {
 import { pickRandomMinecraftData, MINECRAFT_CATEGORIES, getAllItems } from '../utils/minecraftUtils'
 import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThemeUtils'
 import { copySubregionTpToClipboard } from '../utils/anchorClipboardUtils'
-import { findParentRegion } from '../utils/villageUtils'
+import { findDuplicateRegionIds, findParentRegion } from '../utils/villageUtils'
 import { RegionAnchorSection } from './regionAnchor/RegionAnchorSection'
 import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG } from './regionAnchor/regionAnchorConfig'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
@@ -180,6 +180,7 @@ export function AdvancedPanel() {
   } | null>(null)
   const [reviewingSlugName, setReviewingSlugName] = useState<{ regionId: string; subregionId: string; value: string } | null>(null)
   const [reviewSlugNameError, setReviewSlugNameError] = useState<string | null>(null)
+  const [duplicateIdCheckOn, setDuplicateIdCheckOn] = useState(false)
   const [showClearDataModal, setShowClearDataModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [pendingSubregionDelete, setPendingSubregionDelete] = useState<{
@@ -339,6 +340,19 @@ export function AdvancedPanel() {
         .sort((a, b) => a.name.localeCompare(b.name) || a.typeLabel.localeCompare(b.typeLabel)),
     [structureLocators, availableRegions]
   )
+
+  const duplicateIdGroups = useMemo(
+    () => (duplicateIdCheckOn ? findDuplicateRegionIds(regions.regions) : []),
+    [duplicateIdCheckOn, regions.regions]
+  )
+
+  const duplicateMemberKindLabel = (member: ReturnType<typeof findDuplicateRegionIds>[number]['members'][number]) => {
+    if (member.kind === 'structure' && member.structureType) return STRUCTURE_DISPLAY[member.structureType].countLabel
+    if (member.kind === 'village') return 'Village'
+    if (member.kind === 'heart') return 'Heart'
+    if (member.kind === 'nerve') return 'Nerve'
+    return 'Region'
+  }
 
   const saveReviewedStructureName = () => {
     if (!reviewingSlugName) return
@@ -1270,6 +1284,115 @@ export function AdvancedPanel() {
                   </div>
                 )}
                 <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setDuplicateIdCheckOn(true)}
+                    className="text-sm font-medium py-2 px-3 rounded-md border border-gray-600 bg-gray-700/80 text-gray-200 hover:bg-gray-600 hover:text-white"
+                  >
+                    Check for duplicate id
+                  </button>
+                  {duplicateIdCheckOn && duplicateIdGroups.length === 0 && (
+                    <p className="text-xs text-gray-400">No duplicate ids.</p>
+                  )}
+                  {duplicateIdCheckOn && duplicateIdGroups.length > 0 && (
+                    <div className="space-y-2 rounded-md border border-amber-700/50 bg-amber-950/20 px-3 py-2">
+                      <p className="text-xs text-amber-200/80">
+                        {duplicateIdGroups.length} {duplicateIdGroups.length === 1 ? 'id is' : 'ids are'} used more than once.
+                        Rename a village or structure to clear it.
+                      </p>
+                      <ul className="space-y-3">
+                        {duplicateIdGroups.map(group => (
+                          <li key={group.slug} className="space-y-1">
+                            <p className="text-xs font-medium text-amber-100">{group.slug}</p>
+                            <ul className="space-y-1">
+                              {group.members.map(member => {
+                                const memberKey = member.subregionId ?? `${member.kind}-${member.regionId}`
+                                const canRename = member.subregionId != null
+                                const editing = canRename && reviewingSlugName?.subregionId === member.subregionId
+                                return (
+                                  <li key={memberKey} className="text-sm">
+                                    {editing && reviewingSlugName ? (
+                                      <div className="space-y-1">
+                                        <div className="flex items-center gap-1">
+                                          <input
+                                            type="text"
+                                            value={reviewingSlugName.value}
+                                            autoFocus
+                                            onChange={e => {
+                                              setReviewingSlugName({ ...reviewingSlugName, value: e.target.value })
+                                              setReviewSlugNameError(null)
+                                            }}
+                                            onKeyDown={e => {
+                                              if (e.key === 'Enter') saveReviewedStructureName()
+                                              if (e.key === 'Escape') {
+                                                setReviewingSlugName(null)
+                                                setReviewSlugNameError(null)
+                                              }
+                                            }}
+                                            className={`flex-1 bg-gray-700 text-white text-xs px-2 py-1 rounded border focus:outline-none ${
+                                              reviewSlugNameError ? 'border-red-500' : 'border-gray-500 focus:border-lapis-lazuli'
+                                            }`}
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={saveReviewedStructureName}
+                                            className="text-zomp/80 hover:text-zomp text-xs px-1"
+                                            title="Save"
+                                          >
+                                            ✓
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setReviewingSlugName(null)
+                                              setReviewSlugNameError(null)
+                                            }}
+                                            className="text-gray-400 hover:text-gray-300 text-xs px-1"
+                                            title="Cancel"
+                                          >
+                                            ✕
+                                          </button>
+                                        </div>
+                                        {reviewSlugNameError && (
+                                          <p className="text-red-300 text-xs">{reviewSlugNameError}</p>
+                                        )}
+                                      </div>
+                                    ) : canRename ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setReviewingSlugName({
+                                            regionId: member.regionId,
+                                            subregionId: member.subregionId!,
+                                            value: member.label,
+                                          })
+                                          setReviewSlugNameError(null)
+                                        }}
+                                        className="text-left text-white hover:text-lapis-lazuli/80"
+                                        title="Rename"
+                                      >
+                                        <span className="font-medium">{member.label}</span>
+                                        <span className="block text-xs text-gray-400">
+                                          {duplicateMemberKindLabel(member)} — {member.regionName}
+                                        </span>
+                                      </button>
+                                    ) : (
+                                      <div>
+                                        <span className="font-medium text-white">{member.label}</span>
+                                        <span className="block text-xs text-gray-400">
+                                          {duplicateMemberKindLabel(member)} — {member.regionName}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <h5 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Import structures</h5>
                   <div className="flex gap-2 items-center">
                     <select

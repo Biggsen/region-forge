@@ -574,6 +574,76 @@ export function collectTakenRegionSlugs(regions: Region[], exclude?: TakenRegion
   return taken
 }
 
+export type DuplicateRegionIdMember = {
+  slug: string
+  kind: 'region' | 'heart' | 'nerve' | 'village' | 'structure'
+  label: string
+  regionId: string
+  regionName: string
+  subregionId?: string
+  structureType?: StructureType
+}
+
+export type DuplicateRegionIdGroup = {
+  slug: string
+  members: DuplicateRegionIdMember[]
+}
+
+/** Groups of exported ids used more than once across regions, hearts, nerves, villages, and structures. */
+export function findDuplicateRegionIds(regions: Region[]): DuplicateRegionIdGroup[] {
+  const bySlug = new Map<string, DuplicateRegionIdMember[]>()
+  const add = (member: DuplicateRegionIdMember) => {
+    if (!member.slug) return
+    const list = bySlug.get(member.slug)
+    if (list) list.push(member)
+    else bySlug.set(member.slug, [member])
+  }
+  for (const region of regions) {
+    const regionSlug = nameToRegionId(region.name)
+    add({
+      slug: regionSlug,
+      kind: 'region',
+      label: region.name,
+      regionId: region.id,
+      regionName: region.name,
+    })
+    if (region.centerPoint != null && regionSlug) {
+      add({
+        slug: `heart_of_${regionSlug}`,
+        kind: 'heart',
+        label: `Heart of ${region.name}`,
+        regionId: region.id,
+        regionName: region.name,
+      })
+    }
+    if (region.nervePoint != null && regionSlug) {
+      add({
+        slug: `nerve_of_${regionSlug}`,
+        kind: 'nerve',
+        label: `Nerve of ${region.name}`,
+        regionId: region.id,
+        regionName: region.name,
+      })
+    }
+    for (const sub of region.subregions ?? []) {
+      const slug = nameToRegionId(sub.name)
+      add({
+        slug,
+        kind: sub.type === 'structure' ? 'structure' : 'village',
+        label: sub.name,
+        regionId: region.id,
+        regionName: region.name,
+        subregionId: sub.id,
+        structureType: sub.structureType,
+      })
+    }
+  }
+  return [...bySlug.entries()]
+    .filter(([, members]) => members.length > 1)
+    .map(([slug, members]) => ({ slug, members }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
 function isRegionSlugTaken(name: string, takenSlugs: Set<string>): boolean {
   const slug = nameToRegionId(name)
   return slug === '' || takenSlugs.has(slug)

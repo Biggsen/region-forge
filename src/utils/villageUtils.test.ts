@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, subregionRenameRejected } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, findDuplicateRegionIds, subregionRenameRejected } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -373,6 +373,62 @@ describe('collectTakenRegionSlugs', () => {
     expect(taken.has('mossbound')).toBe(true)
     expect(taken.has('heart_of_mossbound')).toBe(true)
     expect(taken.has('nerve_of_mossbound')).toBe(true)
+  })
+})
+
+describe('findDuplicateRegionIds', () => {
+  const triangle = [{ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 0, z: 10 }]
+
+  it('groups structures that share an exported id with a village or a heart', () => {
+    const groups = findDuplicateRegionIds([
+      {
+        id: 'r1',
+        name: 'Mossbound',
+        points: triangle,
+        centerPoint: { x: 1, z: 2 },
+        subregions: [
+          {
+            id: 'v1',
+            name: 'Ancient Tomb',
+            x: 1,
+            z: 2,
+            radius: 64,
+            type: 'village',
+          },
+          {
+            id: 's1',
+            name: 'Ancient  Tomb',
+            x: 3,
+            z: 4,
+            radius: 64,
+            type: 'structure',
+            structureType: STRUCTURE_TYPES.DESERT_PYRAMID,
+          },
+          {
+            id: 's2',
+            name: 'Heart of Mossbound',
+            x: 5,
+            z: 6,
+            radius: 64,
+            type: 'structure',
+            structureType: STRUCTURE_TYPES.OCEAN_RUIN,
+          },
+          {
+            id: 's3',
+            name: 'Salt Treasury',
+            x: 7,
+            z: 8,
+            radius: 64,
+            type: 'structure',
+            structureType: STRUCTURE_TYPES.OCEAN_RUIN,
+          },
+        ],
+      },
+    ])
+    const bySlug = Object.fromEntries(groups.map(group => [group.slug, group.members.map(member => member.label)]))
+    expect(bySlug.ancient_tomb).toEqual(['Ancient Tomb', 'Ancient  Tomb'])
+    expect(bySlug.heart_of_mossbound).toEqual(['Heart of Mossbound', 'Heart of Mossbound'])
+    expect(bySlug.salt_treasury).toBeUndefined()
   })
 })
 
