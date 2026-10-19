@@ -561,7 +561,7 @@ interface DesertPyramidPools {
 
 const desertPyramidPools: DesertPyramidPools = {
   desertMaterial: ['Sand', 'Dune', 'Dust', 'Amber', 'Silt', 'Sun', 'Scorch', 'Ochre', 'Bone', 'Gilded'],
-  adjectives: ['Ancient', 'Buried', 'Silent', 'Forgotten', 'Sealed', 'Sunken', 'Hollow', 'Bleached', 'Veiled'],
+  adjectives: ['Ancient', 'Buried', 'Silent', 'Forgotten', 'Sealed', 'Entombed', 'Hollow', 'Bleached', 'Veiled'],
   structures: ['Pyramid', 'Tomb', 'Vault', 'Sanctum', 'Temple', 'Crypt', 'Sepulcher', 'Reliquary', 'Mausoleum'],
   abstract: ['Silence', 'Heat', 'Ash', 'Dunes', 'Horizon', 'Sun', 'Dust', 'Bones', 'Time'],
   curated: ['Amber Crypt', 'Scorch Hall', 'Dust Vault', 'Dune Sanctum', 'Bone Pyramid']
@@ -859,7 +859,7 @@ const OCEAN_RUIN_FUNCTIONS = [
   'Causeway',
   'Shrine',
   'Watch',
-  'Vault',
+  'Treasury',
   'Crossing',
   'Beacon',
   'Sanctuary',
@@ -922,7 +922,7 @@ const OCEAN_RUIN_NUMERALS = ['First', 'Second', 'Third', 'Fifth', 'Seventh', 'Ni
 const OCEAN_RUIN_FORMAL_OF_FUNCTIONS = [
   'Shrine',
   'Sanctuary',
-  'Vault',
+  'Treasury',
   'Tomb',
   'Reliquary',
   'Archive',
@@ -936,7 +936,7 @@ const OCEAN_RUIN_FORMAL_OF_FUNCTIONS = [
 const OCEAN_RUIN_NUMBERED_FUNCTIONS = [
   'Reliquary',
   'Tomb',
-  'Vault',
+  'Treasury',
   'Sanctuary',
   'Archive',
   'Shrine',
