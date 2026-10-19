@@ -676,6 +676,24 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 120, y: 80, z: -30}')
   })
 
+  it('returns ruined portal cuboid YAML (locator center; x/z ±8, y−6..y+10)', () => {
+    const subregion = {
+      id: 'rp1',
+      name: 'Twilight Rift',
+      x: 100,
+      z: -50,
+      radius: 64,
+      type: 'structure' as const,
+      structureType: STRUCTURE_TYPES.RUINED_PORTAL,
+      y: 70
+    }
+    const yaml = generateSubregionYAML(subregion, 'MyRegion')
+    expect(yaml).not.toBeNull()
+    expect(yaml).toContain('  twilight_rift:')
+    expect(yaml).toContain('min: {x: 92, y: 64, z: -58}')
+    expect(yaml).toContain('max: {x: 108, y: 80, z: -42}')
+  })
+
   it('drops apostrophes in YAML region key for buried treasure', () => {
     const subregion = {
       id: 'bt2',

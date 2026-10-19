@@ -85,6 +85,7 @@ When `kind` is `nerve`, **`discover.method` should be `on_enter`** (same as `hea
 | `woodland_mansion`| Woodland Mansions |
 | `swamp_hut`       | Swamp Huts |
 | `shipwreck`       | Shipwrecks |
+| `ruined_portal`   | Ruined Portals |
 
 ### 3.3 `discover` Object
 
@@ -517,6 +518,7 @@ regions:
 | 2.2    | Added **`kind: nerve`** (e.g. `nerve_of_<region>`): overworld-only; Region Forge and valid exports must not emit nerve rows for `world: nether` or `world: end`. §10 example includes a nerve row next to its paired heart. |
 | 2.3    | Added optional **`coords`** on region objects (§3.9): block position `{ x, y?, z }` for navigation anchors. Region Forge should export on `village`, `heart`, `nerve`, and `structure`. World/dimension comes from the region’s `world` field. |
 | 2.4    | **`kind: nerve`:** document **`discover.method: on_enter`** convention (same as `heart`); §12 validation. **`kind: water`:** overworld-only (Region Forge must not emit water rows for nether/end); §3.6 heading restored; `nerve` added to §3.3 legacy `recipeId` enum. |
+| 2.5    | §3.2: canonical `structureType` includes **`ruined_portal`**. Counter **`ruined_portals_found`**. |
 
 ---
 

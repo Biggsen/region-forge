@@ -42,6 +42,7 @@ const STRUCTURE_DISPLAY: Record<StructureType, { countLabel: string; pluralLabel
   [STRUCTURE_TYPES.SWAMP_HUT]: { countLabel: 'Swamp Hut', pluralLabel: 'swamp huts', buttonLabel: 'Import Swamp Huts (CSV)' },
   [STRUCTURE_TYPES.SHIPWRECK]: { countLabel: 'Shipwreck', pluralLabel: 'shipwrecks', buttonLabel: 'Import Shipwrecks (CSV)' },
   [STRUCTURE_TYPES.OCEAN_RUIN]: { countLabel: 'Ocean Ruin', pluralLabel: 'ocean ruins', buttonLabel: 'Import Ocean Ruins (CSV)' },
+  [STRUCTURE_TYPES.RUINED_PORTAL]: { countLabel: 'Ruined Portal', pluralLabel: 'ruined portals', buttonLabel: 'Import Ruined Portals (CSV)' },
 }
 
 const DEFAULT_ADVANCED_PANEL_SECTIONS = {

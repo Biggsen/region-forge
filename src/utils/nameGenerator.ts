@@ -1337,6 +1337,65 @@ export function generateBuriedTreasureName(): string {
   return `${BURIED_TREASURE_OWNERS[0]}'s ${BURIED_TREASURE_OBJECTS[0]}`
 }
 
+// --- Ruined portal (rift / waygate names from the sample lexicon) ---
+
+type RuinedPortalPattern = (pools: RuinedPortalPools) => string
+
+interface RuinedPortalPools {
+  adjectives: string[]
+  nouns: string[]
+  names: string[]
+}
+
+const ruinedPortalPools: RuinedPortalPools = {
+  adjectives: [
+    'Twilight', 'Silent', 'Lost', 'Ashen', 'Broken', 'Forgotten', 'Fallen', 'Weathered', 'Sundered', 'Forsaken',
+    'Waning', 'Veiled', 'Shattered', 'Obsidian', 'Cinder', 'Blackened', 'Ember', 'Hollow', 'Ancient', 'Dusk'
+  ],
+  nouns: [
+    'Rift', 'Arch', 'Gateway', 'Vestige', 'Portal', 'Transit', 'Breach', 'Doorway', 'Waygate', 'Threshold',
+    'Conduit', 'Span', 'Passage', 'Remnant', 'Crossing'
+  ],
+  names: ['Orren', 'Selvar', 'Tharos', 'Vaelor', 'Drevan', 'Eldren', 'Caldris', 'Mareth', 'Veyran', 'Orvath']
+}
+
+/** Adjective+noun is listed three times so it lands about 3:1 against "Noun of Name". */
+const ruinedPortalPatterns: RuinedPortalPattern[] = [
+  (p) => `${pick(p.adjectives)} ${pick(p.nouns)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.nouns)}`,
+  (p) => `${pick(p.adjectives)} ${pick(p.nouns)}`,
+  (p) => `${pick(p.nouns)} of ${pick(p.names)}`
+]
+
+export function generateRuinedPortalName(): string {
+  return pick(ruinedPortalPatterns)(ruinedPortalPools)
+}
+
+export function generateRuinedPortalNames(count: number): string[] {
+  const results = new Set<string>()
+  const maxAttempts = count * 50
+  let attempts = 0
+  while (results.size < count && attempts < maxAttempts) {
+    results.add(generateRuinedPortalName())
+    attempts++
+  }
+  return Array.from(results)
+}
+
+const RUINED_PORTAL_ADJECTIVES = new Set(ruinedPortalPools.adjectives)
+const RUINED_PORTAL_NOUNS = new Set(ruinedPortalPools.nouns)
+const RUINED_PORTAL_NAMES = new Set(ruinedPortalPools.names)
+
+/** True when the name is `Adjective Noun` or `Noun of Name` from the ruined-portal pools. */
+export function isValidRuinedPortalName(name: string): boolean {
+  const ofParts = name.split(' of ')
+  if (ofParts.length === 2) {
+    return RUINED_PORTAL_NOUNS.has(ofParts[0]) && RUINED_PORTAL_NAMES.has(ofParts[1])
+  }
+  const parts = name.split(' ')
+  return parts.length === 2 && RUINED_PORTAL_ADJECTIVES.has(parts[0]) && RUINED_PORTAL_NOUNS.has(parts[1])
+}
+
 export {
   generateShipwreckShipName,
   generateShipwreckShipNames,

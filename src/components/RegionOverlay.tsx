@@ -41,6 +41,7 @@ const STRUCTURE_MARKER_STYLE: Record<StructureType, { fillSelected: string; fill
   [STRUCTURE_TYPES.SWAMP_HUT]: { fillSelected: 'rgba(55, 95, 75, 1)', fillUnselected: 'rgba(55, 95, 75, 0.85)' },
   [STRUCTURE_TYPES.SHIPWRECK]: { fillSelected: 'rgba(70, 130, 145, 1)', fillUnselected: 'rgba(70, 130, 145, 0.85)' },
   [STRUCTURE_TYPES.OCEAN_RUIN]: { fillSelected: 'rgba(100, 160, 200, 1)', fillUnselected: 'rgba(100, 160, 200, 0.85)' },
+  [STRUCTURE_TYPES.RUINED_PORTAL]: { fillSelected: 'rgba(170, 90, 220, 1)', fillUnselected: 'rgba(170, 90, 220, 0.85)' },
 }
 
 /** Map fill for `region.isWater` (ocean / sea / lake). */

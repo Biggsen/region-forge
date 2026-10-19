@@ -435,6 +435,7 @@ const STRUCTURE_FAMILY_META: Record<StructureType, { label: string; counter: str
   [STRUCTURE_TYPES.SWAMP_HUT]: { label: 'Swamp Huts', counter: 'swamp_huts_found' },
   [STRUCTURE_TYPES.SHIPWRECK]: { label: 'Shipwrecks', counter: 'shipwrecks_found' },
   [STRUCTURE_TYPES.OCEAN_RUIN]: { label: 'Ocean Ruins', counter: 'ocean_ruins_found' },
+  [STRUCTURE_TYPES.RUINED_PORTAL]: { label: 'Ruined Portals', counter: 'ruined_portals_found' },
 }
 
 function pickStructureFamilies(usedTypes: Set<StructureType>): Record<string, { label: string; counter: string }> {

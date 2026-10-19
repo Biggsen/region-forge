@@ -13,6 +13,7 @@ export const STRUCTURE_TYPES = {
   SWAMP_HUT: 'swamp_hut',
   SHIPWRECK: 'shipwreck',
   OCEAN_RUIN: 'ocean_ruin',
+  RUINED_PORTAL: 'ruined_portal',
 } as const
 
 export type StructureType = typeof STRUCTURE_TYPES[keyof typeof STRUCTURE_TYPES]
