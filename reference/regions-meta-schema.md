@@ -80,6 +80,7 @@ When `kind` is `nerve`, **`discover.method` should be `on_enter`** (same as `hea
 | `igloo`           | Igloos |
 | `jungle_temple`   | Jungle Temples |
 | `ocean_ruin`      | Ocean Ruins |
+| `ocean_monument`  | Ocean Monuments |
 | `pillager_outpost`| Pillager Outposts |
 | `trail_ruins`     | Trail Ruins |
 | `woodland_mansion`| Woodland Mansions |
@@ -519,6 +520,7 @@ regions:
 | 2.3    | Added optional **`coords`** on region objects (§3.9): block position `{ x, y?, z }` for navigation anchors. Region Forge should export on `village`, `heart`, `nerve`, and `structure`. World/dimension comes from the region’s `world` field. |
 | 2.4    | **`kind: nerve`:** document **`discover.method: on_enter`** convention (same as `heart`); §12 validation. **`kind: water`:** overworld-only (Region Forge must not emit water rows for nether/end); §3.6 heading restored; `nerve` added to §3.3 legacy `recipeId` enum. |
 | 2.5    | §3.2: canonical `structureType` includes **`ruined_portal`**. Counter **`ruined_portals_found`**. |
+| 2.6    | §3.2: canonical `structureType` includes **`ocean_monument`**. Counter **`ocean_monuments_found`**. |
 
 ---
 

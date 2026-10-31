@@ -1396,6 +1396,192 @@ export function isValidRuinedPortalName(name: string): boolean {
   return parts.length === 2 && RUINED_PORTAL_ADJECTIVES.has(parts[0]) && RUINED_PORTAL_NOUNS.has(parts[1])
 }
 
+// --- Ocean monument (weighted adjective/noun patterns plus a curated list) ---
+
+type OceanMonumentPattern = (pools: OceanMonumentPools) => string
+
+interface OceanMonumentPools {
+  adjectives: string[]
+  nouns: string[]
+  names: string[]
+}
+
+const oceanMonumentPools: OceanMonumentPools = {
+  adjectives: [
+    // Ancient and architectural
+    'Elder', 'Prismarine', 'Abyssal', 'Gilded',
+    'Sovereign', 'Darkwater', 'Seaglass', 'Sunken',
+    'Drowned', 'Forgotten', 'Ancient', 'Tidal',
+    'Deepwater', 'Blacktide', 'Stormbound',
+
+    // Mystical and esoteric
+    'Hollow', 'Veiled', 'Unspoken', 'Nameless',
+    'Pale', 'Blind', 'Eclipsed', 'Twilit',
+    'Dreaming', 'Silent', 'Eternal', 'Unseeing',
+    'Sundered', 'Shrouded', 'Forsaken',
+
+    // Strange and evocative
+    'Ninth', 'Last', 'Thrice-Bound', 'Saltbound',
+    'Starless', 'Moonless', 'Weeping', 'Distant',
+    'Inverted', 'Slumbering', 'Hushed', 'Unhallowed'
+  ],
+
+  nouns: [
+    // Physical places
+    'Sanctum', 'Temple', 'Spire',
+    'Citadel', 'Keep', 'Chamber', 'Shrine',
+    'Vault', 'Hold', 'Court', 'Throne',
+    'Bastion', 'Beacon', 'Atrium',
+
+    // Sacred and mysterious
+    'Eye', 'Vigil', 'Oracle', 'Vesper',
+    'Sepulchre', 'Altar', 'Ossuary', 'Lament',
+    'Testament', 'Conclave', 'Penance',
+    'Requiem', 'Covenant', 'Silence',
+
+    // Strange structures and concepts. Hollow stays an adjective only, so it cannot pair with itself.
+    'Maw', 'Threshold', 'Obelisk', 'Pillar',
+    'Labyrinth', 'Aperture', 'Nadir', 'Axis',
+    'Resonance', 'Veil', 'Crown',
+    'Vestige'
+  ],
+
+  names: [
+    'Aureth', 'Glyphis', 'Morvane', 'Pelagis',
+    'Syrath', 'Quorin', 'Iskarel', 'Vanthe',
+    'Lurien', 'Hadris',
+
+    // Ancient, obscure names
+    'Othrys', 'Vaelith', 'Nhalor', 'Ulthain',
+    'Thessir', 'Ysil', 'Orveth', 'Naevor',
+    'Ithrael', 'Velkhar', 'Ossyra', 'Thalune'
+  ]
+}
+
+const oceanMonumentCompoundNames = [
+  // Recognisable landmarks
+  'Elderwatch',
+  'Elderspire',
+  'Hollowdeep',
+  'Saltspire',
+  'Tidewatch',
+  'Stormhold',
+  'Blackspire',
+
+  // Esoteric and ceremonial
+  'The Ninth Eye',
+  'The Hollow Vigil',
+  'The Drowned Choir',
+  'The Unseeing Crown',
+  'The Salt Testament',
+  'The Pale Communion',
+  'The Last Aperture',
+  'The Sleeping Axis',
+  'The Weeping Threshold',
+  'The Nameless Depth',
+  'The Thirteenth Bell',
+  'The Silent Conclave',
+  'The Inverted Throne',
+  'The Starless Vesper',
+  'The Unspoken Tide',
+  'The Blind Oracle',
+  'The Sundered Covenant',
+  'The Deep Remembers',
+  'The Hollow Vesper',
+  'The Last Vesper',
+  'The Ninth Vesper'
+]
+
+/** Slot counts are the weights: 8/20, 5/20, 3/20, 2/20, 2/20. */
+const oceanMonumentPatterns: OceanMonumentPattern[] = [
+  ...Array.from({ length: 8 }, () =>
+    (p: OceanMonumentPools) =>
+      `${pick(p.adjectives)} ${pick(p.nouns)}`
+  ),
+  ...Array.from({ length: 5 }, () =>
+    (p: OceanMonumentPools) =>
+      `${pick(p.nouns)} of ${pick(p.names)}`
+  ),
+  ...Array.from({ length: 3 }, () =>
+    (p: OceanMonumentPools) =>
+      `The ${pick(p.adjectives)} ${pick(p.nouns)}`
+  ),
+  ...Array.from({ length: 2 }, () =>
+    (p: OceanMonumentPools) =>
+      `${pick(p.names)}'s ${pick(p.nouns)}`
+  ),
+  ...Array.from({ length: 2 }, () =>
+    () => pick(oceanMonumentCompoundNames)
+  )
+]
+
+/** Same word twice. The generator rolls again instead of keeping these. */
+const OCEAN_MONUMENT_AWKWARD_NAMES = new Set(['Silent Silence', 'The Silent Silence'])
+
+export function generateOceanMonumentName(): string {
+  for (let i = 0; i < 32; i++) {
+    const name = pick(oceanMonumentPatterns)(oceanMonumentPools)
+    if (!OCEAN_MONUMENT_AWKWARD_NAMES.has(name)) return name
+  }
+  return oceanMonumentCompoundNames[0]
+}
+
+export function generateOceanMonumentNames(count: number): string[] {
+  const results = new Set<string>()
+  const maxAttempts = count * 50
+  let attempts = 0
+  while (results.size < count && attempts < maxAttempts) {
+    results.add(generateOceanMonumentName())
+    attempts++
+  }
+  return Array.from(results)
+}
+
+/** True for a pool pattern or an exact curated compound name. */
+export function isValidOceanMonumentName(name: string): boolean {
+  if (OCEAN_MONUMENT_AWKWARD_NAMES.has(name)) {
+    return false
+  }
+
+  if (oceanMonumentCompoundNames.includes(name)) {
+    return true
+  }
+
+  const { adjectives, nouns, names } = oceanMonumentPools
+
+  const words = name.startsWith('The ')
+    ? name.slice(4).split(' ')
+    : name.split(' ')
+
+  if (
+    words.length === 2 &&
+    adjectives.includes(words[0]) &&
+    nouns.includes(words[1])
+  ) {
+    return true
+  }
+
+  const ofMatch = /^(.+) of (.+)$/.exec(name)
+  if (
+    ofMatch &&
+    nouns.includes(ofMatch[1]) &&
+    names.includes(ofMatch[2])
+  ) {
+    return true
+  }
+
+  const possessiveMatch = /^(.+)'s (.+)$/.exec(name)
+  if (
+    possessiveMatch &&
+    names.includes(possessiveMatch[1]) &&
+    nouns.includes(possessiveMatch[2])
+  ) {
+    return true
+  }
+
+  return false
+}
+
 export {
   generateShipwreckShipName,
   generateShipwreckShipNames,

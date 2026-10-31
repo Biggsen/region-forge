@@ -13,6 +13,7 @@ export const STRUCTURE_TYPES = {
   SWAMP_HUT: 'swamp_hut',
   SHIPWRECK: 'shipwreck',
   OCEAN_RUIN: 'ocean_ruin',
+  OCEAN_MONUMENT: 'ocean_monument',
   RUINED_PORTAL: 'ruined_portal',
 } as const
 
