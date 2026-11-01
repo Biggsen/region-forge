@@ -5,6 +5,7 @@ import { useRegionForgeYamlGeneration } from '../hooks/useRegionForgeYamlGenerat
 import {
   buildRegionsYamlBody,
   exportRegionsYAML,
+  exportTestRegionsYAML,
   REGION_FORGE_APP_VERSION,
 } from './exportUtils'
 import { clearSavedData, YAML_RELEASES_STORAGE_KEY } from './persistenceUtils'
@@ -243,6 +244,39 @@ describe('yaml release history', () => {
     writeReleaseState(incoming)
     expect(readReleaseState()?.releases).toEqual([verifiedRelease(3, 'b'.repeat(64))])
     expect(readReleaseState()?.releases.some((release) => release.generation === 99)).toBe(false)
+  })
+
+  it('downloads one unreleased regions-test.yml and leaves release history alone', () => {
+    writeReleaseState({
+      projectId: 'same-project',
+      releases: [verifiedRelease(2, 'a'.repeat(64))],
+    })
+    const names: string[] = []
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      names.push(this.download)
+    })
+    const writesBefore = releaseWrites
+    const result = exportTestRegionsYAML(
+      [region()],
+      () => {},
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      'overworld',
+      'Charidh',
+      true,
+      false,
+      'large',
+      false
+    )
+
+    expect(result.status).toBe('downloaded')
+    expect(names).toEqual(['regions-test.yml'])
+    expect(readReleaseState()?.releases.map((release) => release.generation)).toEqual([2])
+    expect(releaseWrites).toBe(writesBefore)
   })
 
   it('offers the dated regions file and then a plain regions.yml', async () => {

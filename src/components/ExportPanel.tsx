@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { useAdvancedFeatures } from '../hooks/useAdvancedFeatures'
-import { exportRegionsYAML, exportRegionsMetaYAML, buildRegionsYamlBody } from '../utils/exportUtils'
+import { exportRegionsYAML, exportTestRegionsYAML, exportRegionsMetaYAML, buildRegionsYamlBody } from '../utils/exportUtils'
 import { loadExportSettings, saveExportSettings } from '../utils/persistenceUtils'
 import { getSpawnExportData } from '../utils/spawnUtils'
 import { latestVerifiedRelease, readReleaseState, sha256Hex, type ReleaseDescriptionContext } from '../utils/yamlRelease'
@@ -207,6 +207,33 @@ export function ExportPanel() {
       if (result.status === 'downloaded') {
         regionForgeYaml.syncFromStorage()
       }
+    } finally {
+      exportInFlight.current = false
+    }
+  }
+
+  const handleExportTestYAML = () => {
+    if (exportInFlight.current) return
+    exportInFlight.current = true
+    try {
+      const spawnData = getSpawnExportData(spawn.spawnState)
+      const finalIncludeSpawnRegion = (dimension === 'nether' || dimension === 'end') ? false : includeSpawnRegion
+      exportTestRegionsYAML(
+        regions.regions,
+        toast.showToast,
+        includeVillages,
+        includeStructures,
+        includeHeartRegions,
+        includeNerveRegions,
+        finalIncludeSpawnRegion,
+        spawnData,
+        dimension,
+        worldName.worldName,
+        useModernWorldHeight,
+        useGreetingsAndFarewells,
+        greetingSize,
+        includeChallengeLevelSubheading
+      )
     } finally {
       exportInFlight.current = false
     }
@@ -532,6 +559,16 @@ export function ExportPanel() {
           >
             Generate regions.yml
           </Button>
+          {unexportedChanges && (
+            <Button
+              onClick={handleExportTestYAML}
+              disabled={regions.regions.length === 0}
+              variant="secondary-outline"
+              className="w-full"
+            >
+              Generate a test regions.yml
+            </Button>
+          )}
 
           {showAdvanced && (
             <div className="border-t border-gunmetal pt-4 mt-4 space-y-4">
