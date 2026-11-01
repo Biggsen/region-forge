@@ -211,31 +211,31 @@ export function getOceanRuinCuboid(x: number, z: number, y: number): { minX: num
   }
 }
 
-/** Locator Y for ocean monument imports. CSV y is ignored, same as ancient cities. */
-export const OCEAN_MONUMENT_IMPORT_Y = 56
+/** Locator Y for ocean monument imports: vertical middle of the structure (edges 37 and 59). CSV y is ignored. */
+export const OCEAN_MONUMENT_IMPORT_Y = 48
 
 /**
- * Ocean monument structure edges, measured from the locator (horizontal center, not vertical center):
- * X/Z −29..+28, Y −19..+3. The cuboid adds 2 blocks outside each edge.
+ * Horizontal structure edges from the locator are X/Z −29..+28. The cuboid adds 2 blocks outside each of those edges.
+ * Vertical edges are ±11 around the pinned middle.
  */
 export const OCEAN_MONUMENT_EXPORT_XZ_NEG = 31
 export const OCEAN_MONUMENT_EXPORT_XZ_POS = 30
-export const OCEAN_MONUMENT_EXPORT_Y_BELOW = 21
-export const OCEAN_MONUMENT_EXPORT_Y_ABOVE = 5
+export const OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y = 11
 
 /**
- * Ocean monument WorldGuard cuboid. CSV (x, y, z) is the locator.
+ * Ocean monument WorldGuard cuboid. CSV (x, z) is the horizontal center; y is {@link OCEAN_MONUMENT_IMPORT_Y}.
  * X/Z: x−{@link OCEAN_MONUMENT_EXPORT_XZ_NEG}..x+{@link OCEAN_MONUMENT_EXPORT_XZ_POS} (same on Z).
- * Y: y−{@link OCEAN_MONUMENT_EXPORT_Y_BELOW}..y+{@link OCEAN_MONUMENT_EXPORT_Y_ABOVE}.
+ * Y: ±{@link OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y}.
  */
 export function getOceanMonumentCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
+  const dy = OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y
   return {
     minX: x - OCEAN_MONUMENT_EXPORT_XZ_NEG,
     maxX: x + OCEAN_MONUMENT_EXPORT_XZ_POS,
     minZ: z - OCEAN_MONUMENT_EXPORT_XZ_NEG,
     maxZ: z + OCEAN_MONUMENT_EXPORT_XZ_POS,
-    minY: y - OCEAN_MONUMENT_EXPORT_Y_BELOW,
-    maxY: y + OCEAN_MONUMENT_EXPORT_Y_ABOVE
+    minY: y - dy,
+    maxY: y + dy
   }
 }
 

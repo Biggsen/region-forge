@@ -1418,7 +1418,7 @@ export function AdvancedPanel() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Re-importing CSV for a structure type removes all existing markers of that type project-wide, then adds from the file. Ancient cities are stored at Y -32 and ocean monuments at Y 56. Use{' '}
+                    Re-importing CSV for a structure type removes all existing markers of that type project-wide, then adds from the file. Ancient cities are stored at Y -32 and ocean monuments at Y 48. Use{' '}
                     <span className="text-gray-400">Add structure manually</span> to append a single locator without editing the CSV.
                   </p>
                   <button
