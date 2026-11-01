@@ -216,11 +216,11 @@ export const OCEAN_MONUMENT_IMPORT_Y = 48
 
 /**
  * Horizontal structure edges from the locator are X/Z −29..+28. The cuboid adds 2 blocks outside each of those edges.
- * Vertical edges are ±11 around the pinned middle.
+ * Vertical structure edges are ±11 around the pinned middle. The cuboid adds one block outside each edge.
  */
 export const OCEAN_MONUMENT_EXPORT_XZ_NEG = 31
 export const OCEAN_MONUMENT_EXPORT_XZ_POS = 30
-export const OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y = 11
+export const OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y = 12
 
 /**
  * Ocean monument WorldGuard cuboid. CSV (x, z) is the horizontal center; y is {@link OCEAN_MONUMENT_IMPORT_Y}.

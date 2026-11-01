@@ -699,7 +699,7 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 120, y: 80, z: -30}')
   })
 
-  it('returns ocean monument cuboid YAML (locator; x/z −31..+30, y±11)', () => {
+  it('returns ocean monument cuboid YAML (locator; x/z −31..+30, y±12)', () => {
     const subregion = {
       id: 'om1',
       name: 'Elder Sanctum',
@@ -713,8 +713,8 @@ describe('generateSubregionYAML', () => {
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('  elder_sanctum:')
-    expect(yaml).toContain('min: {x: 69, y: 59, z: -81}')
-    expect(yaml).toContain('max: {x: 130, y: 81, z: -20}')
+    expect(yaml).toContain('min: {x: 69, y: 58, z: -81}')
+    expect(yaml).toContain('max: {x: 130, y: 82, z: -20}')
   })
 
   it('returns ruined portal cuboid YAML (locator center; x/z ±8, y−6..y+10)', () => {
