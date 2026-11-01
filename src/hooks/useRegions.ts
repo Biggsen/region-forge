@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows, collectTakenRegionSlugs, subregionRenameRejected } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows, collectTakenRegionSlugs, subregionRenameRejected } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -426,7 +426,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
           const orphanY =
             structureType === STRUCTURE_TYPES.ANCIENT_CITY
               ? ANCIENT_CITY_IMPORT_Y
-              : row.y
+              : structureType === STRUCTURE_TYPES.OCEAN_MONUMENT
+                ? OCEAN_MONUMENT_IMPORT_Y
+                : row.y
           results.orphanedVillages.push({
             x: row.x,
             z: row.z,

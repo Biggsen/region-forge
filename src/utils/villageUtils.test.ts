@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, findDuplicateRegionIds, subregionRenameRejected } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, findDuplicateRegionIds, subregionRenameRejected } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -249,6 +249,16 @@ describe('createStructureSubregion', () => {
     expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
     expect(sub.y).toBe(-32)
   })
+
+  it('uses fixed Y for ocean monument imports; ignores CSV y', () => {
+    const sub = createStructureSubregion(
+      { x: -896, z: 304, y: 39, details: 'monument', type: 'ocean_monument' },
+      0,
+      STRUCTURE_TYPES.OCEAN_MONUMENT
+    )
+    expect(sub.y).toBe(OCEAN_MONUMENT_IMPORT_Y)
+    expect(sub.y).toBe(56)
+  })
 })
 
 describe('buildManualStructureSubregion', () => {
@@ -312,6 +322,19 @@ describe('buildManualStructureSubregion', () => {
       subregionId: 'structure_ancient_city_x',
     })
     expect(sub.y).toBe(ANCIENT_CITY_IMPORT_Y)
+  })
+
+  it('uses ocean monument fixed Y like createStructureSubregion', () => {
+    const sub = buildManualStructureSubregion({
+      structureType: STRUCTURE_TYPES.OCEAN_MONUMENT,
+      x: -896,
+      z: 304,
+      y: 39,
+      parentRegionId: 'r1',
+      takenSlugs: new Set(),
+      subregionId: 'structure_ocean_monument_x',
+    })
+    expect(sub.y).toBe(OCEAN_MONUMENT_IMPORT_Y)
   })
 })
 
@@ -676,7 +699,7 @@ describe('generateSubregionYAML', () => {
     expect(yaml).toContain('max: {x: 120, y: 80, z: -30}')
   })
 
-  it('returns ocean monument cuboid YAML (locator center; ±29 xz, ±11 y)', () => {
+  it('returns ocean monument cuboid YAML (locator; x/z −31..+30, y−21..y+5)', () => {
     const subregion = {
       id: 'om1',
       name: 'Elder Sanctum',
@@ -690,8 +713,8 @@ describe('generateSubregionYAML', () => {
     const yaml = generateSubregionYAML(subregion, 'MyRegion')
     expect(yaml).not.toBeNull()
     expect(yaml).toContain('  elder_sanctum:')
-    expect(yaml).toContain('min: {x: 71, y: 59, z: -79}')
-    expect(yaml).toContain('max: {x: 129, y: 81, z: -21}')
+    expect(yaml).toContain('min: {x: 69, y: 49, z: -81}')
+    expect(yaml).toContain('max: {x: 130, y: 75, z: -20}')
   })
 
   it('returns ruined portal cuboid YAML (locator center; x/z ±8, y−6..y+10)', () => {

@@ -211,26 +211,31 @@ export function getOceanRuinCuboid(x: number, z: number, y: number): { minX: num
   }
 }
 
-/** Half-edge on X and Z for ocean monument regions.yml cuboid (CSV = center). Inclusive width 59. */
-export const OCEAN_MONUMENT_EXPORT_HALF_SPAN_XZ = 29
-
-/** Half-edge on Y below / above locator for ocean monument cuboid. Inclusive height 23. */
-export const OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y = 11
+/** Locator Y for ocean monument imports. CSV y is ignored, same as ancient cities. */
+export const OCEAN_MONUMENT_IMPORT_Y = 56
 
 /**
- * Ocean monument WorldGuard cuboid. CSV (x, y, z) is the center.
- * X/Z: ±{@link OCEAN_MONUMENT_EXPORT_HALF_SPAN_XZ}. Y: ±{@link OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y}.
+ * Ocean monument structure edges, measured from the locator (horizontal center, not vertical center):
+ * X/Z −29..+28, Y −19..+3. The cuboid adds 2 blocks outside each edge.
+ */
+export const OCEAN_MONUMENT_EXPORT_XZ_NEG = 31
+export const OCEAN_MONUMENT_EXPORT_XZ_POS = 30
+export const OCEAN_MONUMENT_EXPORT_Y_BELOW = 21
+export const OCEAN_MONUMENT_EXPORT_Y_ABOVE = 5
+
+/**
+ * Ocean monument WorldGuard cuboid. CSV (x, y, z) is the locator.
+ * X/Z: x−{@link OCEAN_MONUMENT_EXPORT_XZ_NEG}..x+{@link OCEAN_MONUMENT_EXPORT_XZ_POS} (same on Z).
+ * Y: y−{@link OCEAN_MONUMENT_EXPORT_Y_BELOW}..y+{@link OCEAN_MONUMENT_EXPORT_Y_ABOVE}.
  */
 export function getOceanMonumentCuboid(x: number, z: number, y: number): { minX: number; maxX: number; minZ: number; maxZ: number; minY: number; maxY: number } {
-  const dxz = OCEAN_MONUMENT_EXPORT_HALF_SPAN_XZ
-  const dy = OCEAN_MONUMENT_EXPORT_HALF_SPAN_Y
   return {
-    minX: x - dxz,
-    maxX: x + dxz,
-    minZ: z - dxz,
-    maxZ: z + dxz,
-    minY: y - dy,
-    maxY: y + dy
+    minX: x - OCEAN_MONUMENT_EXPORT_XZ_NEG,
+    maxX: x + OCEAN_MONUMENT_EXPORT_XZ_POS,
+    minZ: z - OCEAN_MONUMENT_EXPORT_XZ_NEG,
+    maxZ: z + OCEAN_MONUMENT_EXPORT_XZ_POS,
+    minY: y - OCEAN_MONUMENT_EXPORT_Y_BELOW,
+    maxY: y + OCEAN_MONUMENT_EXPORT_Y_ABOVE
   }
 }
 
@@ -514,7 +519,12 @@ export function createStructureSubregion(
 ): Subregion {
   const generateName = STRUCTURE_NAME_GENERATORS[structureType]
   const allocated = allocateUniqueDisplayName(generateName, takenSlugs)
-  const y = structureType === STRUCTURE_TYPES.ANCIENT_CITY ? ANCIENT_CITY_IMPORT_Y : row.y
+  const y =
+    structureType === STRUCTURE_TYPES.ANCIENT_CITY
+      ? ANCIENT_CITY_IMPORT_Y
+      : structureType === STRUCTURE_TYPES.OCEAN_MONUMENT
+        ? OCEAN_MONUMENT_IMPORT_Y
+        : row.y
   return {
     id: `structure_${structureType}_${index}`,
     name: allocated.name,
