@@ -485,29 +485,29 @@ function toRegionId(name: string): string {
   return nameToRegionId(name)
 }
 
-/** Label + AA counter (no `Custom.` prefix) per regions-meta §7.1 — keys match `STRUCTURE_TYPES` values. */
-const STRUCTURE_FAMILY_META: Record<StructureType, { label: string; counter: string }> = {
-  [STRUCTURE_TYPES.ANCIENT_CITY]: { label: 'Ancient Cities', counter: 'ancient_cities_found' },
-  [STRUCTURE_TYPES.BURIED_TREASURE]: { label: 'Buried Treasures', counter: 'buried_treasures_found' },
-  [STRUCTURE_TYPES.DESERT_PYRAMID]: { label: 'Desert Pyramids', counter: 'desert_pyramids_found' },
-  [STRUCTURE_TYPES.DESERT_WELL]: { label: 'Desert Wells', counter: 'desert_wells_found' },
-  [STRUCTURE_TYPES.IGLOO]: { label: 'Igloos', counter: 'igloos_found' },
-  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { label: 'Jungle Temples', counter: 'jungle_temples_found' },
-  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { label: 'Pillager Outposts', counter: 'pillager_outposts_found' },
-  [STRUCTURE_TYPES.TRAIL_RUINS]: { label: 'Trail Ruins', counter: 'trail_ruins_found' },
-  [STRUCTURE_TYPES.WOODLAND_MANSION]: { label: 'Woodland Mansions', counter: 'woodland_mansions_found' },
-  [STRUCTURE_TYPES.SWAMP_HUT]: { label: 'Swamp Huts', counter: 'swamp_huts_found' },
-  [STRUCTURE_TYPES.SHIPWRECK]: { label: 'Shipwrecks', counter: 'shipwrecks_found' },
-  [STRUCTURE_TYPES.OCEAN_RUIN]: { label: 'Ocean Ruins', counter: 'ocean_ruins_found' },
-  [STRUCTURE_TYPES.OCEAN_MONUMENT]: { label: 'Ocean Monuments', counter: 'ocean_monuments_found' },
-  [STRUCTURE_TYPES.RUINED_PORTAL]: { label: 'Ruined Portals', counter: 'ruined_portals_found' },
+/** Plural label, eCore short label, and AA counter (no `Custom.` prefix) per regions-meta §7.1. */
+const STRUCTURE_FAMILY_META: Record<StructureType, { label: string; shortLabel: string; counter: string }> = {
+  [STRUCTURE_TYPES.ANCIENT_CITY]: { label: 'Ancient Cities', shortLabel: 'Ancient Cities', counter: 'ancient_cities_found' },
+  [STRUCTURE_TYPES.BURIED_TREASURE]: { label: 'Buried Treasures', shortLabel: 'Treasures', counter: 'buried_treasures_found' },
+  [STRUCTURE_TYPES.DESERT_PYRAMID]: { label: 'Desert Pyramids', shortLabel: 'Desert Pyramids', counter: 'desert_pyramids_found' },
+  [STRUCTURE_TYPES.DESERT_WELL]: { label: 'Desert Wells', shortLabel: 'Desert Wells', counter: 'desert_wells_found' },
+  [STRUCTURE_TYPES.IGLOO]: { label: 'Igloos', shortLabel: 'Igloos', counter: 'igloos_found' },
+  [STRUCTURE_TYPES.JUNGLE_TEMPLE]: { label: 'Jungle Temples', shortLabel: 'Temples', counter: 'jungle_temples_found' },
+  [STRUCTURE_TYPES.PILLAGER_OUTPOST]: { label: 'Pillager Outposts', shortLabel: 'Outposts', counter: 'pillager_outposts_found' },
+  [STRUCTURE_TYPES.TRAIL_RUINS]: { label: 'Trail Ruins', shortLabel: 'Trail Ruins', counter: 'trail_ruins_found' },
+  [STRUCTURE_TYPES.WOODLAND_MANSION]: { label: 'Woodland Mansions', shortLabel: 'Mansions', counter: 'woodland_mansions_found' },
+  [STRUCTURE_TYPES.SWAMP_HUT]: { label: 'Swamp Huts', shortLabel: 'Swamp Huts', counter: 'swamp_huts_found' },
+  [STRUCTURE_TYPES.SHIPWRECK]: { label: 'Shipwrecks', shortLabel: 'Shipwrecks', counter: 'shipwrecks_found' },
+  [STRUCTURE_TYPES.OCEAN_RUIN]: { label: 'Ocean Ruins', shortLabel: 'Ocean Ruins', counter: 'ocean_ruins_found' },
+  [STRUCTURE_TYPES.OCEAN_MONUMENT]: { label: 'Ocean Monuments', shortLabel: 'Monuments', counter: 'ocean_monuments_found' },
+  [STRUCTURE_TYPES.RUINED_PORTAL]: { label: 'Ruined Portals', shortLabel: 'Portals', counter: 'ruined_portals_found' },
 }
 
-function pickStructureFamilies(usedTypes: Set<StructureType>): Record<string, { label: string; counter: string }> {
-  const out: Record<string, { label: string; counter: string }> = {}
+function pickStructureFamilies(usedTypes: Set<StructureType>): Record<string, { label: string; shortLabel: string; counter: string }> {
+  const out: Record<string, { label: string; shortLabel: string; counter: string }> = {}
   for (const t of [...usedTypes].sort()) {
     const meta = STRUCTURE_FAMILY_META[t]
-    if (meta) out[t] = { label: meta.label, counter: meta.counter }
+    if (meta) out[t] = { label: meta.label, shortLabel: meta.shortLabel, counter: meta.counter }
   }
   return out
 }

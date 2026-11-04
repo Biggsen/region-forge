@@ -235,7 +235,7 @@ Only include entries for regions that should have a LevelledMobs region-band rul
 
 ## 7. `structureFamilies` (object, optional)
 
-Metadata for **structure** regions (`kind: structure`): human-readable labels for TAB and the **Advanced Achievements counter name** (suffix after `Custom.`) used for `aach add` and placeholders such as `%aach_custom_<counter>%`.
+Metadata for **structure** regions (`kind: structure`): a plural label for TAB, a compact `shortLabel` for eCore, and the **Advanced Achievements counter name** (suffix after `Custom.`) used for `aach add` and placeholders such as `%aach_custom_<counter>%`.
 
 **Totals** (e.g. `14/14` on TAB, AA tier thresholds): **not** stored here. Mc-plugin-manager derives denominators by **counting** imported regions per `structureType` so generated configs always match the region list.
 
@@ -252,7 +252,8 @@ Unknown keys in `structureFamilies` are ignored unless referenced by a region.
 
 | Field   | Type   | Required | Description |
 |---------|--------|----------|-------------|
-| `label` | string | **Yes**  | Short label for TAB and UI (e.g. `Ancient Cities`, `Desert Wells`). |
+| `label` | string | **Yes**  | Plural display label for TAB and UI (e.g. `Ancient Cities`, `Desert Wells`). |
+| `shortLabel` | string | **Yes** | Compact plural name for eCore config (e.g. `Ancient Cities`, `Treasures`). Region Forge hard-codes one per family. Files from before schema 2.7 may omit it. |
 | `counter` | string | **Yes** | AA counter key **without** the `Custom.` prefix (e.g. `ancient_cities_found`). Used for `Custom.<counter>` in CE and TAB. |
 
 Unknown keys on each structure family object are ignored (same forward-compatibility rule as region objects in §3.1).
@@ -263,12 +264,15 @@ Example:
 structureFamilies:
   ancient_city:
     label: Ancient Cities
+    shortLabel: Ancient Cities
     counter: ancient_cities_found
   desert_well:
     label: Desert Wells
+    shortLabel: Desert Wells
     counter: desert_wells_found
   ocean_ruin:
     label: Ocean Ruins
+    shortLabel: Ocean Ruins
     counter: ocean_ruins_found
 ```
 
@@ -414,6 +418,7 @@ regions:
 structureFamilies:
   ancient_city:
     label: Ancient Cities
+    shortLabel: Ancient Cities
     counter: ancient_cities_found
 
 levelledMobs:
@@ -488,7 +493,7 @@ regions:
 
 - **`structureFamilies`**  
   - Each `counter` should be a stable snake_case identifier matching the AA custom counter you configure (e.g. `ancient_cities_found`).  
-  - `label` is for display only; human-facing names for individual regions come from **`id`** (formatting rules in mc-plugin-manager).  
+  - `label` is the plural display name. `shortLabel` is the compact plural name mc-plugin-manager uses when generating eCore config. Human-facing names for individual regions come from **`id`** (formatting rules in mc-plugin-manager).  
   - Region Forge emits an entry for **each `structureType` used** in that file (not necessarily every known family).
 
 - **`coords`**  
@@ -521,6 +526,7 @@ regions:
 | 2.4    | **`kind: nerve`:** document **`discover.method: on_enter`** convention (same as `heart`); §12 validation. **`kind: water`:** overworld-only (Region Forge must not emit water rows for nether/end); §3.6 heading restored; `nerve` added to §3.3 legacy `recipeId` enum. |
 | 2.5    | §3.2: canonical `structureType` includes **`ruined_portal`**. Counter **`ruined_portals_found`**. |
 | 2.6    | §3.2: canonical `structureType` includes **`ocean_monument`**. Counter **`ocean_monuments_found`**. |
+| 2.7    | §7.1: each `structureFamilies` entry includes **`shortLabel`**, a hard-coded compact plural name for eCore (e.g. `Treasures` beside `Buried Treasures`). Older files may omit it. |
 
 ---
 

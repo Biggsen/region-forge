@@ -90,6 +90,36 @@ describe('buildRegionsMetaRoot', () => {
     expect(regions.find(r => r.id === 'nerve_of_dradacliff')?.coords).toEqual({ x: 220, z: -850, y: 100 })
     expect(regions.find(r => r.id === 'acornbrook')?.coords).toEqual({ x: 120, z: -340, y: 64 })
     expect(regions.find(r => r.id === 'inner_core')?.coords).toEqual({ x: -300, z: 600, y: 85 })
+    expect(root!.structureFamilies).toEqual({
+      ancient_city: { label: 'Ancient Cities', shortLabel: 'Ancient Cities', counter: 'ancient_cities_found' },
+    })
+  })
+
+  it('exports a hard-coded shortLabel for each used structure family', () => {
+    const root = buildRegionsMetaRoot({
+      ...baseParams,
+      dimension: 'overworld',
+      regions: [
+        baseRegion({
+          subregions: [
+            {
+              id: 's1',
+              name: 'Hidden Chest',
+              x: 1,
+              z: 2,
+              y: 3,
+              radius: 1,
+              type: 'structure',
+              structureType: STRUCTURE_TYPES.BURIED_TREASURE,
+            },
+          ],
+        }),
+      ],
+    })
+
+    expect(root!.structureFamilies).toEqual({
+      buried_treasure: { label: 'Buried Treasures', shortLabel: 'Treasures', counter: 'buried_treasures_found' },
+    })
   })
 
   it('exports kind water with passive discover only on overworld', () => {
