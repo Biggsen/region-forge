@@ -122,7 +122,7 @@ describe('buildRegionsMetaRoot', () => {
     })
   })
 
-  it('exports kind water with passive discover only on overworld', () => {
+  it('exports kind water with on_enter discover only on overworld', () => {
     const waterRegion = baseRegion({ name: 'Northern Sea', isWater: true })
 
     const overworld = buildRegionsMetaRoot({
@@ -136,7 +136,7 @@ describe('buildRegionsMetaRoot', () => {
     })
     const mainOverworld = (overworld!.regions as Array<{ kind: string; discover: { method: string } }>)[0]
     expect(mainOverworld.kind).toBe('water')
-    expect(mainOverworld.discover.method).toBe('passive')
+    expect(mainOverworld.discover.method).toBe('on_enter')
 
     const end = buildRegionsMetaRoot({
       ...baseParams,

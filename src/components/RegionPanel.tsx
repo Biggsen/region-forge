@@ -49,6 +49,7 @@ export function RegionPanel() {
   const { startSettingCenterPoint, stopSettingCenterPoint, startPlacingLabel, stopPlacingLabel, isPlacingLabel, placingLabelRegionId, isWarping, setIsWarping, warpRadius, setWarpRadius, warpStrength, setWarpStrength } = mapCanvas
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [kindFilter, setKindFilter] = useState<'all' | 'land' | 'water'>('all')
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [regionToDelete, setRegionToDelete] = useState<{ id: string; name: string } | null>(null)
   const [sortBy, setSortBy] = useState<'name' | 'size' | 'newest'>(() => loadRegionSort().sortBy)
@@ -123,10 +124,14 @@ export function RegionPanel() {
   
 
   
-  // Filter regions based on search query
-  const filteredRegions = regionsList.filter(region =>
-    region.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Filter regions based on search query and land/water kind
+  const filteredRegions = regionsList.filter(region => {
+    const matchesSearch = region.name.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!matchesSearch) return false
+    if (kindFilter === 'water') return region.isWater === true
+    if (kindFilter === 'land') return region.isWater !== true
+    return true
+  })
 
   // Sort filtered regions
   const sortedRegions = [...filteredRegions].sort((a, b) => {
@@ -205,7 +210,7 @@ export function RegionPanel() {
 
           {/* Region Counter */}
           <div className="flex-shrink-0 mb-4 mt-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Regions ({regionsList.length})</h2>
+            <h2 className="text-xl font-bold text-white">Regions ({sortedRegions.length})</h2>
             {regionsList.length > 0 && (
               <button
                 onClick={() => setShowDeleteAllModal(true)}
@@ -321,6 +326,30 @@ export function RegionPanel() {
             </div>
           </div>
 
+          <div className="flex-shrink-0 mb-4 flex items-center gap-2">
+            <span className="text-gray-400 text-sm">Show:</span>
+            <div className="flex gap-1">
+              {([
+                ['all', 'All'],
+                ['land', 'Land'],
+                ['water', 'Water'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setKindFilter(key)}
+                  className={`px-3 py-1.5 rounded text-sm border transition-colors ${
+                    kindFilter === key
+                      ? 'bg-outer-space border-outer-space text-white'
+                      : 'bg-input-bg border-input-border text-gray-300 hover:bg-gunmetal hover:border-outer-space'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Scrollable Region List - Takes remaining space */}
           <div className="flex-1 overflow-y-auto space-y-2" style={{ maxHeight: 'calc(100vh - 400px)' }}>
             {sortedRegions.map(region => {
@@ -380,8 +409,14 @@ export function RegionPanel() {
             
             {sortedRegions.length === 0 && (
               <div className="text-center py-8 text-gray-400">
-                <p className="text-lg mb-2">No regions</p>
-                <p className="text-sm">Create your first region to get started</p>
+                {regionsList.length === 0 ? (
+                  <>
+                    <p className="text-lg mb-2">No regions</p>
+                    <p className="text-sm">Create your first region to get started</p>
+                  </>
+                ) : (
+                  <p className="text-lg mb-2">No regions match</p>
+                )}
               </div>
             )}
           </div>

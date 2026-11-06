@@ -703,7 +703,7 @@ export function AdvancedPanel() {
               <div className="space-y-3 ml-4">
                 <p className="text-xs text-gray-400">
                   Overworld only. Exports as <code className="text-gray-300">kind: water</code> with{' '}
-                  <code className="text-gray-300">discover.method: passive</code>. WorldGuard and LevelledMobs bands still apply; no main discovery flow in mc-plugin-manager.
+                  <code className="text-gray-300">discover.method: on_enter</code>. WorldGuard and LevelledMobs bands still apply. mc-plugin-manager treats the row as discoverable and decides its contribution to progression.
                 </p>
                 {regions.selectedRegionId ? (
                   <label className="flex items-center space-x-2">

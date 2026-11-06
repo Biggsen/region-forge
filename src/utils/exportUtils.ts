@@ -631,7 +631,7 @@ export function buildRegionsMetaRoot(params: BuildRegionsMetaParams): Record<str
       world: dim,
       kind: isWater ? 'water' : 'region',
       discover: {
-        method: isWater ? 'passive' : region.hasSpawn === true ? 'first_join' : 'on_enter',
+        method: region.hasSpawn === true ? 'first_join' : 'on_enter',
       },
     }
     if (region.description && !excludeDescriptions) regionEntry.description = region.description
