@@ -7,7 +7,7 @@ export function useScrollAnchorRowIntoView(params: {
   sectionExpanded: boolean
   listExpanded: boolean
   listItemRefs: RefObject<Partial<Record<string, HTMLLIElement | null>>>
-  anchorField: 'centerPoint' | 'nervePoint'
+  anchorField: 'centerPoint' | 'nervePoint' | 'soulPoint'
 }): void {
   const { selectedRegionId, regions, sectionExpanded, listExpanded, listItemRefs, anchorField } = params
 

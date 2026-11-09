@@ -42,7 +42,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     updateRegion
   } = regions
   const { spawnState, setSpawnCoordinates } = spawn
-  const { isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isSettingNervePoint, nervePointRegionId, stopSettingNervePoint, isPlacingLabel, placingLabelRegionId, stopPlacingLabel, isWarping, warpRadius, warpStrength } = mapCanvas
+  const { isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isSettingNervePoint, nervePointRegionId, stopSettingNervePoint, isSettingSoulPoint, soulPointRegionId, stopSettingSoulPoint, isPlacingLabel, placingLabelRegionId, stopPlacingLabel, isWarping, warpRadius, warpStrength } = mapCanvas
   const { customMarker, setMarker, orphanedVillageMarkers, showOrphanedVillages } = customMarkers
   const [isSpacePressed, setIsSpacePressed] = useState(false)
   const [mouseCoordinates, setMouseCoordinates] = useState<{ x: number; z: number } | null>(null)
@@ -103,7 +103,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
     if (isSpacePressed) {
       return 'cursor-grab'
     }
-    if (isSettingCenterPoint) {
+    if (isSettingCenterPoint || isSettingNervePoint || isSettingSoulPoint) {
       return 'cursor-crosshair'
     }
     if (isPlacingLabel) {
@@ -250,6 +250,14 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
           regions.setCustomNervePoint(nervePointRegionId, worldPos)
           stopSettingNervePoint()
         }
+      } else if (isSettingSoulPoint && effectiveImage && mapState.originSelected) {
+        const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
+        const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
+
+        if (soulPointRegionId) {
+          regions.setCustomSoulPoint(soulPointRegionId, worldPos)
+          stopSettingSoulPoint()
+        }
       } else if (isPlacingLabel && effectiveImage && mapState.originSelected) {
         const imagePos = canvasToImage(x, y, mapState.scale, mapState.offsetX, mapState.offsetY)
         const worldPos = pixelToWorld(imagePos.x, imagePos.y, effectiveImage.width, effectiveImage.height, mapState.originOffset)
@@ -306,7 +314,7 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
       }
       // Note: Panning is only allowed when space key is pressed (handled in the first condition)
     }
-  }, [mapState.originSelected, effectiveImage, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, isolatedRegionId, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isSettingNervePoint, nervePointRegionId, stopSettingNervePoint, isPlacingLabel, placingLabelRegionId, stopPlacingLabel, updateRegion, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
+  }, [mapState.originSelected, effectiveImage, mapState.scale, mapState.offsetX, mapState.offsetY, mapState.originOffset, drawingRegion, isSpacePressed, editMode.isEditing, editMode.isMovingRegion, editMode.movingRegionId, editMode.originalRegionPoints, setIsMovingRegion, setOrigin, addPointToDrawing, finishDrawingRegion, startDragging, regions, isolatedRegionId, spawnState.isPlacing, setSpawnCoordinates, isSettingCenterPoint, centerPointRegionId, stopSettingCenterPoint, isSettingNervePoint, nervePointRegionId, stopSettingNervePoint, isSettingSoulPoint, soulPointRegionId, stopSettingSoulPoint, isPlacingLabel, placingLabelRegionId, stopPlacingLabel, updateRegion, isWarping, warpRadius, warpStrength, warpRegion, addSplitPoint, editMode.isSplittingRegion, editMode.splitPoints])
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (e.button === 0) {
@@ -538,6 +546,14 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
           </p>
         </div>
       )}
+
+      {isSettingSoulPoint && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-saffron border-2 border-saffron rounded-lg px-4 py-2 shadow-lg">
+          <p className="text-gray-900 font-semibold text-sm">
+            Set soul location
+          </p>
+        </div>
+      )}
       
       {isPlacingLabel && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-saffron border-2 border-saffron rounded-lg px-4 py-2 shadow-lg">
@@ -665,7 +681,9 @@ export function MapCanvas({ onNavigateToRegions }: MapCanvasProps) {
             toggleShowRegions={regions.toggleShowRegions}
             toggleShowVillages={regions.toggleShowVillages}
             toggleShowOrphanedVillages={customMarkers.toggleShowOrphanedVillages}
-            toggleShowCenterPoints={regions.toggleShowCenterPoints}
+            toggleShowHearts={regions.toggleShowHearts}
+            toggleShowNerves={regions.toggleShowNerves}
+            toggleShowSouls={regions.toggleShowSouls}
             toggleShowChallengeLevels={regions.toggleShowChallengeLevels}
             toggleShowGrid={regions.toggleShowGrid}
             toggleShowNames={regions.toggleShowNames}

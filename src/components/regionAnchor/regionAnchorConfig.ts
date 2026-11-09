@@ -1,18 +1,18 @@
-import { Heart, Activity, type LucideIcon } from 'lucide-react'
-import { REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE } from '../../utils/villageUtils'
+import { Heart, Activity, Ghost, type LucideIcon } from 'lucide-react'
+import { REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, REGION_SOUL_CSV_STRUCTURE } from '../../utils/villageUtils'
 
-export type RegionAnchorKind = 'heart' | 'nerve'
+export type RegionAnchorKind = 'heart' | 'nerve' | 'soul'
 
 export type RegionAnchorConfig = {
   kind: RegionAnchorKind
-  anchorField: 'centerPoint' | 'nervePoint'
+  anchorField: 'centerPoint' | 'nervePoint' | 'soulPoint'
   csvStructure: string
   title: string
   Icon: LucideIcon
   importHeading: string
   importDescription: string
   importButtonLabel: string
-  importRowKey: 'heartRows' | 'nerveRows'
+  importRowKey: 'heartRows' | 'nerveRows' | 'soulRows'
   noRowsToast: string
   importFailureMessage: string
   placedListHeading: string
@@ -102,4 +102,38 @@ export const NERVE_ANCHOR_CONFIG: RegionAnchorConfig = {
   summaryAllSet: 'All regions have nerves',
   summaryPartial: (set, total) => `${set} region nerves set out of ${total} regions`,
   listItemKey: regionId => `nerve-${regionId}`
+}
+
+export const SOUL_ANCHOR_CONFIG: RegionAnchorConfig = {
+  kind: 'soul',
+  anchorField: 'soulPoint',
+  csvStructure: REGION_SOUL_CSV_STRUCTURE,
+  title: 'Region Souls',
+  Icon: Ghost,
+  importHeading: 'Import souls',
+  importDescription:
+    'Uses rows where structure is region_soul (same CSV layout as hearts). Only X, Y, and Z are applied; the details column is ignored. Each point is assigned to the region whose polygon contains it.',
+  importButtonLabel: 'Import souls (CSV)',
+  importRowKey: 'soulRows',
+  noRowsToast: 'No region_soul rows found in CSV',
+  importFailureMessage: 'Failed to import souls',
+  placedListHeading: 'Placed souls',
+  listAccordionLabel: count => `Region souls (${count})`,
+  emptyPlacedMessage: 'No region souls yet. Select a region and use Set soul location on the map.',
+  deleteRowLabel: 'Remove region soul',
+  deleteModalLabel: 'region soul',
+  removedToast: 'Region soul removed',
+  setLocationTitle: 'Set Soul Location',
+  setLocationBody: 'Click on the map to set the soul location',
+  setLocationButtonLabel: 'Set soul location',
+  setLocationButtonTitle: 'Click on map to set region soul',
+  selectRegionPrompt: 'Select a region to set its soul on the map',
+  bulkTpButtonLabel: 'Copy all soul TPs',
+  bulkTpCopiedToast: 'All soul teleport commands copied',
+  exportEmptyToast: 'No region souls to export',
+  exportSuccessToast: 'Region souls CSV downloaded',
+  exportFilenameSuffix: 'region-souls',
+  summaryAllSet: 'All regions have souls',
+  summaryPartial: (set, total) => `${set} region souls set out of ${total} regions`,
+  listItemKey: regionId => `soul-${regionId}`
 }

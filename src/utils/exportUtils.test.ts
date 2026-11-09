@@ -3,6 +3,7 @@ import { STRUCTURE_TYPES } from '../types'
 import type { Region } from '../types'
 import {
   buildRegionsMetaRoot,
+  getRegionsYmlExportStats,
   isRegionsMetaWater,
   metaCoordsFromAnchor,
 } from './exportUtils'
@@ -24,6 +25,7 @@ const baseParams = {
   includeStructures: true,
   includeHeartRegions: true,
   includeNerveRegions: true,
+  includeSoulRegions: true,
   includeSpawnRegion: false,
 }
 
@@ -52,7 +54,7 @@ describe('isRegionsMetaWater', () => {
 })
 
 describe('buildRegionsMetaRoot', () => {
-  it('exports coords on heart, nerve, village, and structure rows', () => {
+  it('exports coords on heart, nerve, soul, village, and structure rows', () => {
     const root = buildRegionsMetaRoot({
       ...baseParams,
       dimension: 'overworld',
@@ -60,6 +62,7 @@ describe('buildRegionsMetaRoot', () => {
         baseRegion({
           centerPoint: { x: 224, z: -848, y: 99 },
           nervePoint: { x: 220, z: -850, y: 100 },
+          soulPoint: { x: 218, z: -846, y: 101 },
           subregions: [
             {
               id: 'v1',
@@ -88,6 +91,7 @@ describe('buildRegionsMetaRoot', () => {
     const regions = root!.regions as Array<{ id: string; coords?: { x: number; z: number; y?: number } }>
     expect(regions.find(r => r.id === 'heart_of_dradacliff')?.coords).toEqual({ x: 224, z: -848, y: 99 })
     expect(regions.find(r => r.id === 'nerve_of_dradacliff')?.coords).toEqual({ x: 220, z: -850, y: 100 })
+    expect(regions.find(r => r.id === 'soul_of_dradacliff')?.coords).toEqual({ x: 218, z: -846, y: 101 })
     expect(regions.find(r => r.id === 'acornbrook')?.coords).toEqual({ x: 120, z: -340, y: 64 })
     expect(regions.find(r => r.id === 'inner_core')?.coords).toEqual({ x: -300, z: 600, y: 85 })
     expect(root!.structureFamilies).toEqual({
@@ -133,6 +137,7 @@ describe('buildRegionsMetaRoot', () => {
       includeStructures: false,
       includeHeartRegions: false,
       includeNerveRegions: false,
+      includeSoulRegions: false,
     })
     const mainOverworld = (overworld!.regions as Array<{ kind: string; discover: { method: string } }>)[0]
     expect(mainOverworld.kind).toBe('water')
@@ -146,9 +151,63 @@ describe('buildRegionsMetaRoot', () => {
       includeStructures: false,
       includeHeartRegions: false,
       includeNerveRegions: false,
+      includeSoulRegions: false,
     })
     const mainEnd = (end!.regions as Array<{ kind: string; discover: { method: string } }>)[0]
     expect(mainEnd.kind).toBe('region')
     expect(mainEnd.discover.method).toBe('on_enter')
+  })
+
+  it('omits soul rows outside the overworld', () => {
+    const regions = [baseRegion({ soulPoint: { x: 12, z: 34, y: 56 } })]
+    const nether = buildRegionsMetaRoot({
+      ...baseParams,
+      dimension: 'nether',
+      regions,
+    })
+    const rows = nether!.regions as Array<{ id: string; kind: string }>
+    expect(rows.some(row => row.kind === 'soul' || row.id.startsWith('soul_of_'))).toBe(false)
+  })
+})
+
+describe('getRegionsYmlExportStats', () => {
+  const counted = baseRegion({
+    centerPoint: { x: 1, z: 2 },
+    nervePoint: { x: 3, z: 4 },
+    soulPoint: { x: 5, z: 6 },
+  })
+
+  it('counts souls only for overworld exports', () => {
+    const overworld = getRegionsYmlExportStats(
+      [counted],
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      null,
+      'overworld',
+      true,
+      false,
+      'large'
+    )
+    expect(overworld).toMatchObject({ heartCount: 1, nerveCount: 1, soulCount: 1 })
+
+    const nether = getRegionsYmlExportStats(
+      [counted],
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      null,
+      'nether',
+      true,
+      false,
+      'large'
+    )
+    expect(nether).toMatchObject({ heartCount: 1, nerveCount: 0, soulCount: 0 })
   })
 })

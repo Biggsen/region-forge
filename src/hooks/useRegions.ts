@@ -6,7 +6,7 @@ import { useRegionEditMode } from './useRegionEditMode'
 import { useRegionDrawing } from './useRegionDrawing'
 import { generateId, generateRegionYAML, moveRegionPoints, calculateRegionCenter, warpRegionPoints, resizeRegionPoints, doublePolygonVertices, halvePolygonVertices, simplifyPolygonVertices, splitPolygon, findClosestPointOnPolygonEdge } from '../utils/polygonUtils'
 import { saveRegions, loadRegions, saveSelectedRegion, loadSelectedRegion, migrateRegionsForLegacyStructureIds } from '../utils/persistenceUtils'
-import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows, collectTakenRegionSlugs, subregionRenameRejected } from '../utils/villageUtils'
+import { parseVillageCSV, createVillageSubregion, createStructureSubregion, findParentRegion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildManualStructureSubregion, parseRegionHeartImportRows, parseRegionNerveImportRows, parseRegionSoulImportRows, collectTakenRegionSlugs, subregionRenameRejected } from '../utils/villageUtils'
 import { generateVillageNameByWorldType } from '../utils/nameGenerator'
 
 type ImportVillagesOptions = {
@@ -47,6 +47,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       ...region,
       centerPoint: region.centerPoint || null,
       nervePoint: region.nervePoint ?? null,
+      soulPoint: region.soulPoint ?? null,
       challengeLevel: migrateChallengLevel(region.challengeLevel),
       hasSpawn: region.hasSpawn || false,
       isWater: region.isWater ?? false,
@@ -302,7 +303,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     editModeApi.finishMoveRegion()
   }, [editMode.movingRegionId, editMode.originalRegionPoints, editModeApi])
 
-  const { highlightMode, setStructureTypeVisible, setHighlightedStructureType, toggleHighlightAll, toggleShowRegions, toggleShowVillages, toggleShowCenterPoints, toggleShowChallengeLevels, toggleShowGrid, toggleShowNames } = highlight
+  const { highlightMode, setStructureTypeVisible, setHighlightedStructureType, toggleHighlightAll, toggleShowRegions, toggleShowVillages, toggleShowHearts, toggleShowNerves, toggleShowSouls, toggleShowChallengeLevels, toggleShowGrid, toggleShowNames } = highlight
   const stopEditMode = editModeApi.stopEditMode
   const startDraggingPoint = editModeApi.startDraggingPoint
   const stopDraggingPoint = editModeApi.stopDraggingPoint
@@ -501,6 +502,36 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
       prev.map(r => {
         const np = updates.get(r.id)
         return np ? { ...r, nervePoint: np } : r
+      })
+    )
+    return results
+  }, [regions])
+
+  const importSoulsFromCSV = useCallback((csvContent: string) => {
+    const rows = parseRegionSoulImportRows(csvContent)
+    const results = { soulRows: rows.length, regionsUpdated: 0, orphaned: 0 }
+    if (rows.length === 0) {
+      return results
+    }
+    const regionsSnapshot = regions
+    const updates = new Map<string, { x: number; z: number; y?: number }>()
+    for (const row of rows) {
+      const parent = findParentRegion(row, regionsSnapshot)
+      if (!parent) {
+        results.orphaned++
+        continue
+      }
+      const sp: { x: number; z: number; y?: number } = { x: row.x, z: row.z }
+      if (row.y !== undefined && !Number.isNaN(row.y)) {
+        sp.y = row.y
+      }
+      updates.set(parent.id, sp)
+    }
+    results.regionsUpdated = updates.size
+    setRegions(prev =>
+      prev.map(r => {
+        const sp = updates.get(r.id)
+        return sp ? { ...r, soulPoint: sp } : r
       })
     )
     return results
@@ -800,6 +831,57 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     )
   }, [])
 
+  const setCustomSoulPoint = useCallback((regionId: string, soulPoint: { x: number; z: number; y?: number } | null) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId) return region
+        if (soulPoint === null) return { ...region, soulPoint: null }
+        const prevSoul = region.soulPoint
+        const next: { x: number; z: number; y?: number } = {
+          x: soulPoint.x,
+          z: soulPoint.z
+        }
+        if (soulPoint.y !== undefined) {
+          next.y = soulPoint.y
+        } else if (prevSoul?.y !== undefined) {
+          next.y = prevSoul.y
+        }
+        return { ...region, soulPoint: next }
+      })
+    )
+  }, [])
+
+  const updateRegionSoulX = useCallback((regionId: string, _subregionId: string, x: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.soulPoint
+          ? { ...region, soulPoint: { ...region.soulPoint, x } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionSoulZ = useCallback((regionId: string, _subregionId: string, z: number) => {
+    setRegions(prev =>
+      prev.map(region =>
+        region.id === regionId && region.soulPoint
+          ? { ...region, soulPoint: { ...region.soulPoint, z } }
+          : region
+      )
+    )
+  }, [])
+
+  const updateRegionSoulY = useCallback((regionId: string, _subregionId: string, y: number | undefined) => {
+    setRegions(prev =>
+      prev.map(region => {
+        if (region.id !== regionId || !region.soulPoint) return region
+        const { y: _drop, ...rest } = region.soulPoint
+        const soulPoint = y === undefined ? rest : { ...rest, y }
+        return { ...region, soulPoint }
+      })
+    )
+  }, [])
+
   // Split region functions
   const startSplitRegion = useCallback((regionId: string) => {
     setEditMode(editModeForSplit(regionId))
@@ -933,7 +1015,9 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     toggleHighlightAll,
     toggleShowRegions,
     toggleShowVillages,
-    toggleShowCenterPoints,
+    toggleShowHearts,
+    toggleShowNerves,
+    toggleShowSouls,
     toggleShowChallengeLevels,
     toggleShowGrid,
     toggleShowNames,
@@ -941,6 +1025,7 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     importStructuresFromCSV,
     importHeartsFromCSV,
     importNervesFromCSV,
+    importSoulsFromCSV,
     addManualStructureSubregion,
     removeSubregionFromRegion,
     updateSubregionName,
@@ -952,12 +1037,16 @@ export function useRegions(dimension: 'overworld' | 'nether' | 'end' = 'overworl
     regenerateVillageNames,
     setCustomCenterPoint,
     setCustomNervePoint,
+    setCustomSoulPoint,
     updateRegionHeartX,
     updateRegionHeartY,
     updateRegionHeartZ,
     updateRegionNerveX,
     updateRegionNerveY,
     updateRegionNerveZ,
+    updateRegionSoulX,
+    updateRegionSoulY,
+    updateRegionSoulZ,
     warpRegion,
     resizeRegion,
     doubleRegionVertices,

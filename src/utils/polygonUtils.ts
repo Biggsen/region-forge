@@ -35,7 +35,7 @@ function getChallengeLevelColor(challengeLevel: ChallengeLevel, isWater?: boolea
   }
 }
 
-export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeStructures: boolean = true, includeHeartRegions: boolean = true, includeNerveRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
+export function generateRegionYAML(region: Region, includeVillages: boolean = true, includeStructures: boolean = true, includeHeartRegions: boolean = true, includeNerveRegions: boolean = true, includeSoulRegions: boolean = true, dimension?: 'overworld' | 'nether' | 'end', useModernWorldHeight: boolean = true, useGreetingsAndFarewells: boolean = false, greetingSize: 'large' | 'small' | 'chat' = 'large', includeChallengeLevelSubheading: boolean = false): string {
   const points = region.points.map(point => `      - {x: ${Math.round(point.x)}, z: ${Math.round(point.z)}}`).join('\n')
   
   // Check if this is a main region (not spawn, hearts, or villages)
@@ -252,6 +252,57 @@ ${points}`
     members: {}
     owners: {}
     flags:${useGreetingsAndFarewells ? '\n' + nerveFlags : ' ' + nerveFlags}
+    priority: 10`
+  }
+
+  // Add soul_of_[region] subregion (parallel to nerve), overworld only — if enabled and set
+  if (includeSoulRegions && region.soulPoint != null && dim === 'overworld') {
+    const regionCenter = region.soulPoint
+    const soulRegionName = `soul_of_${nameToRegionId(region.name)}`
+    const soulSize = 5
+    const soulY = regionCenter.y
+    const soulFallbackMinY = isWaterRegion ? 35 : landMinY
+    const soulFallbackMaxY = isWaterRegion ? 75 : landMaxY
+    const soulMinY =
+      soulY !== undefined && !Number.isNaN(soulY) ? Math.round(soulY) - 1 : soulFallbackMinY
+    const soulMaxY =
+      soulY !== undefined && !Number.isNaN(soulY) ? Math.round(soulY) + 2 : soulFallbackMaxY
+
+    let soulFlags: string
+    if (useGreetingsAndFarewells) {
+      if (greetingSize === 'chat') {
+        soulFlags = `      greeting: §2Entering §7Soul of ${region.name}\n      farewell: §6Leaving §7Soul of ${region.name}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      } else {
+        let greetingLine1: string
+        let greetingLine2: string
+        let farewellLine1: string
+        let farewellLine2: string
+
+        if (greetingSize === 'large') {
+          greetingLine1 = `§fSoul of ${region.name}`
+          greetingLine2 = `§f`
+          farewellLine1 = `§fLeaving Soul of ${region.name}`
+          farewellLine2 = `§f`
+        } else {
+          greetingLine1 = `§f`
+          greetingLine2 = `§fSoul of ${region.name}`
+          farewellLine1 = `§f`
+          farewellLine2 = `§fLeaving Soul of ${region.name}`
+        }
+
+        soulFlags = `      greeting-title: |-\n        ${greetingLine1}\n        ${greetingLine2}\n      farewell-title: |-\n        ${farewellLine1}\n        ${farewellLine2}\n      build: deny\n      interact: allow\n      creeper-explosion: deny\n      other-explosion: deny\n      tnt: deny`
+      }
+    } else {
+      soulFlags = `{build: deny, interact: allow, creeper-explosion: deny, other-explosion: deny, tnt: deny}`
+    }
+
+    yaml += `\n\n  ${soulRegionName}:
+    type: cuboid
+    min: {x: ${Math.round(regionCenter.x - Math.floor(soulSize / 2))}, y: ${soulMinY}, z: ${Math.round(regionCenter.z - Math.floor(soulSize / 2))}}
+    max: {x: ${Math.round(regionCenter.x + Math.floor(soulSize / 2))}, y: ${soulMaxY}, z: ${Math.round(regionCenter.z + Math.floor(soulSize / 2))}}
+    members: {}
+    owners: {}
+    flags:${useGreetingsAndFarewells ? '\n' + soulFlags : ' ' + soulFlags}
     priority: 10`
   }
 

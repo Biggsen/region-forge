@@ -28,6 +28,7 @@ const stats: RegionsYamlPreambleStats = {
   structureCount: 0,
   heartCount: 0,
   nerveCount: 0,
+  soulCount: 0,
   spawn: false,
 }
 
@@ -46,6 +47,7 @@ function bodyFor(regions: Region[], includeVillages = false): string {
   return buildRegionsYamlBody(
     regions,
     includeVillages,
+    false,
     false,
     false,
     false,
@@ -264,6 +266,7 @@ describe('yaml release history', () => {
       false,
       false,
       false,
+      false,
       null,
       'overworld',
       'Charidh',
@@ -287,6 +290,7 @@ describe('yaml release history', () => {
     const result = await exportRegionsYAML(
       [region()],
       () => {},
+      false,
       false,
       false,
       false,
@@ -318,6 +322,7 @@ describe('yaml release history', () => {
     const result = await exportRegionsYAML(
       [region()],
       () => {},
+      false,
       false,
       false,
       false,
@@ -431,6 +436,7 @@ describe('yaml release history', () => {
       false,
       false,
       false,
+      false,
       null,
       'overworld',
       'Charidh',
@@ -465,6 +471,21 @@ describe('yaml release history', () => {
     writeReleaseState({ projectId: 'local-id', releases: [verifiedRelease(2, 'e'.repeat(64))] })
     clearSavedData()
     expect(readReleaseState()).toBeNull()
+  })
+
+  it('writes the soul count on the regions.yml preamble', () => {
+    const preamble = buildRegionForgeYamlPreamble({
+      generation: 1,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      description: '',
+      worldName: 'Charidh',
+      projectId: 'project',
+      dimension: 'overworld',
+      checksum: 'a'.repeat(64),
+      appVersion: REGION_FORGE_APP_VERSION,
+      stats: { ...stats, soulCount: 3 },
+    })
+    expect(preamble).toContain('hearts=0; nerves=0; souls=3; spawn=false')
   })
 
   it('does not write or download when the description prompt is cancelled', async () => {

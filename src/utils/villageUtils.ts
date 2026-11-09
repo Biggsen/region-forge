@@ -363,6 +363,16 @@ export function parseRegionNerveImportRows(csvContent: string): VillageData[] {
   )
 }
 
+/** `structure` column value for region soul CSV export/import (seed-map style). */
+export const REGION_SOUL_CSV_STRUCTURE = 'region_soul'
+
+/** Parsed CSV rows whose structure column is {@link REGION_SOUL_CSV_STRUCTURE} (case-insensitive). */
+export function parseRegionSoulImportRows(csvContent: string): VillageData[] {
+  return parseVillageCSV(csvContent).filter(
+    r => r.type.trim().toLowerCase() === REGION_SOUL_CSV_STRUCTURE
+  )
+}
+
 const REGION_HEART_CSV_BOUNDS_PADDING = 256
 
 function sanitizeVillageFormatCsvField(value: string): string {
@@ -461,6 +471,54 @@ export function buildRegionNervesVillageFormatCSV(regions: Region[], seed: strin
     `#Z2;${z2}`,
     'seed;structure;x;z;details',
     ...rows.map(r => `${seedStr};${REGION_NERVE_CSV_STRUCTURE};${r.x};${r.z};${r.details}`)
+  ]
+
+  return lines.join('\n')
+}
+
+/**
+ * Same layout as {@link buildRegionHeartsVillageFormatCSV} but for `region_soul` rows.
+ * Returns `null` if no regions have a soul set.
+ */
+export function buildRegionSoulsVillageFormatCSV(regions: Region[], seed: string | undefined): string | null {
+  const withSouls = regions.filter(r => r.soulPoint != null && r.points.length >= 3)
+  if (withSouls.length === 0) return null
+
+  const seedStr = sanitizeVillageFormatCsvField(
+    seed != null && seed.trim() !== '' ? seed.trim() : '0'
+  )
+
+  type Row = { x: number; z: number; details: string; sortName: string }
+  const rows: Row[] = withSouls.map(r => {
+    const sp = r.soulPoint!
+    return {
+      x: Math.round(sp.x),
+      z: Math.round(sp.z),
+      details: sanitizeVillageFormatCsvField(r.name),
+      sortName: r.name
+    }
+  })
+
+  const minX = Math.min(...rows.map(r => r.x))
+  const maxX = Math.max(...rows.map(r => r.x))
+  const minZ = Math.min(...rows.map(r => r.z))
+  const maxZ = Math.max(...rows.map(r => r.z))
+  const p = REGION_HEART_CSV_BOUNDS_PADDING
+  const x1 = minX - p
+  const z1 = minZ - p
+  const x2 = maxX + p
+  const z2 = maxZ + p
+
+  rows.sort((a, b) => a.sortName.localeCompare(b.sortName))
+
+  const lines: string[] = [
+    'Sep=;',
+    `#X1;${x1}`,
+    `#Z1;${z1}`,
+    `#X2;${x2}`,
+    `#Z2;${z2}`,
+    'seed;structure;x;z;details',
+    ...rows.map(r => `${seedStr};${REGION_SOUL_CSV_STRUCTURE};${r.x};${r.z};${r.details}`)
   ]
 
   return lines.join('\n')
@@ -615,7 +673,7 @@ export type TakenRegionSlugExclude = {
   subregionId?: string
 }
 
-/** Ids that share regions.yml: region names, heart/nerve keys, and subregion slugs. */
+/** Ids that share regions.yml: region names, heart/nerve/soul keys, and subregion slugs. */
 export function collectTakenRegionSlugs(regions: Region[], exclude?: TakenRegionSlugExclude): Set<string> {
   const taken = new Set<string>()
   for (const region of regions) {
@@ -623,6 +681,7 @@ export function collectTakenRegionSlugs(regions: Region[], exclude?: TakenRegion
     if (regionSlug) taken.add(regionSlug)
     if (region.centerPoint != null && regionSlug) taken.add(`heart_of_${regionSlug}`)
     if (region.nervePoint != null && regionSlug) taken.add(`nerve_of_${regionSlug}`)
+    if (region.soulPoint != null && regionSlug) taken.add(`soul_of_${regionSlug}`)
     for (const sub of region.subregions ?? []) {
       if (exclude?.structureType && sub.type === 'structure' && sub.structureType === exclude.structureType) continue
       if (exclude?.subregionId && sub.id === exclude.subregionId) continue
@@ -635,7 +694,7 @@ export function collectTakenRegionSlugs(regions: Region[], exclude?: TakenRegion
 
 export type DuplicateRegionIdMember = {
   slug: string
-  kind: 'region' | 'heart' | 'nerve' | 'village' | 'structure'
+  kind: 'region' | 'heart' | 'nerve' | 'soul' | 'village' | 'structure'
   label: string
   regionId: string
   regionName: string
@@ -648,7 +707,7 @@ export type DuplicateRegionIdGroup = {
   members: DuplicateRegionIdMember[]
 }
 
-/** Groups of exported ids used more than once across regions, hearts, nerves, villages, and structures. */
+/** Groups of exported ids used more than once across regions, hearts, nerves, souls, villages, and structures. */
 export function findDuplicateRegionIds(regions: Region[]): DuplicateRegionIdGroup[] {
   const bySlug = new Map<string, DuplicateRegionIdMember[]>()
   const add = (member: DuplicateRegionIdMember) => {
@@ -680,6 +739,15 @@ export function findDuplicateRegionIds(regions: Region[]): DuplicateRegionIdGrou
         slug: `nerve_of_${regionSlug}`,
         kind: 'nerve',
         label: `Nerve of ${region.name}`,
+        regionId: region.id,
+        regionName: region.name,
+      })
+    }
+    if (region.soulPoint != null && regionSlug) {
+      add({
+        slug: `soul_of_${regionSlug}`,
+        kind: 'soul',
+        label: `Soul of ${region.name}`,
         regionId: region.id,
         regionName: region.name,
       })

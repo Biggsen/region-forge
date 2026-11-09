@@ -194,9 +194,14 @@ export function RegionOverlay({
         const isHighlighted = highlightMode.highlightAll
         const showChallengeLevels = highlightMode.showChallengeLevels
         const isDisabled = region.disabled === true
-        if (highlightMode.showCenterPoints) {
+        if (highlightMode.showHearts) {
           drawCenterPoint(ctx, region, mapState, img, isSelected)
+        }
+        if (highlightMode.showNerves) {
           drawNervePoint(ctx, region, mapState, img, isSelected)
+        }
+        if (highlightMode.showSouls) {
+          drawSoulPoint(ctx, region, mapState, img, isSelected)
         }
         drawRegion(ctx, region, mapState, img, isSelected, false, isEditing, isHighlighted, showChallengeLevels, isMoving, isHovered, isDisabled, highlightMode.showNames, regionFillOpacity, false)
         if (isSplitting) {
@@ -271,9 +276,14 @@ export function RegionOverlay({
 
     if (drawingRegion && drawingRegion.points.length > 0) {
       drawRegion(ctx, drawingRegion, mapState, img, false, true, false, false, false, false, false, false, highlightMode.showNames, regionFillOpacity, false)
-      if (highlightMode.showCenterPoints) {
+      if (highlightMode.showHearts) {
         drawCenterPoint(ctx, drawingRegion, mapState, img, false)
+      }
+      if (highlightMode.showNerves) {
         drawNervePoint(ctx, drawingRegion, mapState, img, false)
+      }
+      if (highlightMode.showSouls) {
+        drawSoulPoint(ctx, drawingRegion, mapState, img, false)
       }
     }
 
@@ -574,6 +584,54 @@ export function RegionOverlay({
       const boxWidth = textWidth + padding * 2
       const boxHeight = 16
       const labelY = canvasPos.y + markerSize + 20
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+      ctx.fillRect(canvasPos.x - boxWidth / 2, labelY - boxHeight / 2, boxWidth, boxHeight)
+
+      ctx.fillStyle = 'white'
+      ctx.fillText(label, canvasPos.x, labelY)
+    }
+  }
+
+  const drawSoulPoint = (
+    ctx: CanvasRenderingContext2D,
+    region: Region,
+    mapState: MapState,
+    img: HTMLImageElement,
+    isSelected: boolean = false
+  ) => {
+    if (!region.soulPoint) return
+
+    const pixelPos = worldToPixel(region.soulPoint.x, region.soulPoint.z, img.width, img.height, mapState.originOffset)
+    const canvasPos = imageToCanvas(pixelPos.x, pixelPos.y, mapState.scale, mapState.offsetX, mapState.offsetY)
+
+    const markerSize = isSelected ? 6 : 4
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+    ctx.beginPath()
+    ctx.arc(canvasPos.x, canvasPos.y, markerSize + 1, 0, 2 * Math.PI)
+    ctx.fill()
+
+    ctx.fillStyle = 'rgba(230, 190, 70, 1)'
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'
+    ctx.lineWidth = 1
+
+    ctx.beginPath()
+    ctx.arc(canvasPos.x, canvasPos.y, markerSize, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.stroke()
+
+    if (isSelected) {
+      ctx.font = '9px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      const label = 'Region Soul'
+      const textMetrics = ctx.measureText(label)
+      const textWidth = textMetrics.width
+      const padding = 6
+      const boxWidth = textWidth + padding * 2
+      const boxHeight = 16
+      const labelY = canvasPos.y + markerSize + 40
 
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
       ctx.fillRect(canvasPos.x - boxWidth / 2, labelY - boxHeight / 2, boxWidth, boxHeight)

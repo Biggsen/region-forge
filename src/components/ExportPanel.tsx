@@ -15,6 +15,7 @@ export function ExportPanel() {
   const [includeStructures, setIncludeStructures] = useState(true)
   const [includeHeartRegions, setIncludeHeartRegions] = useState(false)
   const [includeNerveRegions, setIncludeNerveRegions] = useState(false)
+  const [includeSoulRegions, setIncludeSoulRegions] = useState(false)
   const [includeSpawnRegion, setIncludeSpawnRegion] = useState(true)
   const [useModernWorldHeight, setUseModernWorldHeight] = useState(true)
   const [useGreetingsAndFarewells, setUseGreetingsAndFarewells] = useState(false)
@@ -66,6 +67,7 @@ export function ExportPanel() {
     setIncludeStructures(saved.includeStructures ?? true)
     setIncludeHeartRegions(saved.includeHeartRegions)
     setIncludeNerveRegions(saved.includeNerveRegions ?? false)
+    setIncludeSoulRegions(saved.includeSoulRegions ?? false)
     setIncludeSpawnRegion(saved.includeSpawnRegion)
     setUseModernWorldHeight(saved.useModernWorldHeight)
     setUseGreetingsAndFarewells(saved.useGreetingsAndFarewells)
@@ -106,6 +108,7 @@ export function ExportPanel() {
         includeStructures,
         includeHeartRegions,
         includeNerveRegions,
+        includeSoulRegions,
         includeSpawnRegion,
         useModernWorldHeight,
         useGreetingsAndFarewells,
@@ -120,6 +123,7 @@ export function ExportPanel() {
     includeStructures,
     includeHeartRegions,
     includeNerveRegions,
+    includeSoulRegions,
     includeSpawnRegion,
     useModernWorldHeight,
     useGreetingsAndFarewells,
@@ -146,6 +150,7 @@ export function ExportPanel() {
       includeStructures,
       includeHeartRegions,
       includeNerveRegions,
+      includeSoulRegions,
       finalIncludeSpawnRegion,
       spawnData,
       dimension,
@@ -169,6 +174,7 @@ export function ExportPanel() {
     includeStructures,
     includeHeartRegions,
     includeNerveRegions,
+    includeSoulRegions,
     includeSpawnRegion,
     spawn.spawnState,
     dimension,
@@ -194,6 +200,7 @@ export function ExportPanel() {
         includeStructures,
         includeHeartRegions,
         includeNerveRegions,
+        includeSoulRegions,
         finalIncludeSpawnRegion,
         spawnData,
         dimension,
@@ -225,6 +232,7 @@ export function ExportPanel() {
         includeStructures,
         includeHeartRegions,
         includeNerveRegions,
+        includeSoulRegions,
         finalIncludeSpawnRegion,
         spawnData,
         dimension,
@@ -250,6 +258,7 @@ export function ExportPanel() {
       includeStructures,
       includeHeartRegions,
       includeNerveRegions,
+      includeSoulRegions,
       finalIncludeSpawnRegion,
       toast.showToast,
       mapState.mapState,
@@ -492,6 +501,27 @@ export function ExportPanel() {
                 {dimension !== 'overworld' && (
                   <p className="text-xs text-gray-400 ml-7">
                     Nerves are overworld-only; this dimension’s export will not include nerve regions.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="includeSoulRegions"
+                    checked={includeSoulRegions}
+                    onChange={(e) => setIncludeSoulRegions(e.target.checked)}
+                    title="Soul cuboids and regions-meta soul rows are emitted only for overworld exports."
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gunmetal rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <label htmlFor="includeSoulRegions" className="ml-2 text-white">
+                    Include Soul of Regions
+                  </label>
+                </div>
+                {dimension !== 'overworld' && (
+                  <p className="text-xs text-gray-400 ml-7">
+                    Souls are overworld-only; this dimension’s export will not include soul regions.
                   </p>
                 )}
               </div>

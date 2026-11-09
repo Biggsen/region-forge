@@ -140,7 +140,8 @@ export function useProjectImport({
         saveExportSettings({
           ...(sanitized as ExportSettings),
           excludeDescriptionsFromRegionsMeta: s.excludeDescriptionsFromRegionsMeta ?? false,
-          includeNerveRegions: s.includeNerveRegions ?? false
+          includeNerveRegions: s.includeNerveRegions ?? false,
+          includeSoulRegions: s.includeSoulRegions ?? false
         })
         window.dispatchEvent(new Event('exportSettingsUpdated'))
       }

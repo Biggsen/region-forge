@@ -13,6 +13,7 @@ export interface ExportSettings {
   includeStructures: boolean
   includeHeartRegions: boolean
   includeNerveRegions: boolean
+  includeSoulRegions: boolean
   includeSpawnRegion: boolean
   useModernWorldHeight: boolean
   useGreetingsAndFarewells: boolean
@@ -36,6 +37,7 @@ export type AdvancedPanelSectionsState = {
   isImportExpanded: boolean
   isRegionSpecificExpanded: boolean
   isRegionNervesExpanded: boolean
+  isRegionSoulsExpanded: boolean
   isRegionDescriptionExpanded: boolean
   isBiomeDataExpanded: boolean
   isWorldBiomeDataExpanded: boolean
@@ -51,6 +53,7 @@ export function migrateRegionsForLegacyStructureIds(regions: Region[]): Region[]
   return regions.map(region => ({
     ...region,
     nervePoint: region.nervePoint ?? null,
+    soulPoint: region.soulPoint ?? null,
     subregions: region.subregions?.map(sub => {
       if (sub.type !== 'structure') return sub
       const st = sub.structureType as string | undefined
@@ -341,6 +344,9 @@ export function loadExportSettings(): ExportSettings | null {
     if (parsed.includeNerveRegions === undefined) {
       parsed.includeNerveRegions = false
     }
+    if (parsed.includeSoulRegions === undefined) {
+      parsed.includeSoulRegions = false
+    }
     return parsed as ExportSettings
   } catch (error) {
     console.error('Failed to load export settings:', error)
@@ -361,7 +367,9 @@ export function loadHighlightMode(defaultMode: HighlightMode): HighlightMode {
     const saved = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_MODE)
     if (!saved) return defaultMode
 
-    const parsed = JSON.parse(saved) as Partial<HighlightMode>
+    const parsed = JSON.parse(saved) as Partial<HighlightMode> & { showCenterPoints?: boolean }
+    const legacyAnchors = typeof parsed.showCenterPoints === 'boolean' ? parsed.showCenterPoints : undefined
+    delete parsed.showCenterPoints
     const structureTypes = Object.values(STRUCTURE_TYPES) as StructureType[]
     const visibleStructureTypes: Partial<Record<StructureType, boolean>> = { ...(defaultMode.visibleStructureTypes || {}) }
     for (const structureType of structureTypes) {
@@ -392,6 +400,9 @@ export function loadHighlightMode(defaultMode: HighlightMode): HighlightMode {
     return {
       ...defaultMode,
       ...parsed,
+      showHearts: typeof parsed.showHearts === 'boolean' ? parsed.showHearts : (legacyAnchors ?? defaultMode.showHearts),
+      showNerves: typeof parsed.showNerves === 'boolean' ? parsed.showNerves : (legacyAnchors ?? defaultMode.showNerves),
+      showSouls: typeof parsed.showSouls === 'boolean' ? parsed.showSouls : (legacyAnchors ?? defaultMode.showSouls),
       visibleStructureTypes,
       highlightedStructureType,
     }
@@ -445,6 +456,7 @@ export function loadAdvancedPanelSectionsState(defaultState: AdvancedPanelSectio
       isImportExpanded: typeof parsed.isImportExpanded === 'boolean' ? parsed.isImportExpanded : defaultState.isImportExpanded,
       isRegionSpecificExpanded: typeof parsed.isRegionSpecificExpanded === 'boolean' ? parsed.isRegionSpecificExpanded : defaultState.isRegionSpecificExpanded,
       isRegionNervesExpanded: typeof parsed.isRegionNervesExpanded === 'boolean' ? parsed.isRegionNervesExpanded : defaultState.isRegionNervesExpanded,
+      isRegionSoulsExpanded: typeof parsed.isRegionSoulsExpanded === 'boolean' ? parsed.isRegionSoulsExpanded : defaultState.isRegionSoulsExpanded,
       isRegionDescriptionExpanded: typeof parsed.isRegionDescriptionExpanded === 'boolean' ? parsed.isRegionDescriptionExpanded : defaultState.isRegionDescriptionExpanded,
       isBiomeDataExpanded: typeof parsed.isBiomeDataExpanded === 'boolean' ? parsed.isBiomeDataExpanded : defaultState.isBiomeDataExpanded,
       isWorldBiomeDataExpanded: typeof parsed.isWorldBiomeDataExpanded === 'boolean' ? parsed.isWorldBiomeDataExpanded : defaultState.isWorldBiomeDataExpanded,

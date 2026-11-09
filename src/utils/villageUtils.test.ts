@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, findDuplicateRegionIds, subregionRenameRejected } from './villageUtils'
+import { getJunglePyramidCuboid, getIglooCuboid, getTrailRuinsCuboid, getBuriedTreasureCuboid, generateSubregionYAML, nameToRegionId, parseVillageCSV, createStructureSubregion, buildManualStructureSubregion, ANCIENT_CITY_IMPORT_Y, OCEAN_MONUMENT_IMPORT_Y, buildRegionHeartsVillageFormatCSV, buildRegionNervesVillageFormatCSV, buildRegionSoulsVillageFormatCSV, REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, REGION_SOUL_CSV_STRUCTURE, parseRegionHeartImportRows, parseRegionNerveImportRows, parseRegionSoulImportRows, allocateUniqueDisplayName, collectTakenRegionSlugs, findDuplicateRegionIds, subregionRenameRejected } from './villageUtils'
 import { STRUCTURE_TYPES } from '../types'
 
 describe('getIglooCuboid', () => {
@@ -239,6 +239,75 @@ seed;structure;x;y;z;details
   })
 })
 
+describe('buildRegionSoulsVillageFormatCSV', () => {
+  const triangle = [
+    { x: 0, z: 0 },
+    { x: 10, z: 0 },
+    { x: 5, z: 10 }
+  ]
+
+  it('returns null when no souls', () => {
+    expect(buildRegionSoulsVillageFormatCSV([], '1')).toBeNull()
+    expect(
+      buildRegionSoulsVillageFormatCSV(
+        [{ id: 'a', name: 'R', points: triangle, soulPoint: null }],
+        '1'
+      )
+    ).toBeNull()
+  })
+
+  it('emits region_soul rows and round-trips through parseVillageCSV', () => {
+    const regions = [
+      { id: '1', name: 'Mossbound', points: triangle, soulPoint: { x: -100, z: 50 } },
+      { id: '2', name: 'Alpha Peak', points: triangle, soulPoint: { x: 100, z: -200 } }
+    ]
+    const csv = buildRegionSoulsVillageFormatCSV(regions, '1203994305')!
+    expect(linesOf(csv)[5]).toBe('seed;structure;x;z;details')
+    expect(csv).toContain(`1203994305;${REGION_SOUL_CSV_STRUCTURE};100;-200;Alpha Peak`)
+    expect(csv).toContain(`1203994305;${REGION_SOUL_CSV_STRUCTURE};-100;50;Mossbound`)
+    const parsed = parseVillageCSV(csv)
+    expect(parsed).toHaveLength(2)
+    expect(parsed.every(r => r.type === REGION_SOUL_CSV_STRUCTURE)).toBe(true)
+  })
+
+  it('uses 0 as seed when unset', () => {
+    const csv = buildRegionSoulsVillageFormatCSV(
+      [{ id: '1', name: 'Only', points: triangle, soulPoint: { x: 0, z: 0 } }],
+      undefined
+    )!
+    expect(csv).toContain(`0;${REGION_SOUL_CSV_STRUCTURE};0;0;Only`)
+  })
+})
+
+describe('parseRegionSoulImportRows', () => {
+  it('keeps only region_soul rows', () => {
+    const csv = `Sep=;
+seed;structure;x;y;z;details
+1;village;1;64;3;a
+1203994305;region_soul;-1234;69;1915;Aureas
+`
+    const rows = parseRegionSoulImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      x: -1234,
+      y: 69,
+      z: 1915,
+      type: 'region_soul',
+      details: 'Aureas'
+    })
+  })
+
+  it('is case-insensitive on structure column', () => {
+    const csv = `seed;structure;x;z;details
+1;Region_Soul;10;20;ignored
+`
+    const rows = parseRegionSoulImportRows(csv)
+    expect(rows).toHaveLength(1)
+    expect(rows[0].x).toBe(10)
+    expect(rows[0].z).toBe(20)
+  })
+})
+
 describe('createStructureSubregion', () => {
   it('uses fixed Y for ancient city imports; ignores CSV y', () => {
     const sub = createStructureSubregion(
@@ -368,6 +437,7 @@ describe('collectTakenRegionSlugs', () => {
           points: triangle,
           centerPoint: { x: 1, z: 2 },
           nervePoint: { x: 3, z: 4 },
+          soulPoint: { x: 5, z: 6 },
           subregions: [
             {
               id: 'v1',
@@ -396,6 +466,7 @@ describe('collectTakenRegionSlugs', () => {
     expect(taken.has('mossbound')).toBe(true)
     expect(taken.has('heart_of_mossbound')).toBe(true)
     expect(taken.has('nerve_of_mossbound')).toBe(true)
+    expect(taken.has('soul_of_mossbound')).toBe(true)
   })
 })
 
@@ -452,6 +523,30 @@ describe('findDuplicateRegionIds', () => {
     expect(bySlug.ancient_tomb).toEqual(['Ancient Tomb', 'Ancient  Tomb'])
     expect(bySlug.heart_of_mossbound).toEqual(['Heart of Mossbound', 'Heart of Mossbound'])
     expect(bySlug.salt_treasury).toBeUndefined()
+  })
+
+  it('groups a structure that shares an exported id with a soul', () => {
+    const groups = findDuplicateRegionIds([
+      {
+        id: 'r1',
+        name: 'Mossbound',
+        points: triangle,
+        soulPoint: { x: 5, z: 6 },
+        subregions: [
+          {
+            id: 's1',
+            name: 'Soul of Mossbound',
+            x: 5,
+            z: 6,
+            radius: 64,
+            type: 'structure',
+            structureType: STRUCTURE_TYPES.SHIPWRECK,
+          },
+        ],
+      },
+    ])
+    const bySlug = Object.fromEntries(groups.map(group => [group.slug, group.members.map(member => member.label)]))
+    expect(bySlug.soul_of_mossbound).toEqual(['Soul of Mossbound', 'Soul of Mossbound'])
   })
 })
 

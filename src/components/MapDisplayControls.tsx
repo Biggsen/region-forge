@@ -7,7 +7,9 @@ interface MapDisplayControlsProps {
     highlightAll: boolean
     showRegions: boolean
     showVillages: boolean
-    showCenterPoints: boolean
+    showHearts: boolean
+    showNerves: boolean
+    showSouls: boolean
     showChallengeLevels: boolean
     showGrid: boolean
     showNames: boolean
@@ -19,7 +21,9 @@ interface MapDisplayControlsProps {
   toggleShowRegions: () => void
   toggleShowVillages: () => void
   toggleShowOrphanedVillages: () => void
-  toggleShowCenterPoints: () => void
+  toggleShowHearts: () => void
+  toggleShowNerves: () => void
+  toggleShowSouls: () => void
   toggleShowChallengeLevels: () => void
   toggleShowGrid: () => void
   toggleShowNames: () => void
@@ -34,7 +38,9 @@ export function MapDisplayControls({
   toggleShowRegions,
   toggleShowVillages,
   toggleShowOrphanedVillages,
-  toggleShowCenterPoints,
+  toggleShowHearts,
+  toggleShowNerves,
+  toggleShowSouls,
   toggleShowChallengeLevels,
   toggleShowGrid,
   toggleShowNames
@@ -131,11 +137,31 @@ export function MapDisplayControls({
           
           {showAdvanced && (
             <ToggleButton
-              isActive={highlightMode.showCenterPoints}
-              onClick={toggleShowCenterPoints}
-              title="Show/hide region hearts and nerves on map"
+              isActive={highlightMode.showHearts}
+              onClick={toggleShowHearts}
+              title="Show/hide region hearts on map"
             >
-              Hearts / Nerves
+              Hearts
+            </ToggleButton>
+          )}
+
+          {showAdvanced && (
+            <ToggleButton
+              isActive={highlightMode.showNerves}
+              onClick={toggleShowNerves}
+              title="Show/hide region nerves on map"
+            >
+              Nerves
+            </ToggleButton>
+          )}
+
+          {showAdvanced && (
+            <ToggleButton
+              isActive={highlightMode.showSouls}
+              onClick={toggleShowSouls}
+              title="Show/hide region souls on map"
+            >
+              Souls
             </ToggleButton>
           )}
           

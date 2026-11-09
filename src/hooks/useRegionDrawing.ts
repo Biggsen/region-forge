@@ -19,6 +19,7 @@ export function useRegionDrawing({ onAddRegion, onExitEditMode }: UseRegionDrawi
       points: [],
       centerPoint: null,
       nervePoint: null,
+      soulPoint: null,
       challengeLevel: 'easy',
       hasSpawn: false,
       isWater: false
@@ -43,6 +44,7 @@ export function useRegionDrawing({ onAddRegion, onExitEditMode }: UseRegionDrawi
       points,
       centerPoint: drawingRegion.centerPoint ?? null,
       nervePoint: drawingRegion.nervePoint ?? null,
+      soulPoint: drawingRegion.soulPoint ?? null,
       challengeLevel: drawingRegion.challengeLevel ?? 'easy',
       hasSpawn: drawingRegion.hasSpawn ?? false,
       isWater: drawingRegion.isWater ?? false

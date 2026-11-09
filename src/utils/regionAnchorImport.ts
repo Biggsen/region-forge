@@ -3,6 +3,7 @@ export type RegionAnchorImportResult = {
   orphaned: number
   heartRows?: number
   nerveRows?: number
+  soulRows?: number
 }
 
 type ToastType = 'success' | 'error' | 'warning'
@@ -11,7 +12,7 @@ export async function runRegionAnchorCsvImport(
   file: File,
   importFn: (text: string) => RegionAnchorImportResult,
   options: {
-    rowKey: 'heartRows' | 'nerveRows'
+    rowKey: 'heartRows' | 'nerveRows' | 'soulRows'
     noRowsToast: string
     failureMessage: string
   },

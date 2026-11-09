@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG } from './regionAnchorConfig'
-import { REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE } from '../../utils/villageUtils'
+import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG, SOUL_ANCHOR_CONFIG } from './regionAnchorConfig'
+import { REGION_HEART_CSV_STRUCTURE, REGION_NERVE_CSV_STRUCTURE, REGION_SOUL_CSV_STRUCTURE } from '../../utils/villageUtils'
 import type { Region } from '../../types'
 
 const REQUIRED_STRING_KEYS = [
@@ -54,15 +54,26 @@ describe('regionAnchorConfig', () => {
     expect(NERVE_ANCHOR_CONFIG.importDescription).toContain(REGION_NERVE_CSV_STRUCTURE)
   })
 
+  it('soul config uses soulPoint and region_soul CSV structure', () => {
+    assertConfigShape(SOUL_ANCHOR_CONFIG)
+    expect(SOUL_ANCHOR_CONFIG.kind).toBe('soul')
+    expect(SOUL_ANCHOR_CONFIG.anchorField).toBe('soulPoint')
+    expect(SOUL_ANCHOR_CONFIG.csvStructure).toBe(REGION_SOUL_CSV_STRUCTURE)
+    expect(SOUL_ANCHOR_CONFIG.importRowKey).toBe('soulRows')
+    expect(SOUL_ANCHOR_CONFIG.importDescription).toContain(REGION_SOUL_CSV_STRUCTURE)
+  })
+
   it('getAnchor field matches Region type keys', () => {
     const region = {
       id: 'r1',
       name: 'Test',
       points: [],
       centerPoint: { x: 1, z: 2 },
-      nervePoint: { x: 3, z: 4 }
+      nervePoint: { x: 3, z: 4 },
+      soulPoint: { x: 5, z: 6 }
     } as Region
     expect(region[HEART_ANCHOR_CONFIG.anchorField]).toEqual({ x: 1, z: 2 })
     expect(region[NERVE_ANCHOR_CONFIG.anchorField]).toEqual({ x: 3, z: 4 })
+    expect(region[SOUL_ANCHOR_CONFIG.anchorField]).toEqual({ x: 5, z: 6 })
   })
 })

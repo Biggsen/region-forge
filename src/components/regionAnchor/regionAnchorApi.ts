@@ -3,7 +3,8 @@ import type { useRegions } from '../../hooks/useRegions'
 import type { Region } from '../../types'
 import {
   buildRegionHeartsVillageFormatCSV,
-  buildRegionNervesVillageFormatCSV
+  buildRegionNervesVillageFormatCSV,
+  buildRegionSoulsVillageFormatCSV
 } from '../../utils/villageUtils'
 import type { RegionAnchorImportResult } from '../../utils/regionAnchorImport'
 import type { RegionAnchorKind } from './regionAnchorConfig'
@@ -44,18 +45,34 @@ export function getRegionAnchorApi(
       }
     }
   }
+  if (kind === 'nerve') {
+    return {
+      importFromCsv: regions.importNervesFromCSV,
+      updateY: regions.updateRegionNerveY,
+      updateX: regions.updateRegionNerveX,
+      updateZ: regions.updateRegionNerveZ,
+      clearAnchor: regionId => regions.setCustomNervePoint(regionId, null),
+      buildExportCsv: buildRegionNervesVillageFormatCSV,
+      mapPlacement: {
+        isPlacing: mapCanvas.isSettingNervePoint,
+        placingRegionId: mapCanvas.nervePointRegionId,
+        startPlacing: mapCanvas.startSettingNervePoint,
+        stopPlacing: mapCanvas.stopSettingNervePoint
+      }
+    }
+  }
   return {
-    importFromCsv: regions.importNervesFromCSV,
-    updateY: regions.updateRegionNerveY,
-    updateX: regions.updateRegionNerveX,
-    updateZ: regions.updateRegionNerveZ,
-    clearAnchor: regionId => regions.setCustomNervePoint(regionId, null),
-    buildExportCsv: buildRegionNervesVillageFormatCSV,
+    importFromCsv: regions.importSoulsFromCSV,
+    updateY: regions.updateRegionSoulY,
+    updateX: regions.updateRegionSoulX,
+    updateZ: regions.updateRegionSoulZ,
+    clearAnchor: regionId => regions.setCustomSoulPoint(regionId, null),
+    buildExportCsv: buildRegionSoulsVillageFormatCSV,
     mapPlacement: {
-      isPlacing: mapCanvas.isSettingNervePoint,
-      placingRegionId: mapCanvas.nervePointRegionId,
-      startPlacing: mapCanvas.startSettingNervePoint,
-      stopPlacing: mapCanvas.stopSettingNervePoint
+      isPlacing: mapCanvas.isSettingSoulPoint,
+      placingRegionId: mapCanvas.soulPointRegionId,
+      startPlacing: mapCanvas.startSettingSoulPoint,
+      stopPlacing: mapCanvas.stopSettingSoulPoint
     }
   }
 }

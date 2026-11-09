@@ -20,7 +20,7 @@ import { pickRandomThemePairs, getAValues, getBValues } from '../utils/regionThe
 import { copySubregionTpToClipboard } from '../utils/anchorClipboardUtils'
 import { findDuplicateRegionIds, findParentRegion } from '../utils/villageUtils'
 import { RegionAnchorSection } from './regionAnchor/RegionAnchorSection'
-import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG } from './regionAnchor/regionAnchorConfig'
+import { HEART_ANCHOR_CONFIG, NERVE_ANCHOR_CONFIG, SOUL_ANCHOR_CONFIG } from './regionAnchor/regionAnchorConfig'
 import { formatRegionLore } from '../utils/loreInstructionsUtils'
 import { MinecraftItemPicker } from './MinecraftItemPicker'
 import { ClearDataModal } from './ClearDataModal'
@@ -55,6 +55,7 @@ const DEFAULT_ADVANCED_PANEL_SECTIONS = {
   isImportExpanded: false,
   isRegionSpecificExpanded: false,
   isRegionNervesExpanded: false,
+  isRegionSoulsExpanded: false,
   isRegionDescriptionExpanded: false,
   isBiomeDataExpanded: false,
   isWorldBiomeDataExpanded: false,
@@ -102,6 +103,7 @@ export function AdvancedPanel() {
   const [isImportExpanded, setIsImportExpanded] = useState(savedSectionState.isImportExpanded)
   const [isRegionSpecificExpanded, setIsRegionSpecificExpanded] = useState(savedSectionState.isRegionSpecificExpanded)
   const [isRegionNervesExpanded, setIsRegionNervesExpanded] = useState(savedSectionState.isRegionNervesExpanded)
+  const [isRegionSoulsExpanded, setIsRegionSoulsExpanded] = useState(savedSectionState.isRegionSoulsExpanded)
   const [isRegionDescriptionExpanded, setIsRegionDescriptionExpanded] = useState(savedSectionState.isRegionDescriptionExpanded)
   const [isBiomeDataExpanded, setIsBiomeDataExpanded] = useState(savedSectionState.isBiomeDataExpanded)
   const [isWorldBiomeDataExpanded, setIsWorldBiomeDataExpanded] = useState(savedSectionState.isWorldBiomeDataExpanded)
@@ -131,6 +133,7 @@ export function AdvancedPanel() {
       isImportExpanded,
       isRegionSpecificExpanded,
       isRegionNervesExpanded,
+      isRegionSoulsExpanded,
       isRegionDescriptionExpanded,
       isBiomeDataExpanded,
       isWorldBiomeDataExpanded,
@@ -147,6 +150,7 @@ export function AdvancedPanel() {
     isImportExpanded,
     isRegionSpecificExpanded,
     isRegionNervesExpanded,
+    isRegionSoulsExpanded,
     isRegionDescriptionExpanded,
     isBiomeDataExpanded,
     isWorldBiomeDataExpanded,
@@ -353,6 +357,7 @@ export function AdvancedPanel() {
     if (member.kind === 'village') return 'Village'
     if (member.kind === 'heart') return 'Heart'
     if (member.kind === 'nerve') return 'Nerve'
+    if (member.kind === 'soul') return 'Soul'
     return 'Region'
   }
 
@@ -2194,6 +2199,13 @@ export function AdvancedPanel() {
           config={NERVE_ANCHOR_CONFIG}
           expanded={isRegionNervesExpanded}
           onToggleExpanded={() => setIsRegionNervesExpanded(v => !v)}
+          availableRegions={availableRegions}
+        />
+
+        <RegionAnchorSection
+          config={SOUL_ANCHOR_CONFIG}
+          expanded={isRegionSoulsExpanded}
+          onToggleExpanded={() => setIsRegionSoulsExpanded(v => !v)}
           availableRegions={availableRegions}
         />
 

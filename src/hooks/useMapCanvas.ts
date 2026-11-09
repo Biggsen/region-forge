@@ -5,6 +5,8 @@ export function useMapCanvas() {
   const [centerPointRegionId, setCenterPointRegionId] = useState<string | null>(null)
   const [isSettingNervePoint, setIsSettingNervePoint] = useState(false)
   const [nervePointRegionId, setNervePointRegionId] = useState<string | null>(null)
+  const [isSettingSoulPoint, setIsSettingSoulPoint] = useState(false)
+  const [soulPointRegionId, setSoulPointRegionId] = useState<string | null>(null)
   const [isPlacingLabel, setIsPlacingLabel] = useState(false)
   const [placingLabelRegionId, setPlacingLabelRegionId] = useState<string | null>(null)
   const [isWarping, setIsWarping] = useState(false)
@@ -14,6 +16,8 @@ export function useMapCanvas() {
   const startSettingCenterPoint = useCallback((regionId: string) => {
     setIsSettingNervePoint(false)
     setNervePointRegionId(null)
+    setIsSettingSoulPoint(false)
+    setSoulPointRegionId(null)
     setIsSettingCenterPoint(true)
     setCenterPointRegionId(regionId)
   }, [])
@@ -26,6 +30,8 @@ export function useMapCanvas() {
   const startSettingNervePoint = useCallback((regionId: string) => {
     setIsSettingCenterPoint(false)
     setCenterPointRegionId(null)
+    setIsSettingSoulPoint(false)
+    setSoulPointRegionId(null)
     setIsSettingNervePoint(true)
     setNervePointRegionId(regionId)
   }, [])
@@ -33,6 +39,20 @@ export function useMapCanvas() {
   const stopSettingNervePoint = useCallback(() => {
     setIsSettingNervePoint(false)
     setNervePointRegionId(null)
+  }, [])
+
+  const startSettingSoulPoint = useCallback((regionId: string) => {
+    setIsSettingCenterPoint(false)
+    setCenterPointRegionId(null)
+    setIsSettingNervePoint(false)
+    setNervePointRegionId(null)
+    setIsSettingSoulPoint(true)
+    setSoulPointRegionId(regionId)
+  }, [])
+
+  const stopSettingSoulPoint = useCallback(() => {
+    setIsSettingSoulPoint(false)
+    setSoulPointRegionId(null)
   }, [])
 
   const startPlacingLabel = useCallback((regionId: string) => {
@@ -54,6 +74,10 @@ export function useMapCanvas() {
     nervePointRegionId,
     startSettingNervePoint,
     stopSettingNervePoint,
+    isSettingSoulPoint,
+    soulPointRegionId,
+    startSettingSoulPoint,
+    stopSettingSoulPoint,
     isPlacingLabel,
     placingLabelRegionId,
     startPlacingLabel,

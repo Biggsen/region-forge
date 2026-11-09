@@ -33,8 +33,16 @@ export function useRegionHighlight() {
     setHighlightMode(prev => ({ ...prev, showVillages: !prev.showVillages }))
   }, [])
 
-  const toggleShowCenterPoints = useCallback(() => {
-    setHighlightMode(prev => ({ ...prev, showCenterPoints: !prev.showCenterPoints }))
+  const toggleShowHearts = useCallback(() => {
+    setHighlightMode(prev => ({ ...prev, showHearts: !prev.showHearts }))
+  }, [])
+
+  const toggleShowNerves = useCallback(() => {
+    setHighlightMode(prev => ({ ...prev, showNerves: !prev.showNerves }))
+  }, [])
+
+  const toggleShowSouls = useCallback(() => {
+    setHighlightMode(prev => ({ ...prev, showSouls: !prev.showSouls }))
   }, [])
 
   const toggleShowChallengeLevels = useCallback(() => {
@@ -57,7 +65,9 @@ export function useRegionHighlight() {
     toggleHighlightAll,
     toggleShowRegions,
     toggleShowVillages,
-    toggleShowCenterPoints,
+    toggleShowHearts,
+    toggleShowNerves,
+    toggleShowSouls,
     toggleShowChallengeLevels,
     toggleShowGrid,
     toggleShowNames,

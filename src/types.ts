@@ -29,6 +29,8 @@ export type Region = {
   centerPoint?: { x: number; z: number; y?: number } | null
   /** Optional nerve anchor (parallel to centerPoint / heart); separate WG nerve_of_* cuboid when exported. */
   nervePoint?: { x: number; z: number; y?: number } | null
+  /** Optional soul anchor (parallel to nerve); separate WG soul_of_* cuboid when exported. Overworld only. */
+  soulPoint?: { x: number; z: number; y?: number } | null
   labelPosition?: { x: number; z: number } | null
   subregions?: Subregion[]
   challengeLevel?: ChallengeLevel
@@ -118,7 +120,9 @@ export type HighlightMode = {
   highlightAll: boolean
   showRegions: boolean
   showVillages: boolean
-  showCenterPoints: boolean
+  showHearts: boolean
+  showNerves: boolean
+  showSouls: boolean
   showChallengeLevels: boolean
   showGrid: boolean
   showNames: boolean
